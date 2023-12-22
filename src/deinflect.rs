@@ -1,15 +1,24 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DeinflectRule {
-    kanaIn: String,
-    kanaOut: String,
-    rulesIn: Vec<String>,
-    rulesOut: Vec<String>,
+    #[serde(rename = "kanaIn")]
+    pub kana_in: String,
+    #[serde(rename = "kanaOut")]
+    pub kana_out: String,
+    #[serde(rename = "rulesIn")]
+    rules_in: Vec<String>,
+    #[serde(rename = "rulesOut")]
+    rules_out: Vec<String>,
 }
 
-pub type DeinflectionRuleMap = HashMap<String, Vec<DeinflectRule>>;
+type DeinflectionRuleMap = HashMap<String, Vec<DeinflectRule>>;
 
-pub fn get_deinflection_rules() -> DeinflectionRuleMap {
-    serde_json::from_str(include_str!("deinflect.json")).unwrap()
+pub fn get_deinflection_rules() -> Vec<DeinflectRule> {
+    serde_json::from_str::<DeinflectionRuleMap>(include_str!("deinflect.json"))
+        .unwrap()
+        .values()
+        .flatten()
+        .cloned()
+        .collect()
 }

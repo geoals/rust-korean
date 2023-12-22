@@ -32,6 +32,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
+ "took",
 ]
 
 [[package]]
@@ -81,6 +82,12 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "took"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af1ea65cb083be6f0b13ba9a26eec5eb563e55198e318cbb0f525d593fbd349e"
 
 [[package]]
 name = "unicode-ident"

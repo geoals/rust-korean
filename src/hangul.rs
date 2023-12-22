@@ -87,6 +87,10 @@ fn to_jamo(ch: char) -> Vec<char> {
     result.iter().flat_map(disassemble_vowel_jamo).collect()
 }
 
+pub fn is_hangul(c: char) -> bool {
+    (0xAC00..0xD7AF).contains(&(c as i32))
+}
+
 pub trait HangulExt {
     fn to_jamo(&self) -> String;
     fn to_hangul(&self) -> String;
@@ -108,6 +112,7 @@ impl HangulExt for String {
     }
 
     // TODO this might need refactoring and optimization
+    // TODO return Result or Option instead?
     fn to_hangul(&self) -> String {
         let mut result = String::new();
         let mut iter = self.chars();
@@ -135,7 +140,12 @@ impl HangulExt for String {
                     // if there are two vowels in a row, reassemble them first
                     // TODO replace this if block with just reassmeble the two vowels and then going to next iteration
                     if VOWEL_JAMO.contains(&medial) && VOWEL_JAMO.contains(&last) {
-                        let assembled_middle = assemble_vowel_jamo(medial, last).unwrap();
+                        let assembled_middle = assemble_vowel_jamo(medial, last);
+                        if assembled_middle.is_none() {
+                            result.extend([initial, medial, last]);
+                            continue;
+                        }
+                        let assembled_middle = assembled_middle.unwrap();
                         let next = iter.clone().next().unwrap_or(' '); // TODO replace with peekable
 
                         // if the fourth char is a vowel, compose the first two
