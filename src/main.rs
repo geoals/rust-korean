@@ -1,22 +1,37 @@
-use crate::dictionary::{Dictionary, KrDictEntry};
-use crate::search::get;
+use axum::routing::get;
+use tracing::debug;
+use crate::dictionary::Dictionary;
 
 mod deinflect;
 mod hangul;
 mod dictionary;
 mod search;
+mod resource;
 
-fn main() {
-    let first_cli_arg = std::env::args().nth(1).unwrap_or("".to_string());
+#[derive(Clone)]
+pub struct SharedState {
+    dictionary: Dictionary,
+}
 
-    let dictionary = Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json");
-
-    let matches = get(&first_cli_arg, &dictionary);
-    for term in matches {
-        for def in term.definitions() {
-            println!("{}", def);
-            println!("{} stars", term.krdict_stars())
+impl SharedState {
+    fn new() -> Self {
+        Self {
+            dictionary: Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json"),
         }
     }
+}
+
+#[tokio::main]
+async fn main() {
+    let shared_state = SharedState::new();
+    let app = axum::Router::new()
+        .route("/lookup/:term", get(resource::lookup::handler))
+        .with_state(shared_state);
+
+    tracing_subscriber::fmt::init();
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    debug!("listening on {}", listener.local_addr().unwrap());
+    axum::serve(listener, app).await.unwrap();
 }
 
