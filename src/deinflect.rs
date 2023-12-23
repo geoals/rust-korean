@@ -17,7 +17,7 @@ pub struct DeinflectRule {
 
 type DeinflectionRuleMap = HashMap<String, Vec<DeinflectRule>>;
 
-// Possibly remove lazy_static and encapsulate this along with use of deinflect() into DictSearcher in search.rs
+// Possibly remove lazy_static and encapsulate this along with Dictionary in main.rs
 lazy_static! {
     static ref DEINFLECTION_RULES: Vec<DeinflectRule> = {
         serde_json::from_str::<DeinflectionRuleMap>(include_str!("../deinflect.json"))

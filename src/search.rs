@@ -53,7 +53,7 @@ fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match>
         matches.push(Match { match_type: MatchType::Exact, matches: value.clone() });
     }
 
-    if let Some(value) = search_with_deinflections_of_word(word, dictionary) {
+    if let Some(value) = search_deinflections_of_word(word, dictionary) {
         matches.push(Match { match_type: MatchType::Deinflected, matches: value.clone() });
     }
 
@@ -75,7 +75,7 @@ fn sort(matches: &mut [Match]) {
     });
 }
 
-fn search_with_deinflections_of_word(word: &str, dictionary: &Dictionary) -> Option<Vec<Entry>> {
+fn search_deinflections_of_word(word: &str, dictionary: &Dictionary) -> Option<Vec<Entry>> {
     let mut results = vec![];
     for deinflection in deinflect(word) {
         if let Some(result) = dictionary.search_with_deinflection_rules(&deinflection.word, deinflection.rules) {
