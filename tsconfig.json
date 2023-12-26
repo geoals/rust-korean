@@ -10,10 +10,9 @@
   ],
   "compilerOptions": {
     "paths": {
-      "~*": [
-        "./*"
-      ]
+      "~*": ["./src/*"]
     },
-    "baseUrl": "."
-  }
+    "baseUrl": ".",
+  },
+  "lib": ["dom"]
 }
