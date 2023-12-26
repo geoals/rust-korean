@@ -19,11 +19,8 @@ pub struct Entry {
 
 #[allow(dead_code)]
 impl Entry {
-    pub fn get_first_definition(&self) -> Option<&String> {
-        self.definitions.first()
-    }
-
     pub fn definitions(&self) -> &Vec<String> { &self.definitions }
+    pub fn sequence_number(&self) -> &i32 { &self.sequence_number }
 }
 
 type Headword = String;
@@ -76,6 +73,9 @@ pub trait KrDictEntry {
     ///
     /// Returns the number of stars
     fn krdict_stars(&self) -> u8;
+
+    /// KRDICT entries only have one definition
+    fn get_first_definition(&self) -> Option<&String>;
 }
 
 impl KrDictEntry for Entry {
@@ -87,5 +87,9 @@ impl KrDictEntry for Entry {
 
             })
 
+    }
+
+    fn get_first_definition(&self) -> Option<&String> {
+        self.definitions.first()
     }
 }

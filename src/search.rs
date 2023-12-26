@@ -57,11 +57,15 @@ fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match>
         matches.push(Match { match_type: MatchType::Deinflected, matches: value.clone() });
     }
 
+    // TODO modify this to detect which words are contained in a compound word or suffixed word
     if let Some(value) = search_partial(word, dictionary) {
         matches.push(Match { match_type: MatchType::Partial, matches: value.clone() });
     }
 
     sort(&mut matches);
+    matches.dedup_by(|a, b| {
+        a.matches.first().unwrap().sequence_number() == b.matches.first().unwrap().sequence_number()
+    });
     matches
 }
 

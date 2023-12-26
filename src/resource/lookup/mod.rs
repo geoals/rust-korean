@@ -3,6 +3,7 @@ use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use tracing::{debug};
 use crate::{SharedState, search};
+use crate::dictionary::KrDictEntry;
 
 pub async fn handler(
     Path(term): Path<String>,
