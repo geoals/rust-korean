@@ -2,29 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { sendToBackground } from "@plasmohq/messaging"
 
 export default function FloatingBox() {
-  const {hoveredWord, positionX, positionY} = useWordUnderCursor();
+  const {hoveredWord, response, positionX, positionY} = useWordUnderCursor();
   const isVisible = useIsVisible(hoveredWord);
-  // TODO react-query or something?
-  const [response, setResponse] = useState<string | undefined>(undefined);
-
-  async function sendToBg() {
-    if (!hoveredWord) {
-      return
-    }
-
-    const resp = await sendToBackground({
-      name: "lookup",
-      body: {
-        word: hoveredWord
-      }
-    })
-
-    if (resp.message) {
-      console.log(resp.message)
-      setResponse(resp.message)
-    }
-  }
-  void sendToBg()
 
   return (
     <>
@@ -52,7 +31,7 @@ export default function FloatingBox() {
           {/* frequency */}
           {/* hanja */}
           {/* definition list */}
-          {/* tabs for other senses */}
+          {/* tabs for homonyms */}
           {/* for deconjugated terms: conjugation/grammar */}
           {/* add to anki btn */}
         </div>
@@ -62,8 +41,22 @@ export default function FloatingBox() {
 };
 
 function useWordUnderCursor() {
-  const mousePositionRef = React.useRef({x: 0, y: 0});
   const [hoveredWord, setHoveredWord] = useState<string | undefined>(undefined);
+  const [response, setResponse] = useState("");
+  const getMousePosition = useMousePosition();
+  const mousePosition = getMousePosition();
+
+  async function sendToBg(hoveredWord: string) {
+    // TODO react-query or something?
+    const resp = await sendToBackground({
+      name: "lookup",
+      body: {
+        word: hoveredWord
+      }
+    })
+
+    return resp.message
+  }
 
   const findWordUnderCursor = (mouseX: number, mouseY: number) => {
     const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO caretPositionFromPoint for firefox
@@ -88,36 +81,56 @@ function useWordUnderCursor() {
     return word
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    mousePositionRef.current = {x: e.clientX, y: e.clientY}; // TODO avoid rerenders?
-    if (e.shiftKey) {
-      const hoveredWord = findWordUnderCursor(mousePositionRef.current.x, mousePositionRef.current.y);
-      setHoveredWord(hoveredWord);
-    }
-  };
 
-  const handleShiftKeyDown = (e: React.KeyboardEvent) => {
-    if (e.shiftKey) {
-      const hoveredWord = findWordUnderCursor(mousePositionRef.current.x, mousePositionRef.current.y);
-      setHoveredWord(hoveredWord);
+  async function lookupHoveredWordHandler(e: React.KeyboardEvent | React.MouseEvent) {
+    if (!e.shiftKey) {
+      return
     }
-  };
+    const mousePosition = getMousePosition()
+    const hoveredWord = findWordUnderCursor(mousePosition.x, mousePosition.y);
+    const response = await sendToBg(hoveredWord)
+    setHoveredWord(hoveredWord);
+    setResponse(response);
+  }
 
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('keydown', handleShiftKeyDown);
+    document.addEventListener('mousemove', lookupHoveredWordHandler);
+    document.addEventListener('keydown', lookupHoveredWordHandler);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('keydown', handleShiftKeyDown);
+      document.removeEventListener('mousemove', lookupHoveredWordHandler);
+      document.removeEventListener('keydown', lookupHoveredWordHandler);
     };
   }, []);
 
   return {
     hoveredWord,
-    positionX: mousePositionRef.current.x + window.scrollX,
-    positionY: mousePositionRef.current.y + window.scrollY,
+    response,
+    positionX: mousePosition.x + window.scrollX,
+    positionY: mousePosition.y + window.scrollY,
   };
+}
+
+function useMousePosition() {
+  const mousePositionRef = React.useRef({ x: 0, y: 0 });
+
+  const handleMouseMove = async (e: React.MouseEvent) => {
+    mousePositionRef.current = {x: e.clientX, y: e.clientY}; // TODO avoid rerenders?
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  function getMousePosition() {
+    return mousePositionRef.current;
+  }
+
+  return getMousePosition
 }
 
 function useIsVisible(hoveredWord: string | undefined): boolean {
