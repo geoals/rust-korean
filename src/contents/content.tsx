@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { sendToBackground } from "@plasmohq/messaging"
 
-export default function FloatingBox() {
+const FloatingBox = () => {
   const {hoveredWord, response, positionX, positionY} = useWordUnderCursor();
   const isVisible = useIsVisible(hoveredWord);
 
@@ -40,6 +40,8 @@ export default function FloatingBox() {
   );
 };
 
+export default FloatingBox;
+
 function useWordUnderCursor() {
   const [hoveredWord, setHoveredWord] = useState<string | undefined>(undefined);
   const [response, setResponse] = useState("");
@@ -61,18 +63,23 @@ function useWordUnderCursor() {
   const findWordUnderCursor = (mouseX: number, mouseY: number) => {
     const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO caretPositionFromPoint for firefox
 
-    if (range?.startContainer?.nodeType !== Node.TEXT_NODE
-      || range?.startOffset === 0
-      || range?.startOffset >= range?.startContainer?.textContent?.length) {
+    const textContent = range?.startContainer.textContent;
+
+    if (textContent == null) {
       return undefined;
     }
 
-    const textNode = range.startContainer;
+    if (range?.startContainer?.nodeType !== Node.TEXT_NODE
+      || range?.startOffset === 0
+      || range?.startOffset >= textContent.length) {
+      return undefined;
+    }
+
     const offset = range.startOffset;
 
-    const start = textNode.textContent.lastIndexOf(' ', offset) + 1;
-    const end = textNode.textContent.indexOf(' ', offset);
-    const word = textNode.textContent.substring(start, end === -1 ? undefined : end);
+    const start = textContent.lastIndexOf(' ', offset) + 1;
+    const end = textContent.indexOf(' ', offset);
+    const word = textContent.substring(start, end === -1 ? undefined : end);
 
     if (word === ' ') {
       return undefined;

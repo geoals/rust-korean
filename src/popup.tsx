@@ -5,7 +5,7 @@ function IndexPopup() {
         padding: 16
       }}>
       <h2>
-        HMR is working 3
+        HMR is working 4
       </h2>
     </div>
   )
