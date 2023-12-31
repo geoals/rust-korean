@@ -89,7 +89,7 @@ function useWordUnderCursor() {
   };
 
 
-  async function lookupHoveredWordHandler(e: React.KeyboardEvent | React.MouseEvent) {
+  async function lookupHoveredWordHandler(e: KeyboardEvent | MouseEvent) {
     if (!e.shiftKey) {
       return
     }
@@ -121,7 +121,7 @@ function useWordUnderCursor() {
 function useMousePosition() {
   const mousePositionRef = React.useRef({ x: 0, y: 0 });
 
-  const handleMouseMove = async (e: React.MouseEvent) => {
+  const handleMouseMove = async (e: MouseEvent) => {
     mousePositionRef.current = {x: e.clientX, y: e.clientY}; // TODO avoid rerenders?
   };
 
@@ -143,13 +143,13 @@ function useMousePosition() {
 function useIsVisible(hoveredWord: string | undefined): boolean {
   const [isVisible, setIsVisible] = useState(Boolean(hoveredWord));
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       setIsVisible(false);
     }
   };
 
-  const handleOnClick = (e: React.MouseEvent) => {
+  const handleOnClick = (e: MouseEvent) => {
     const plasmoCsui = document.querySelector('html > plasmo-csui'); // TODO replace with something more robust
     if (e.target != plasmoCsui) {
       setIsVisible(false);
