@@ -1,9 +1,8 @@
 use std::time::Instant;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
-use tracing::{debug};
+use tracing::debug;
 use crate::{SharedState, search};
-use crate::dictionary::KrDictEntry;
 
 pub async fn handler(
     Path(term): Path<String>,
@@ -15,11 +14,7 @@ pub async fn handler(
     let matches = search::get(&term, &state.dictionary);
     debug!("Found {} matches", matches.len());
 
-    let response = if let Some(value) = matches.first() {
-        value.get_first_definition().unwrap_or(&String::from("")).clone()
-    } else {
-        "".to_string()
-    };
+    let response = serde_json::to_string(&matches).unwrap();
 
     debug!("Request processed in {:?}", start_time.elapsed());
     response

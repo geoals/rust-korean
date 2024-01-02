@@ -37,6 +37,8 @@ pub struct DeinflectedMatch {
 
 // Not all of the deinflected words are existing words
 pub fn deinflect(word: &str) -> HashSet<DeinflectedMatch> {
+    // TODO: continue deinflecting to be able to parse compound grammar
+    // should collect list of deinflection rules like:  았/었 <- 지만
     let decomposed_term = word.to_jamo();
 
     DEINFLECTION_RULES.iter().filter(|rule| {

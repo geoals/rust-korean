@@ -540,6 +540,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "lazy_static",
+ "regex",
  "serde",
  "serde_json",
  "tokio",
