@@ -4,20 +4,26 @@ import type { AddToAnkiPayload } from "~background/messages/addAnkiNote";
 export function AddToAnkiButton({
   hoveredWord,
   hoveredSentence,
-  response,
+  headword,
+  hanja,
+  definition_full,
+  reading,
 }: {
   hoveredWord: string;
   hoveredSentence: string;
-  response: string;
+  headword: string;
+  hanja?: string;
+  definition_full: string;
+  reading?: string;
 }) {
   function addToAnkiBtnHandler(): void {
-    const { headword, hanja, definitionFull } = reponseToFields(response);
     addAnkiNoteMessage({
       hoveredWord,
       headword,
       hanja,
+      reading,
       sentence: hoveredSentence,
-      definitionFull,
+      definitionFull: definition_full,
     });
   }
 
@@ -32,7 +38,7 @@ export function AddToAnkiButton({
 }
 
 async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
-  const { hoveredWord, sentence, headword, hanja, definitionFull } = payload;
+  const { hoveredWord, sentence, headword, reading, hanja, definitionFull } = payload;
   const resp = await sendToBackground<AddToAnkiPayload>({
     name: "addAnkiNote",
     body: {
@@ -40,24 +46,11 @@ async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
       sentence,
       hoveredWord,
       hanja,
-      reading: undefined, // TODO
+      reading,
       selectionText: window.getSelection()?.toString(),
       definitionFull,
     },
   });
   // TODO handle errors
   return resp.message;
-}
-
-function reponseToFields(response: string) {
-  const regexPattern =
-    /(?:★{0,3}\s*)?(?<headword>[^〔]+)\s*〔(?<hanja>[^〕]+)〕\s*(?<definitionFull>[\s\S]+)/;
-
-  const match = response.match(regexPattern);
-
-  if (match) {
-    return match.groups;
-  } else {
-    return undefined;
-  }
 }
