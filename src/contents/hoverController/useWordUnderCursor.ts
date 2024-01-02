@@ -107,8 +107,21 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
 
   const offset = range.startOffset;
 
-  const start = textContent.lastIndexOf(" ", offset) + 1;
-  const end = textContent.indexOf(" ", offset);
+  // Move backward to find the start of the word
+  let start = offset;
+  while (start > 0 && isHangulCharacter(textContent.charAt(start - 1))) {
+    start--;
+  }
+
+  // Move forward to find the end of the word
+  let end = offset;
+  while (
+    end < textContent.length &&
+    isHangulCharacter(textContent.charAt(end))
+  ) {
+    end++;
+  }
+
   const word = textContent.substring(start, end === -1 ? undefined : end);
 
   if (word === " ") {
@@ -121,6 +134,11 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
 
   return { word, sentence };
 };
+
+function isHangulCharacter(char: string) {
+  const hangulRegex = /[\uAC00-\uD7AF]/;
+  return hangulRegex.test(char);
+}
 
 function useMousePosition() {
   const mousePositionRef = useRef({ x: 0, y: 0 });
@@ -146,7 +164,7 @@ function useMousePosition() {
 
 /**
  * Register event handlers on mouse click and escape key press to hide the popup
- * 
+ *
  * @param unsetHoveredWord Callback function to unset the hovered word
  */
 function useHidePopup(unsetHoveredWord: () => void): void {
