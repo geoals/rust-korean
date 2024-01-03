@@ -95,6 +95,7 @@ function DictionaryEntry({
       <b>
         <p>{headword}</p>
       </b>
+      {/*TODO display if it has been added to anki already */}
       {/* unknown, seen, known */}
       {/* frequency */}
       {[...Array(stars)].map((_, i) => (
@@ -112,10 +113,10 @@ function DictionaryEntry({
       )}
       <ol lang="jp">
         {tl_definitions.map((element, index) => (
-          <>
+          <React.Fragment key={index}>
             <li>{element.translation}</li>
             {element.definition}
-          </>
+          </React.Fragment>
         ))}
       </ol>
       {/* for deconjugated terms: conjugation/grammar */}

@@ -45,9 +45,9 @@ async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
       headword,
       sentence,
       hoveredWord,
-      hanja,
-      reading,
-      selectionText: window.getSelection()?.toString(),
+      hanja: hanja ?? undefined,
+      reading: reading ?? undefined, // TODO map null to undefined closer to api layer
+      selectionText: window.getSelection()?.toString().replaceAll("\n", "<br>"),
       definitionFull,
     },
   });
