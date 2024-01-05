@@ -6,8 +6,10 @@
 ## Goals
 TBD
 
-## Usage
+## Development
 Download dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) and extract it into `dictionaries/[KO-JA] KRDICT/`
+
+`docker run --name postgres-korean -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres` to run a local postgres instance for development
 
 `cargo run` to start a HTTP server on localhost:3000
 
