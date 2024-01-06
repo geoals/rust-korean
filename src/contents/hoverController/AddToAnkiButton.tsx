@@ -1,5 +1,6 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import type { AddToAnkiPayload } from "~background/messages/addAnkiNote";
+import AnkiImg from './anki.png'; 
 
 export function AddToAnkiButton({
   hoveredWord,
@@ -29,10 +30,11 @@ export function AddToAnkiButton({
 
   return (
       <button
-        style={{ position: "absolute", right: "8px" }}
+        style={{ position: "absolute", right: "8px", display: "flex", alignItems: "center", }}
         onClick={addToAnkiBtnHandler}
       >
-        Add to ANKI
+        <img className="anki-img" src={AnkiImg} alt="add to anki" />
+        <span style={{ marginLeft: "4px" }}>Export</span>
       </button>
   );
 }
