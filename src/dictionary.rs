@@ -104,6 +104,7 @@ pub struct TargetLanguageDefinition {
 impl KrDictEntry {
     pub fn sequence_number(&self) -> &i32 { &self.sequence_number }
     pub fn stars(&self) -> &u8 { &self.stars }
+    pub fn headword(&self) -> &String { &self.headword }
 }
 
 type Headword = String;
@@ -111,6 +112,7 @@ type Headword = String;
 #[derive(Clone)]
 pub struct Dictionary {
     terms_map: HashMap<Headword, Vec<KrDictEntry>>,
+    terms_vec: Vec<KrDictEntry>,
 }
 
 #[allow(dead_code)]
@@ -126,6 +128,7 @@ impl Dictionary {
             });
         Self {
             terms_map,
+            terms_vec: terms_vec.iter().map(|term| term.to_krdict_entry()).collect(),
         }
     }
 
@@ -150,6 +153,13 @@ impl Dictionary {
                     })
                     .collect()
             })
+    }
+
+    pub fn get_by_sequence_number(&self, sequence_number: i32) -> Option<KrDictEntry> {
+        if sequence_number == 0 || sequence_number > self.terms_vec.len() as i32 {
+            return None
+        }
+        Some(self.terms_vec[sequence_number as usize - 1].clone())
     }
 }
 
