@@ -4,7 +4,7 @@ use axum::response::IntoResponse;
 use tracing::debug;
 use crate::{SharedState, search};
 
-pub async fn handler(
+pub async fn get_handler(
     Path(term): Path<String>,
     State(state): State<SharedState>,
 ) -> impl IntoResponse {
@@ -26,19 +26,10 @@ pub async fn handler(
             .execute(&state.db)
             .await
             .expect("Failed to insert into Lookup");
-    }
+    } 
 
     let response = serde_json::to_string(&matches).unwrap();
 
     debug!("Request processed in {:?}", start_time.elapsed());
     response
 }
-
-// #[derive(Debug, FromRow)]
-// struct Lookup {
-//     id: i32,
-//     headword: String,
-//     conjugated_form: Option<String>,
-//     user_id: i32,
-//     created_at: chrono::DateTime<chrono::Utc>,
-// }
