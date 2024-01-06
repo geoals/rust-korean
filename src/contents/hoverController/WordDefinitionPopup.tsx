@@ -66,21 +66,21 @@ export function WordDefinitionPopup({
             />
             <div>
               <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "known" })}}>
-                known
+                Known
               </button>
               <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "seen" })}}>
-                seen
+                Seen
               </button>
               <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "unknown" })}}>
-                unknown
+                Unknown
               </button>
             </div>
             <div>
               <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { ignored: !entry.status.ignored })}}>
-                ignore
+                Ignore
               </button>
               <button onClick={() => changeWordStatus(entry.dictEntry.sequence_number, { tracked: !entry.status.tracked })}>
-                track
+                Track
               </button>
             </div>
             {JSON.stringify(entry.status)}

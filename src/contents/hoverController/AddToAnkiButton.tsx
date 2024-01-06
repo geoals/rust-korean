@@ -32,7 +32,7 @@ export function AddToAnkiButton({
         style={{ position: "absolute", right: "8px" }}
         onClick={addToAnkiBtnHandler}
       >
-        add to anki
+        Add to ANKI
       </button>
   );
 }
