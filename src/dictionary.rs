@@ -109,7 +109,6 @@ impl KrDictEntry {
 
 type Headword = String;
 
-#[derive(Clone)]
 pub struct Dictionary {
     terms_map: HashMap<Headword, Vec<KrDictEntry>>,
     terms_vec: Vec<KrDictEntry>,

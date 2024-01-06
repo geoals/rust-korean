@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{time::Instant, sync::Arc};
 
 use axum::routing::{get, patch};
 use sqlx::postgres::PgPoolOptions;
@@ -14,14 +14,17 @@ mod error_handling;
 
 #[derive(Clone)]
 pub struct SharedState {
-    dictionary: Dictionary,
+    dictionary: Arc<Dictionary>,
     db: sqlx::PgPool,
 }
 
 impl SharedState {
     fn new(db: sqlx::PgPool) -> Self {
+        let start_time = Instant::now();
+        let dictionary = Arc::new(Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json"));
+        info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
-            dictionary: Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json"),
+            dictionary,
             db
         }
     }
@@ -31,6 +34,7 @@ impl SharedState {
 async fn main() -> Result<(), std::io::Error> {
     let start_time = Instant::now();
     tracing_subscriber::fmt::init();
+    info!("Application starting...");
 
     let db = PgPoolOptions::new()
             .max_connections(128)
@@ -45,8 +49,9 @@ async fn main() -> Result<(), std::io::Error> {
         .route("/word_status/:id",  patch(resource::word_status::patch_handler))
         .with_state(shared_state);
 
+
     let listener = tokio::net::TcpListener::bind("localhost:3000").await?;
-    info!("Application ready in {:?}, listening on {}", start_time.elapsed(), listener.local_addr().unwrap());
+    info!("Application ready in {:.2}s - listening on {}", start_time.elapsed().as_secs_f32(), listener.local_addr().unwrap());
     axum::serve(listener, app).await?;
 
     Ok(())
