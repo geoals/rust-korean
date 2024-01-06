@@ -2,6 +2,8 @@
 Frontend for [rust-korean](https://github.com/geoals/rust-korean).
 Name is pending.
 
+![demo img](demo.png)
+
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
 ## Features
