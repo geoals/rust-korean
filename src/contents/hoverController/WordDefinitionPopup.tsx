@@ -1,6 +1,8 @@
 import React from "react";
 import { AddToAnkiButton } from "./AddToAnkiButton";
-import type { KrDictEntryDTO } from "~background/messages/lookup";
+import type { KrDictEntryDTO, LookupResponse } from "~background/messages/lookup";
+import type { WordStatusDTO } from "~background/messages/changeWordStatus";
+import { sendToBackground } from "@plasmohq/messaging";
 
 export function WordDefinitionPopup({
   hoveredWord,
@@ -13,7 +15,7 @@ export function WordDefinitionPopup({
   hoveredSentence: string;
   positionX: number;
   positionY: number;
-  response: Array<KrDictEntryDTO>;
+  response: LookupResponse;
 }) {
   const [activeTabIndex, setActiveTabIndex] = React.useState(0);
 
@@ -22,7 +24,7 @@ export function WordDefinitionPopup({
   }
 
   // TODO remove after we filter gargabe in backend
-  if (response[0].tl_definitions.length === 0) {
+  if (response[0].dictEntry.tl_definitions.length === 0) {
     return null;
   }
 
@@ -36,7 +38,7 @@ export function WordDefinitionPopup({
         backgroundColor: "white",
         padding: "8px",
         border: "solid black 2px",
-        width: "320px",
+        width: "420px",
         maxHeight: "400px",
         overflowY: "auto",
       }}
@@ -45,26 +47,60 @@ export function WordDefinitionPopup({
         response.map((entry, index) => (
           <TabButton
             title={String(index + 1)}
-            key={entry.sequence_number}
+            key={entry.dictEntry.sequence_number}
             onClick={() => setActiveTabIndex(index)}
             isActive={index === activeTabIndex}
           />
         ))}
       {response.map((entry, index) => (
         <DictionaryEntry
-          {...entry}
+          {...entry.dictEntry }
           isVisible={index === activeTabIndex}
-          key={entry.sequence_number}
+          key={entry.dictEntry.sequence_number}
         >
-          <AddToAnkiButton
-            hoveredWord={hoveredWord}
-            hoveredSentence={hoveredSentence}
-            {...entry}
-          />
+          <>
+            <AddToAnkiButton
+              hoveredWord={hoveredWord}
+              hoveredSentence={hoveredSentence}
+              {...entry.dictEntry}
+            />
+            <div>
+              <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "known" })}}>
+                known
+              </button>
+              <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "seen" })}}>
+                seen
+              </button>
+              <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { status: "unknown" })}}>
+                unknown
+              </button>
+            </div>
+            <div>
+              <button onClick={() => { changeWordStatus(entry.dictEntry.sequence_number, { ignored: !entry.status.ignored })}}>
+                ignore
+              </button>
+              <button onClick={() => changeWordStatus(entry.dictEntry.sequence_number, { tracked: !entry.status.tracked })}>
+                track
+              </button>
+            </div>
+            {JSON.stringify(entry.status)}
+          </>
         </DictionaryEntry>
       ))}
     </div>
   );
+}
+
+async function changeWordStatus(wordId: number, wordStatus: WordStatusDTO) {
+  const resp = await sendToBackground({
+    name: "changeWordStatus",
+    body: {
+      wordId,
+      wordStatus,
+    },
+  });
+
+  return resp.message;
 }
 
 interface DictionaryEntryProps extends KrDictEntryDTO {
@@ -91,10 +127,10 @@ function DictionaryEntry({
 
   return (
     <div style={getStyle()}>
-      {children}
       <b>
         <p>{headword}</p>
       </b>
+      {children}
       {/*TODO display if it has been added to anki already */}
       {/* unknown, seen, known */}
       {/* frequency */}

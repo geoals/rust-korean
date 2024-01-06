@@ -1,6 +1,6 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
-import type { KrDictEntryDTO } from "~background/messages/lookup";
+import type { LookupResponse } from "~background/messages/lookup";
 
 export function useWordUnderCursor() {
   const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord } =
@@ -9,12 +9,12 @@ export function useWordUnderCursor() {
     undefined
   );
   useHidePopup(unsetHoveredWord);
-  const [response, setResponse] = useState<Array<KrDictEntryDTO>>([]);
+  const [response, setResponse] = useState<LookupResponse>([]);
   const getMousePosition = useMousePosition();
   const mousePosition = getMousePosition();
   const isFetchingRef = useRef(false);
 
-  async function lookup(hoveredWord: string): Promise<Array<KrDictEntryDTO>> {
+  async function lookup(hoveredWord: string): Promise<LookupResponse> {
     // TODO react-query or something?
     const resp = await sendToBackground({
       name: "lookup",
