@@ -100,7 +100,6 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
 
   if (
     range?.startContainer?.nodeType !== Node.TEXT_NODE ||
-    range?.startOffset === 0 ||
     range?.startOffset >= textContent.length
   ) {
     return undefined;
