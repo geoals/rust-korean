@@ -91,12 +91,24 @@ Example response
 ```json
 {
   "그러니까": [
-    { "id": 47399, "status": "known", "ignored": false, "tracked": false }
+    {
+      "id": 47399,
+      "status": "known",
+      "ignored": false,
+      "tracked": false
+    }
   ],
   "말입니다!": [
-    { "id": 38157, "status": "seen", "ignored": false, "tracked": false }
-  ]
+    {
+      "id": 38157,
+      "status": "seen",
+      "ignored": false,
+      "tracked": false
+    }
+  ],
+  "했냔": []
 }
 ```
 
-Words without status or words not found in the dictionary are not included in the response.
+Words without status are not included in the response, so in this example 소개를 is found but has default status.
+Words not found in the dictionary have an empty array of statuses (no ID).

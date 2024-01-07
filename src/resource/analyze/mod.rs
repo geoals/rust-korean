@@ -54,6 +54,16 @@ pub async fn post_handler(
         response_body.entry(word.clone()).or_default().push(status);
     }
 
+    let words_with_no_matches = unconjugated_to_ids_tuples
+        .iter()
+        .filter(|(_, ids)| ids.is_empty())
+        .map(|(word, _)| word.clone())
+        .collect::<Vec<String>>();
+
+    for word in words_with_no_matches {
+        response_body.entry(word).or_default();
+    }
+
     let response = http::Response::builder()
         .status(http::StatusCode::OK)
         .body(serde_json::to_string(&response_body).unwrap()).unwrap();
