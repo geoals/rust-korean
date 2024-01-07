@@ -69,6 +69,7 @@ fn tl_translation_lines(definition: &String) -> Vec<String> {
         .collect()
 }
 
+// TODO wrong parsing id 47428
 fn tl_definition_lines(definition: &String) -> Vec<String> {
     definition
         .lines().skip(3)

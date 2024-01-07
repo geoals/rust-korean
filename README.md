@@ -70,7 +70,7 @@ Example response
 ```json
 {
   "ignored": true,
-  "status": "seen"
+  "status": "seen",
   "tracked": false
 }
 ```
