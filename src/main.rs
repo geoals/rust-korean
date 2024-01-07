@@ -1,6 +1,6 @@
 use std::{time::Instant, sync::Arc};
 
-use axum::routing::{get, patch};
+use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 use crate::dictionary::Dictionary;
@@ -47,6 +47,7 @@ async fn main() -> Result<(), std::io::Error> {
         .route("/lookup/:term",     get(resource::lookup::get_handler))
         .route("/word_status/:id",  get(resource::word_status::get_handler))
         .route("/word_status/:id",  patch(resource::word_status::patch_handler))
+        .route("/analyze",          post(resource::analyze::post_handler))
         .with_state(shared_state);
 
 

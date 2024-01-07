@@ -18,3 +18,85 @@ Download dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dict
 `RUST_LOG=debug cargo run` to see debug logs
 
 `curl localhost:3000/lookup/{term}` to lookup definition for Korean word {term}
+
+## API
+
+### Lookup
+`GET /lookup/:term`
+
+Example response
+```json
+[
+  {
+    "dictEntry": {
+      "headword": "최상위",
+      "reading": null,
+      "part_of_speech": "명사",
+      "deinflection_rule": "n",
+      "definition_full": "최상위 〔最上位〕\nさいじょうい【最上位】\n가장 높은 지위나 등급.\n最も高い地位や等級。\n",
+      "sequence_number": 9504,
+      "hanja": "最上位",
+      "tl_definitions": [
+        {
+          "translation": "さいじょうい【最上位】",
+          "definition": "最も高い地位や等級。"
+        }
+      ],
+      "stars": 0
+    },
+    "status": {
+      "id": 9504,
+      "status": "known",
+      "ignored": false,
+      "tracked": false
+    }
+  }
+]
+```
+
+### Word status
+#### `GET /word_status/:id`
+
+**Example response**
+```json
+{"id":123,"status":"unknown","ignored":false,"tracked":false}
+```
+
+---
+
+#### `PATCH /word_status/:id`
+
+**Example request body** (all fields are optional)
+```json
+{
+  "ignored": true,
+  "status": "seen"
+  "tracked": false
+}
+```
+
+**Example response**
+
+`200 OK` if it updated an existing record
+
+`200 CREATED` if it inserted a new record
+
+### Analyze
+#### `POST /analyze`
+**Example request body**
+
+`"그러니까 뭐라고 소개를 했냔 말입니다!"`
+
+**Example response**
+```json
+{
+  "그러니까": [
+    { "id": 47399, "status": "known", "ignored": false, "tracked": false }
+  ],
+  "말입니다!": [
+    { "id": 38157, "status": "seen", "ignored": false, "tracked": false }
+  ]
+}
+```
+
+Words without status or words not found in the dictionary are not included in the response.

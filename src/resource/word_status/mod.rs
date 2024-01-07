@@ -107,7 +107,7 @@ pub async fn get_handler(
         }).unwrap() // TODO map error
     };
 
-    let response =http::Response::builder()
+    let response = http::Response::builder()
         .status(http::StatusCode::OK)
         .body(response_body).unwrap(); // TODO map error
 
@@ -128,12 +128,14 @@ struct WordStatusEntity {
     updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-#[derive(Debug, FromRow, Serialize)]
-struct WordStatusResponse {
-    id: Option<i32>,
-    status: WordStatus,
-    ignored: bool,
-    tracked: bool,
+// TODO not public fields, use separate object for Analyze reponse
+#[derive(Debug, Clone, FromRow, Serialize)]
+pub struct WordStatusResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<i32>,
+    pub status: WordStatus,
+    pub ignored: bool,
+    pub tracked: bool,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type, Clone)]
