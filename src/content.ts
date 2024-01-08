@@ -12,7 +12,6 @@ const sendAnalyzeRequestToBG = async (text: string) => {
 
 let analysisResults = {};
 
-
 // TODO clean up this abomination
 const observer = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
@@ -32,20 +31,26 @@ const observer = new MutationObserver((mutations) => {
 
           addedNode.textContent.split("\n").forEach((line) => {
             line.split(" ").map((word) => {
-              const trimmedWord = word.trim().replace(/[\(\)\[\]\?\!,\.'"]/g, "");
-              const status = getWordStatus(trimmedWord, analysisResults);
-              const underlinecolor = {
-                seen: "#FCE38A",
-                known: "transparent",
-                unknown: "#F38181",
-                unmatched: "gray",
-              }[status];
+              // Only words contain hangul characters are underlined and reinserted into the DOM
+              const hangulRegex = /[\uAC00-\uD7AF]/;
+              if (hangulRegex.test(word)) {
+                const trimmedWord = word
+                  .trim()
+                  .replace(/[\(\)\[\]\?\!,\.'"-]/g, "");
+                const status = getWordStatus(trimmedWord, analysisResults);
+                const underlinecolor = {
+                  seen: "#FACB6E",
+                  known: "transparent",
+                  unknown: "#F38181",
+                  unmatched: "gray",
+                }[status];
 
-              newContent += `<span class="rust-korean ${status}" style="text-decoration: underline 4px ${underlinecolor}; text-underline-offset: 5px;">${word}</span> `;
+                newContent += `<span class="rust-korean ${status}" style="text-decoration: underline 4px ${underlinecolor}; text-underline-offset: 5px;">${word}</span> `;
+              }
             });
             newContent += "\n";
           });
-          
+
           // Replace the content of the target node
           mutation.target.innerHTML = newContent;
           reapplyUnderlineColors();
@@ -61,10 +66,12 @@ function reapplyUnderlineColors() {
   const rustKoreanElements = document.getElementsByClassName("rust-korean");
   for (let i = 0; i < rustKoreanElements.length; i++) {
     const element = rustKoreanElements[i];
-    const trimmedWord = element.textContent.trim().replace(/[\(\)\[\]\?\!,\.'"]/g, "");
+    const trimmedWord = element.textContent
+      .trim()
+      .replace(/[\(\)\[\]\?\!,\.'"-]/g, "");
     const status = getWordStatus(trimmedWord, analysisResults);
     const underlinecolor = {
-      seen: "#FCE38A",
+      seen: "#FACB6E",
       known: "transparent",
       unknown: "#F38181",
       unmatched: "gray",
@@ -75,7 +82,7 @@ function reapplyUnderlineColors() {
 
 function getWordStatus(word: string, wordStatuses: AnalyzeResponse) {
   if (wordStatuses[word] === undefined) {
-    return "unknown"
+    return "unknown";
   }
   if (wordStatuses[word].length === 0) {
     return "unmatched";

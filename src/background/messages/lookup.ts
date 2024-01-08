@@ -16,7 +16,7 @@ export interface KrDictEntryDTO {
   stars: number;
 }
 
-type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };
+export type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };
 export type LookupResponse = Array<LookupDTO>;
 
 async function getLookup(word: string): Promise<LookupResponse> {

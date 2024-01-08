@@ -8,6 +8,7 @@ export function useWordUnderCursor() {
   const [hoveredSentence, setHoveredSentence] = useState<string | undefined>(
     undefined
   );
+  const [hoveredElement, setHoveredElement] = useState<Element | undefined>(undefined);
   useHidePopup(unsetHoveredWord);
   const [response, setResponse] = useState<LookupResponse>([]);
   const getMousePosition = useMousePosition();
@@ -51,6 +52,7 @@ export function useWordUnderCursor() {
     setResponse(response);
     setHoveredWord(underCursor.word);
     setHoveredSentence(underCursor.sentence);
+    setHoveredElement(underCursor.element);
   }
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export function useWordUnderCursor() {
   return {
     hoveredWord,
     hoveredSentence,
+    hoveredElement,
     response,
     positionX: mousePosition.x + window.scrollX, // TODO position relative to the hovered word itself
     positionY: mousePosition.y + window.scrollY,
@@ -132,7 +135,7 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
   const sentences = textContent.split(/[.!?]/);
   const sentence = sentences.find((sentence) => sentence.includes(word)); // TODO this will return the wrong sentence if there are multiple sentences with the same word
 
-  return { word, sentence };
+  return { word, sentence, element: range.startContainer.parentElement };
 };
 
 function isHangulCharacter(char: string) {
