@@ -5,7 +5,7 @@ use tracing::debug;
 
 use crate::error_handling::AppError;
 use crate::dictionary::KrDictEntry;
-use crate::{search, SharedState};
+use crate::{search, SharedState, hangul};
 use crate::resource::word_status::{WordStatusResponse, WordStatus};
 
 // TODO refactor this abomination
@@ -16,7 +16,8 @@ pub async fn post_handler(
     let start_time = Instant::now();
     debug!("New request to analyze text with length {}", body.len());
 
-    let words = body.split_whitespace();
+    let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
+    let words = bodytext_with_only_hangul.split_whitespace();
 
     // TODO change to hashmap
      let unconjugated_to_ids_tuples = words.map(|w| {
