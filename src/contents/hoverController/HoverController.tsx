@@ -8,48 +8,29 @@ import type {
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
 
+// Right now this component exists to recalling useWordUnderCursor hen you change tab (activeIndex)
+// as that makes it get a new position from current mouse position. If the popup is positioned relative
+// to the word then this component can be merged with the other one.
 export function HoverController() {
-  const {
-    hoveredWord,
-    hoveredSentence,
-    hoveredElement,
-    response,
-    positionX,
-    positionY,
-  } = useWordUnderCursor();
+  const propsForChild = useWordUnderCursor();
+
+  // TODO loading
+  if (propsForChild.response.length === 0 || !propsForChild.hoveredWord) {
+    return null;
+  }
 
   return (
-    <TabbedWordDefinitions
-      hoveredWord={hoveredWord}
-      hoveredSentence={hoveredSentence}
-      hoveredElement={hoveredElement}
-      response={response}
-      positionX={positionX}
-      positionY={positionY}
-    />
+    <TabbedWordDefinitions {...propsForChild} />
   );
 }
 
-export function TabbedWordDefinitions({
-  hoveredWord,
-  hoveredSentence,
-  hoveredElement,
-  response,
-  positionX,
-  positionY,
-}: {
-  hoveredWord: string;
-  hoveredSentence: string;
-  hoveredElement: Element;
-  response: LookupResponse;
-  positionX: number;
-  positionY: number;
-}) {
+export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCursor>) {
   const [activeTabIndex, setActiveTabIndex] = React.useState(0);
+  const previousHoveredWord = React.useRef<string | null>(null);
 
-  // TODO loading
-  if (response.length === 0 || !response || !hoveredWord) {
-    return null;
+  if (props.hoveredWord !== previousHoveredWord.current) {
+    setActiveTabIndex(0);
+    previousHoveredWord.current = props.hoveredWord;
   }
 
   // TODO remove after we filter gargabe in backend
@@ -59,29 +40,29 @@ export function TabbedWordDefinitions({
 
   return (
     <>
-      <WordDefinitionPopup positionX={positionX} positionY={positionY}>
-        {response.length > 1 &&
-          response.map((entry, index) => (
+      <WordDefinitionPopup positionX={props.positionX} positionY={props.positionY}>
+        {props.response.length > 1 &&
+          props.response.map((entry, index) => (
             <TabButton
               title={String(index + 1)}
-              key={entry.dictEntry.sequence_number}
+              key={entry.dictEntry.sequence_number + " " + index}
               onClick={() => setActiveTabIndex(index)}
               isActive={index === activeTabIndex}
             />
           ))}
-        {response.map((entry, index) => (
+        {props.response.map((entry, index) => (
           <DictionaryEntryContent
             {...entry.dictEntry}
             isVisible={index === activeTabIndex}
-            key={entry.dictEntry.sequence_number}
+            key={entry.dictEntry.sequence_number + " " + index}
           >
             <>
               <AddToAnkiButton
-                hoveredWord={hoveredWord}
-                hoveredSentence={hoveredSentence}
+                hoveredWord={props.hoveredWord}
+                hoveredSentence={props.hoveredSentence}
                 {...entry.dictEntry}
               />
-              <StatusButtons entry={entry} hoveredElement={hoveredElement} />
+              <StatusButtons entry={entry} hoveredElement={props.hoveredElement} />
               {JSON.stringify(entry.status)}
             </>
           </DictionaryEntryContent>

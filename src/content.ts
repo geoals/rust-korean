@@ -73,7 +73,6 @@ let analysisResults = {};
     let textNodes: Array<Node> = [];
 
     if (node.nodeType === Node.TEXT_NODE) {
-      console.log(node.textContent);
       textNodes.push(node);
     } else {
       // Recursively traverse child nodes

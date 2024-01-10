@@ -6,9 +6,11 @@ export function useWordUnderCursor() {
   const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord } =
     useHoveredWordState();
   const [hoveredSentence, setHoveredSentence] = useState<string | undefined>(
-    undefined
+    undefined,
   );
-  const [hoveredElement, setHoveredElement] = useState<Element | undefined>(undefined);
+  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(
+    null,
+  );
   useHidePopup(unsetHoveredWord);
   const [response, setResponse] = useState<LookupResponse>([]);
   const getMousePosition = useMousePosition();
@@ -35,7 +37,7 @@ export function useWordUnderCursor() {
     const mousePosition = getMousePosition();
     const underCursor = findWordAndSentenceUnderCursor(
       mousePosition.x,
-      mousePosition.y
+      mousePosition.y,
     );
 
     if (
@@ -101,10 +103,7 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
     return undefined;
   }
 
-  if (
-    range?.startContainer?.nodeType !== Node.TEXT_NODE ||
-    range?.startOffset >= textContent.length
-  ) {
+  if (range?.startContainer?.nodeType !== Node.TEXT_NODE) {
     return undefined;
   }
 
