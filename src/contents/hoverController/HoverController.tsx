@@ -1,36 +1,36 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { WordDefinitionPopup } from "./WordDefinitionPopup";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import type {
   KrDictEntryDTO,
-  LookupResponse,
 } from "~background/messages/lookup";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
 
-// Right now this component exists to recalling useWordUnderCursor hen you change tab (activeIndex)
-// as that makes it get a new position from current mouse position. If the popup is positioned relative
-// to the word then this component can be merged with the other one.
 export function HoverController() {
-  const propsForChild = useWordUnderCursor();
-
-  // TODO loading
-  if (propsForChild.response.length === 0 || !propsForChild.hoveredWord) {
-    return null;
-  }
-
-  return (
-    <TabbedWordDefinitions {...propsForChild} />
-  );
-}
-
-export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCursor>) {
+  const { hoveredElement, hoveredSentence, hoveredWord, positionX, positionY, positionY2, response } = useWordUnderCursor();
   const [activeTabIndex, setActiveTabIndex] = React.useState(0);
   const previousHoveredWord = React.useRef<string | null>(null);
+  const popupRef = React.useRef<HTMLDivElement>(null);
 
-  if (props.hoveredWord !== previousHoveredWord.current) {
+  useLayoutEffect(() => {
+    if (popupRef.current) {
+      const height = popupRef.current.clientHeight;
+      if (positionY - window.scrollY + height > window.innerHeight) {
+        popupRef.current.style.top = `${positionY2 - height - 16}px`;
+      }
+    }
+  }, [popupRef.current, hoveredElement, positionY, positionY2]);
+
+  if (hoveredWord !== previousHoveredWord.current) {
     setActiveTabIndex(0);
-    previousHoveredWord.current = props.hoveredWord;
+    previousHoveredWord.current = hoveredWord;
+  }
+
+
+  // TODO loading
+  if (response.length === 0 || !hoveredWord) {
+    return null;
   }
 
   // TODO remove after we filter garbage in backend
@@ -40,9 +40,9 @@ export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCurso
 
   return (
     <>
-      <WordDefinitionPopup positionX={props.positionX} positionY={props.positionY}>
-        {props.response.length > 1 &&
-          props.response.map((entry, index) => (
+      <WordDefinitionPopup positionX={positionX} positionY={positionY} ref={popupRef}>
+        {response.length > 1 &&
+          response.map((entry, index) => (
             <TabButton
               title={String(index + 1)}
               key={entry.dictEntry.sequence_number + " " + index}
@@ -50,7 +50,7 @@ export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCurso
               isActive={index === activeTabIndex}
             />
           ))}
-        {props.response.map((entry, index) => (
+        {response.map((entry, index) => (
           <DictionaryEntryContent
             {...entry.dictEntry}
             isVisible={index === activeTabIndex}
@@ -58,11 +58,11 @@ export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCurso
           >
             <>
               <AddToAnkiButton
-                hoveredWord={props.hoveredWord}
-                hoveredSentence={props.hoveredSentence}
+                hoveredWord={hoveredWord}
+                hoveredSentence={hoveredSentence}
                 {...entry.dictEntry}
               />
-              <StatusButtons entry={entry} hoveredElement={props.hoveredElement} />
+              <StatusButtons entry={entry} hoveredElement={hoveredElement} />
               {JSON.stringify(entry.status)}
             </>
           </DictionaryEntryContent>

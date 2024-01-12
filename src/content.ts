@@ -110,7 +110,7 @@ let analysisResults = {};
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
           const color = underlineColor[status];
-          newHTML += `${wordStart}<span class="rust-korean" style="text-decoration: underline 0.2rem ${color}; text-underline-offset: 0.3rem;">${hangulWord}</span>${wordEnd}`;
+          newHTML += `${wordStart}<span class="rust-korean" style="text-decoration: underline 0.15rem ${color}; text-underline-offset: 0.2rem;">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
           newHTML += " ";

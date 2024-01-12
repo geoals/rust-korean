@@ -1,6 +1,7 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
 import type { LookupResponse } from "~background/messages/lookup";
+import { POPUP_WIDTH } from "~contents/hoverController/WordDefinitionPopup";
 
 export function useWordUnderCursor() {
   const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord } =
@@ -66,7 +67,7 @@ export function useWordUnderCursor() {
     };
   }, []);
 
-  const { x, y } = getPosition(hoveredElement);
+  const { x, y, y2 } = getPosition(hoveredElement);
 
   return {
     hoveredWord,
@@ -75,6 +76,7 @@ export function useWordUnderCursor() {
     response,
     positionX: x,
     positionY: y + 6,
+    positionY2: y2 + 6,
   };
 }
 
@@ -82,8 +84,21 @@ function getPosition(element: HTMLElement | null) {
   if (!element) {
     return { x: 0, y: 0};
   }
-  const { x, y } = element.getBoundingClientRect();
-  return { x: x + window.scrollX, y: y + window.scrollY };
+  const { x, top, bottom, left, right } = element.getBoundingClientRect();
+  const centeredX = x + window.scrollX + ((right - left) / 2);
+  // 300 is the height of the popup, 16 is the padding?
+  // const y = bottom + 316 >= window.innerHeight ? top - 332: bottom;
+  return { x: clampHorizontallyWithinViewport(centeredX, 16), y: bottom + window.scrollY, y2: top + window.scrollY };
+}
+
+function clampHorizontallyWithinViewport(positionX: number, padding: number) {
+  if (positionX - (POPUP_WIDTH / 2) <= padding) {
+    return padding;
+  }
+  if (positionX - (POPUP_WIDTH / 2) + POPUP_WIDTH + padding >= document.documentElement.clientWidth) { // TODO react to window resize
+    return document.documentElement.clientWidth - padding * 2 - POPUP_WIDTH;
+  }
+  return positionX - (POPUP_WIDTH / 2);
 }
 
 function useHoveredWordState() {
