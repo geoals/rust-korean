@@ -33,7 +33,7 @@ export function TabbedWordDefinitions(props: ReturnType<typeof useWordUnderCurso
     previousHoveredWord.current = props.hoveredWord;
   }
 
-  // TODO remove after we filter gargabe in backend
+  // TODO remove after we filter garbage in backend
   // if (response[0].dictEntry.tl_definitions.length === 0) {
   //   return null;
   // }
@@ -85,6 +85,7 @@ function DictionaryEntryContent({
   part_of_speech,
   deinflection_rule,
   tl_definitions,
+  frequency,
   isVisible,
   children,
 }: DictionaryEntryContentProps) {
@@ -106,6 +107,7 @@ function DictionaryEntryContent({
       {[...Array(stars)].map((_, i) => (
         <React.Fragment key={i}>★</React.Fragment>
       ))}
+      {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
       {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
       {reading && reading !== headword && (
         <span style={{ paddingLeft: "8px" }}>{reading}</span>

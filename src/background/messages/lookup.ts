@@ -14,6 +14,7 @@ export interface KrDictEntryDTO {
     definition: string;
   }[],
   stars: number;
+  frequency: number | null;
 }
 
 export type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };

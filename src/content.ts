@@ -100,6 +100,7 @@ let analysisResults = {};
         if (!hangulRegex.test(word)) {
           newHTML += word;
         } else {
+          // TODO underline all words in the string, not just one e.g. '쵸센고(조선어)'라고
           const {
             hangulWord,
             start: startIndex,

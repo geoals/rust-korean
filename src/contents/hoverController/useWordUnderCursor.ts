@@ -80,7 +80,9 @@ export function useWordUnderCursor() {
 function useHoveredWordState() {
   const hoveredWordRef = useRef<string>(""); // Ref is used to capture the value of hoveredWord at the time of the event handler
   const [hoveredWord, setHoveredWord] = useState<string>("");
-  const unsetHoveredWord = () => setHoveredWord("");
+  const unsetHoveredWord = () => {
+    setHoveredWord("");
+  }
 
   useEffect(() => {
     hoveredWordRef.current = hoveredWord;
@@ -178,7 +180,7 @@ function useHidePopup(unsetHoveredWord: () => void): void {
 
   const handleOnClick = (e: MouseEvent) => {
     const plasmoCsui = document.querySelector("html > plasmo-csui"); // TODO replace with something more robust
-    if (e.target != plasmoCsui) {
+    if (e.target?.tagName != plasmoCsui?.tagName) {
       unsetHoveredWord();
     }
   };
