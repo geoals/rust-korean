@@ -14,7 +14,6 @@ export function useWordUnderCursor() {
   useHidePopup(unsetHoveredWord);
   const [response, setResponse] = useState<LookupResponse>([]);
   const getMousePosition = useMousePosition();
-  const mousePosition = getMousePosition();
   const isFetchingRef = useRef(false);
 
   async function lookup(hoveredWord: string): Promise<LookupResponse> {
@@ -67,14 +66,24 @@ export function useWordUnderCursor() {
     };
   }, []);
 
+  const { x, y } = getPosition(hoveredElement);
+
   return {
     hoveredWord,
     hoveredSentence,
     hoveredElement,
     response,
-    positionX: mousePosition.x + window.scrollX, // TODO position relative to the hovered word itself
-    positionY: mousePosition.y + window.scrollY,
+    positionX: x,
+    positionY: y + 6,
   };
+}
+
+function getPosition(element: HTMLElement | null) {
+  if (!element) {
+    return { x: 0, y: 0};
+  }
+  const { x, y } = element.getBoundingClientRect();
+  return { x: x + window.scrollX, y: y + window.scrollY };
 }
 
 function useHoveredWordState() {
@@ -132,7 +141,6 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
     return undefined;
   }
 
-  // TODO when textContent contains inline html, you might not get the whole sentence
   const sentences = textContent.split(/[.!?]/);
   const sentence = sentences.find((sentence) => sentence.includes(word)); // TODO this will return the wrong sentence if there are multiple sentences with the same word
 
