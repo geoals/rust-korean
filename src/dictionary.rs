@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use crate::frequency_dictionary::FrequencyDictionary;
 
 const KRDICT_STAR: char = '★';
 
@@ -27,7 +28,7 @@ struct EntryJson {
 
 // TODO: better seperation of concerns between parsing json and mapping to krdict entry?
 impl EntryJson {
-    fn to_krdict_entry(&self) -> KrDictEntry {
+    fn to_krdict_entry(&self, frequency: Option<u32>) -> KrDictEntry {
         let definition_full = self.definitions
             .first()
             .expect("definition is empty")
@@ -48,6 +49,7 @@ impl EntryJson {
                 .collect(),
             definition_full,
             stars,
+            frequency
         }
     }
 }
@@ -94,6 +96,8 @@ pub struct KrDictEntry {
     /// Some definitions in the krdict dictionaries have one to three stars at the beginning of the definition
     /// indicating frequency. Three stars indicate the most frequent words.
     stars: u8,
+    /// From CC100 freq
+    frequency: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -120,15 +124,22 @@ impl Dictionary {
     pub fn new(path: &str) -> Self {
         // TODO remove garbage entries like 24200
         let terms_vec: Vec<EntryJson> = serde_json::from_str(&read_to_string(path).unwrap()).unwrap();
+
+        let freq_dict = FrequencyDictionary::new();
+
         let terms_map = terms_vec
             .iter()
             .fold(HashMap::new(), |mut map: HashMap<Headword, Vec<KrDictEntry>>, term| {
-                map.entry(term.headword.clone()).or_default().push(term.to_krdict_entry());
+                let frequency = freq_dict.lookup(&term.headword);
+                map.entry(term.headword.clone()).or_default().push(term.to_krdict_entry(frequency));
                 map
             });
         Self {
             terms_map,
-            terms_vec: terms_vec.iter().map(|term| term.to_krdict_entry()).collect(),
+            terms_vec: terms_vec.iter().map(|term| {
+                let frequency = freq_dict.lookup(&term.headword);
+                term.to_krdict_entry(frequency)
+            }).collect(),
         }
     }
 
@@ -189,7 +200,7 @@ mod tests {
             tags2: "".to_string(),
         };
 
-        let krdict_entry = entry_json.to_krdict_entry();
+        let krdict_entry = entry_json.to_krdict_entry(Some(123));
 
         assert_eq!(krdict_entry, super::KrDictEntry {
             headword: "개국하다".to_string(),
@@ -210,6 +221,7 @@ mod tests {
                 },
             ],
             stars: 0,
+            frequency: Some(123)
         });
     }
 
@@ -231,7 +243,7 @@ mod tests {
             tags2: "".to_string(),
         };
 
-        let krdict_entry = entry_json.to_krdict_entry();
+        let krdict_entry = entry_json.to_krdict_entry(None);
 
         assert_eq!(krdict_entry, super::KrDictEntry {
             headword: "개국하다".to_string(),
@@ -248,6 +260,7 @@ mod tests {
                 },
             ],
             stars: 1,
+            frequency: None,
         });
     }
     

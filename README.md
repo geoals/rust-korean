@@ -9,15 +9,16 @@ TBD
 ## Development
 Download dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) and extract it into `dictionaries/[KO-JA] KRDICT/`
 
-`docker run --name postgres-korean -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres` to run a local postgres instance for development
+`docker compose up` to run a local postgres instance for development
+
+`sqlx migrate run` to run database migrations
 
 `cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on localhost:3000 (must be installed with cargo install cargo-watch)
 
-`cargo run` to start a HTTP server on localhost:3000
+alternatively you can use
+`cargo run`
 
-`RUST_LOG=debug cargo run` to see debug logs
-
-`curl localhost:3000/lookup/{term}` to lookup definition for Korean word {term}
+set environment variable `RUST_LOG=debug` to see debug logs
 
 ## API
 

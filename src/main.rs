@@ -11,6 +11,7 @@ mod dictionary;
 mod search;
 mod resource;
 mod error_handling;
+mod frequency_dictionary;
 
 #[derive(Clone)]
 pub struct SharedState {
