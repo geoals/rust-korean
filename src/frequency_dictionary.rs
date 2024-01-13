@@ -1,6 +1,6 @@
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::read_to_string;
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Item {
@@ -33,8 +33,11 @@ impl FrequencyDictionary {
 }
 
 fn read_freq_dict_to_map() -> HashMap<String, u32> {
-    let result: Vec<Item> = serde_json::from_str(&read_to_string("dictionaries/[Frequency] CC100 (Korean)/term_meta_bank_1.json").unwrap())
-        .expect("Failed to parse JSON for frequency dictionary");
+    let result: Vec<Item> = serde_json::from_str(
+        &read_to_string("dictionaries/[Frequency] CC100 (Korean)/term_meta_bank_1.json")
+            .expect("Could not find frequency dictionary file. See README.md"),
+    )
+    .expect("Failed to parse JSON for frequency dictionary");
 
     result.iter().fold(HashMap::new(), |mut map, item| {
         map.insert(item.word.clone(), item.frequency_data.value);

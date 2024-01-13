@@ -2,12 +2,13 @@
 ## Features
 - partial support for yomichan format of dictionaries (POC with KRDICT)
 - deinflection of verbs and adjectives using deinflection rules from [the Korean fork of yomichan](https://github.com/Lyroxide/yomichan-korean/blob/master/ext/data/deinflect.json)
+- keep track of word status (unknown, seen, known) or ignored
 
 ## Goals
 TBD
 
 ## Development
-Download dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) and extract it into `dictionaries/[KO-JA] KRDICT/`
+Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) along with CC100 (Frequency) and extract it into `dictionaries/`
 
 `docker compose up` to run a local postgres instance for development
 
@@ -43,7 +44,8 @@ Example response
           "definition": "最も高い地位や等級。"
         }
       ],
-      "stars": 0
+      "stars": 0,
+      "frequency": 123
     },
     "status": {
       "id": 9504,
