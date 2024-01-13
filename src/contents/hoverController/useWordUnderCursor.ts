@@ -156,11 +156,25 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
     return undefined;
   }
 
-  const sentences = textContent.split(/[.!?]/);
-  const sentence = sentences.find((sentence) => sentence.includes(word)); // TODO this will return the wrong sentence if there are multiple sentences with the same word
+  const sentences = findFullParagraph(range.startContainer).split(/[.!?]/);
+  // TODO  don't remove .!? from the sentence
+  // TODO this will return the wrong sentence if there are multiple sentences with the same word
+  const sentence = sentences.find((sentence) => sentence.includes(word))?.replaceAll('\n', ''); 
 
   return { word, sentence, element: range.startContainer.parentElement };
 };
+
+// TODO this needs more testing and work
+function findFullParagraph(node: Node): string {
+  let newNode = node;
+  while (['a', 'span'].includes(newNode.nodeName.toLocaleLowerCase()) || newNode.nodeType === Node.TEXT_NODE) {
+    newNode = newNode.parentNode!;
+  }
+  if (!newNode.textContent) {
+    throw new Error("Could not find full paragraph for hoverd word");
+  }
+  return newNode.textContent;
+}
 
 function isHangulCharacter(char: string) {
   const hangulRegex = /[\uAC00-\uD7AF]/;
