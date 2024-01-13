@@ -8,12 +8,12 @@ This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with
 
 ## Features
 - Hover Korean words while holding shift key to search for the word in Japanese KRDICT and display the result in a popup next to the word.
+- Change status of words (known, unknown, seen)
+- Ignore words (i.e. for proper nouns)
 - Underline words on a webpage based on status (known, unknown, seen)
 
 ## TODO
 
-- position popup correctly near edges of viewport
-- position popup relative to the hovered word instead of the mouse
 - allow looking up partial words by selecting text
 - proper styling and a decent design
 
