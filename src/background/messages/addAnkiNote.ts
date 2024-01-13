@@ -8,6 +8,7 @@ export type AddToAnkiPayload = {
     sentence: string,
     selectionText?: string,
     definitionFull: string,
+    frequency?: string,
 }
 
 async function postAddAnkiNote(payload: AddToAnkiPayload): Promise<string> {
@@ -27,6 +28,7 @@ async function postAddAnkiNote(payload: AddToAnkiPayload): Promise<string> {
                     "Sentence": payload.sentence,
                     "DefinitionFull": payload.definitionFull,
                     "VocabOriginalInflection": payload.hoveredWord,
+                    "Frequency": payload.frequency
                 },
                 "tags": [
                     "rust-korean-plasmo"
@@ -35,7 +37,7 @@ async function postAddAnkiNote(payload: AddToAnkiPayload): Promise<string> {
         }
     }
 
-    return fetch("http://localhost:8765", {
+    return fetch("http://127.0.0.1:8765", {
         method: "POST",
         body: JSON.stringify(json)
     }).then(res => res.text())

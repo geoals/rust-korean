@@ -82,7 +82,7 @@ export function useWordUnderCursor() {
 
 function getPosition(element: HTMLElement | null) {
   if (!element) {
-    return { x: 0, y: 0};
+    return { x: 0, y: 0, y2: 0 };
   }
   const { x, top, bottom, left, right } = element.getBoundingClientRect();
   const centeredX = x + window.scrollX + ((right - left) / 2);

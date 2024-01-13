@@ -107,6 +107,7 @@ function DictionaryEntryContent({
       {[...Array(stars)].map((_, i) => (
         <React.Fragment key={i}>★</React.Fragment>
       ))}
+      <br />
       {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
       {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
       {reading && reading !== headword && (

@@ -21,7 +21,7 @@ export type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };
 export type LookupResponse = Array<LookupDTO>;
 
 async function getLookup(word: string): Promise<LookupResponse> {
-  return fetch(`http://localhost:3000/lookup/${word}`)
+  return fetch(`http://127.0.0.1:3000/lookup/${word}`)
     .then(res => res.json()) // TODO error handling
 }
 

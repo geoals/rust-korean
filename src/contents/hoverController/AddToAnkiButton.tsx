@@ -9,6 +9,7 @@ export function AddToAnkiButton({
   hanja,
   definition_full,
   reading,
+  frequency,
 }: {
   hoveredWord: string;
   hoveredSentence: string;
@@ -16,6 +17,7 @@ export function AddToAnkiButton({
   hanja?: string;
   definition_full: string;
   reading?: string;
+  frequency?: number;
 }) {
   function addToAnkiBtnHandler(): void {
     addAnkiNoteMessage({
@@ -25,6 +27,7 @@ export function AddToAnkiButton({
       reading,
       sentence: hoveredSentence,
       definitionFull: definition_full,
+      frequency: frequency?.toString(),
     });
   }
 
@@ -51,6 +54,7 @@ async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
       reading: reading ?? undefined, // TODO map null to undefined closer to api layer
       selectionText: window.getSelection()?.toString().replaceAll("\n", "<br>"),
       definitionFull,
+      frequency: payload.frequency ?? undefined,
     },
   });
   // TODO handle errors

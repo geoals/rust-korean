@@ -1,16 +1,17 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import type { AnalyzeResponse } from "~background/messages/analyze";
 
-const hangulRegex = /[\uAC00-\uD7AF]/;
-const underlineColor = {
-  seen: "#FACB6E",
-  known: "transparent",
-  unknown: "#F38181",
-  unmatched: "gray",
-};
-let analysisResults = {};
-
 (async () => {
+  const hangulRegex = /[\uAC00-\uD7AF]/;
+  const underlineColor = {
+    seen: "#FACB6E",
+    known: "transparent",
+    unknown: "#F38181",
+    unmatched: "gray",
+  };
+
+  let analysisResults = {};
+
   const sendAnalyzeRequestToBackground = async (text: string) => {
     const result = (await sendToBackground({
       name: "analyze",
@@ -19,6 +20,24 @@ let analysisResults = {};
 
     return result.message;
   };
+
+  function getConsecutiveHangulSubstring(word: string) {
+    let start = 0;
+    let end = word.length;
+    for (let i = 0; i < word.length; i++) {
+      if (hangulRegex.test(word[i])) {
+        start = i;
+        break;
+      }
+    }
+    for (let i = start; i < word.length; i++) {
+      if (!hangulRegex.test(word[i])) {
+        end = i;
+        break;
+      }
+    }
+    return { hangulWord: word.substring(start, end), start, end };
+  }
 
   // TODO clean up this abomination
   function mutationObserverCallback(mutations: MutationRecord[]) {
@@ -142,21 +161,3 @@ let analysisResults = {};
   // observer.disconnect();
   // make this a toggleswitch in popup.tsx
 })();
-
-function getConsecutiveHangulSubstring(word: string) {
-  let start = 0;
-  let end = word.length;
-  for (let i = 0; i < word.length; i++) {
-    if (hangulRegex.test(word[i])) {
-      start = i;
-      break;
-    }
-  }
-  for (let i = start; i < word.length; i++) {
-    if (!hangulRegex.test(word[i])) {
-      end = i;
-      break;
-    }
-  }
-  return { hangulWord: word.substring(start, end), start, end };
-}
