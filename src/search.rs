@@ -1,3 +1,8 @@
+use std::u32::MAX;
+
+use tracing::debug;
+use itertools::Itertools;
+
 use crate::deinflect::deinflect;
 use crate::dictionary::{Dictionary, KrDictEntry};
 
@@ -35,7 +40,10 @@ pub fn get(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
             .flat_map(|m| m.matches).collect();
     }
 
-    matches.into_iter().flat_map(|m| m.matches).collect()
+    matches.into_iter().flat_map(|m| m.matches)
+        .sorted_by_key(|m| *m.frequency())
+        .dedup_by(|a, b| a.sequence_number() == b.sequence_number())
+        .collect()
 }
 
 /// Tries to find one or more matches of word or variations of it in the dictionary
@@ -43,7 +51,9 @@ pub fn get(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
 pub fn get_all(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
     find_matches_in_dictionary(word, dictionary).into_iter()
         .flat_map(|m| m.matches)
-        .collect()
+        .sorted_by_key(|m| m.frequency().unwrap_or(MAX))
+        .dedup_by(|a, b| a.sequence_number() == b.sequence_number())
+        .collect::<Vec<KrDictEntry>>()
 }
 
 fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match> {
@@ -63,21 +73,7 @@ fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match>
         matches.push(Match { match_type: MatchType::Partial, matches: value.clone() });
     }
 
-    sort(&mut matches);
-    matches.dedup_by(|a, b| {
-        a.matches.first().unwrap().sequence_number() == b.matches.first().unwrap().sequence_number()
-    });
     matches
-}
-
-fn sort(matches: &mut [Match]) {
-    matches.sort_by_key(|m| { m.match_type.clone() });
-
-    matches.iter_mut().for_each(|m| {
-        m.matches.sort_by(|a, b| {
-            b.stars().cmp(&a.stars())
-        })
-    });
 }
 
 fn search_deinflections_of_word(word: &str, dictionary: &Dictionary) -> Option<Vec<KrDictEntry>> {
@@ -97,10 +93,16 @@ fn search_deinflections_of_word(word: &str, dictionary: &Dictionary) -> Option<V
 // Remove the last character of the word until there is a match or the word is empty
 fn search_partial(word: &str, dictionary: &Dictionary) -> Option<Vec<KrDictEntry>> {
     let char_count = word.chars().count();
+    let mut matches = vec![];
     for i in 0..char_count {
         let word_without_last_char: String = word.chars().take(char_count - i).collect();
+        let deinflected_matches = search_deinflections_of_word(&word_without_last_char, dictionary);
+        if let Some(result) = deinflected_matches {
+            matches.extend(result.clone());
+        }
         if let Some(result) = dictionary.search(&word_without_last_char) {
-            return Some(result.clone());
+            matches.extend(result.clone());
+            return Some(matches);
         }
     }
     None

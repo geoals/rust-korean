@@ -22,7 +22,7 @@ pub async fn post_handler(
 
     // TODO change to hashmap
      let unconjugated_to_ids_tuples = words.map(|w| {
-        let matches: Vec<KrDictEntry> = search::get(w, &state.dictionary);
+        let matches: Vec<KrDictEntry> = search::get_all(w, &state.dictionary);
         let ids = matches.iter().map(|m| *m.sequence_number()).collect::<Vec<i32>>();
         (w.to_owned(), ids)
     }).collect::<Vec<(String, Vec<i32>)>>();

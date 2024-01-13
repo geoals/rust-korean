@@ -29,7 +29,7 @@ lazy_static! {
     };
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct DeinflectedMatch {
     pub word: String,
     pub rules: Vec<String>,
@@ -45,10 +45,35 @@ pub fn deinflect(word: &str) -> HashSet<DeinflectedMatch> {
         decomposed_term.ends_with(&rule.kana_in)
     }).map(|rule| {
         DeinflectedMatch {
-            word: decomposed_term.replace(&rule.kana_in, &rule.kana_out).to_hangul(),
+            word: apply_inflection_rule(&decomposed_term, rule),
             rules: rule.rules_out.clone(),
         }
     }).filter(|rule| {
         rule.word.chars().all(is_hangul)
     }).collect()
+}
+
+/// Panics if decomposed_term does not end with rule.kana_in
+fn apply_inflection_rule(decomposed_term: &str, rule: &DeinflectRule) -> String {
+    let mut input = decomposed_term.to_string();
+    let index = input.rfind(&rule.kana_in).unwrap();
+    input.replace_range(index.., &rule.kana_out);
+    input.to_hangul()
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn apply_inflection_rule_on_term_with_more_than_one_of_the_same_jamo() {
+        let deinflected = "ㄷㅡㄹㅣㄹ";
+        let deinflection_rule = DeinflectRule {
+            kana_in: "ㄹ".to_string(),
+            kana_out: "ㄷㅏ".to_string(),
+            rules_in: vec![],
+            rules_out: vec!["v".to_string(), "adj".to_string()],
+        };
+
+        assert_eq!(apply_inflection_rule(deinflected, &deinflection_rule), "드리다");
+    }
 }

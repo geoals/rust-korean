@@ -108,7 +108,7 @@ pub struct TargetLanguageDefinition {
 
 impl KrDictEntry {
     pub fn sequence_number(&self) -> &i32 { &self.sequence_number }
-    pub fn stars(&self) -> &u8 { &self.stars }
+    pub fn frequency(&self) -> &Option<u32> { &self.frequency }
     pub fn headword(&self) -> &String { &self.headword }
 }
 

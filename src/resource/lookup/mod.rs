@@ -14,7 +14,7 @@ pub async fn get_handler(
     let start_time = Instant::now();
     debug!("New request for {}", term); // TODO request ID
 
-    let matches: Vec<KrDictEntry> = search::get(&term, &state.dictionary);
+    let matches: Vec<KrDictEntry> = search::get_all(&term, &state.dictionary);
     debug!("Found {} matches", matches.len());
 
     if !matches.is_empty() {
