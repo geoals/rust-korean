@@ -82,17 +82,21 @@ import type { AnalyzeResponse } from "~background/messages/analyze";
     if (wordStatuses[word] === undefined) {
       return "unknown";
     }
+
     if (wordStatuses[word].length === 0) {
       return "unmatched";
     }
 
-    if (wordStatuses[word].some((wordStatus) => wordStatus.status === "seen")) {
+    const filteredWordStatuses = wordStatuses[word].filter((wordStatus) => !wordStatus.ignored);
+
+    if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "known")) {
+      return "known"
+    }
+
+    if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "seen")) {
       return "seen"
     }
 
-    if (wordStatuses[word].some((wordStatus) => wordStatus.status === "known")) {
-      return "known"
-    }
     return "unknown"
   }
 

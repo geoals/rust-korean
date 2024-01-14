@@ -18,7 +18,7 @@ export interface KrDictEntryDTO {
 }
 
 export type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };
-export type LookupResponse = Array<LookupDTO>;
+export type LookupResponse = Record<string, Array<LookupDTO>>;
 
 async function getLookup(word: string): Promise<LookupResponse> {
   return fetch(`http://127.0.0.1:3000/lookup/${word}`)

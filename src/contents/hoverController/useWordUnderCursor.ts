@@ -1,6 +1,6 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
-import type { LookupResponse } from "~background/messages/lookup";
+import type { LookupDTO, LookupResponse } from "~background/messages/lookup";
 import { POPUP_WIDTH } from "~contents/hoverController/WordDefinitionPopup";
 
 const hangulRegex = /[\uAC00-\uD7AF]/;
@@ -15,7 +15,7 @@ export function useWordUnderCursor() {
     null,
   );
   useHidePopup(unsetHoveredWord);
-  const [response, setResponse] = useState<LookupResponse>([]);
+  const [response, setResponse] = useState<LookupResponse>({});
   const getMousePosition = useMousePosition();
   const isFetchingRef = useRef(false);
 
@@ -53,9 +53,9 @@ export function useWordUnderCursor() {
     isFetchingRef.current = true;
     const response = await lookup(underCursor.word);
     isFetchingRef.current = false;
-    // TODO remove filtering after we filter garbage in backend
-    setResponse(response.filter((r) => r.dictEntry.tl_definitions.length > 0 &&
-      !hangulRegex.test(r.dictEntry.tl_definitions[0].translation)));
+
+
+    setResponse(filterResponse(response));
     setHoveredWord(underCursor.word);
     setHoveredSentence(underCursor.sentence);
     setHoveredElement(underCursor.element);
@@ -82,6 +82,19 @@ export function useWordUnderCursor() {
     positionY: y + 6,
     positionY2: y2 + 6,
   };
+}
+
+function filterResponse(response: LookupResponse) {
+    // TODO remove filtering after we filter garbage in backend
+    const filterPredicate = (it: LookupDTO) => it.dictEntry.tl_definitions.length > 0
+      && it.dictEntry.tl_definitions[0].translation.length > 0 
+      && !hangulRegex.test(it.dictEntry.tl_definitions[0].translation);
+
+    return Object.fromEntries(
+      Object.entries(response)
+        .map(([key, value]) => [key, value.filter(filterPredicate)])
+        .filter(([_, value]) => value.length > 0)
+    );
 }
 
 function getPosition(element: HTMLElement | null) {

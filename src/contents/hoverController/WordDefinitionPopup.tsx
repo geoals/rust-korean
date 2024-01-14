@@ -18,10 +18,10 @@ export const WordDefinitionPopup = forwardRef(({ positionX, positionY, children 
         left: `${positionX}` + "px",
         color: "black",
         backgroundColor: "white",
-        padding: "8px",
+        padding: "0 8px 8px",
         border: "solid black 2px",
         width: `${POPUP_WIDTH}px`,
-        maxHeight: "300px",
+        maxHeight: "400px",
         overflowY: "auto",
         overflowX: "hidden",
       }}

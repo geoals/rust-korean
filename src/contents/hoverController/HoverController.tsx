@@ -1,18 +1,26 @@
 import React, { useLayoutEffect } from "react";
 import { WordDefinitionPopup } from "./WordDefinitionPopup";
 import { useWordUnderCursor } from "./useWordUnderCursor";
-import type {
-  KrDictEntryDTO,
-} from "~background/messages/lookup";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
+import * as styles from "./style.module.css";
+import type { KrDictEntryDTO } from "~background/messages/lookup";
 
 export function HoverController() {
-  const { hoveredElement, hoveredSentence, hoveredWord, positionX, positionY, positionY2, response } = useWordUnderCursor();
+  const {
+    hoveredElement,
+    hoveredSentence,
+    hoveredWord,
+    positionX,
+    positionY,
+    positionY2,
+    response,
+  } = useWordUnderCursor();
   const [activeTabIndex, setActiveTabIndex] = React.useState(0);
   const previousHoveredWord = React.useRef<string | null>(null);
   const popupRef = React.useRef<HTMLDivElement>(null);
 
+  // Position popup above hovered word if it would otherwise go offscreen
   useLayoutEffect(() => {
     if (popupRef.current) {
       const height = popupRef.current.clientHeight;
@@ -27,48 +35,52 @@ export function HoverController() {
     previousHoveredWord.current = hoveredWord;
   }
 
-
   // TODO loading
-  if (response.length === 0 || !hoveredWord) {
+  if (Object.keys(response).length === 0 || !hoveredWord) {
     return null;
   }
 
-  // TODO remove after we filter garbage in backend
-  // if (response[0].dictEntry.tl_definitions.length === 0) {
-  //   return null;
-  // }
-
-  // TODO group different senses of the same word in same tab and have tabs be for 
-  // different conjugation matches etc. (all senses of word spelled equally will have the same frequency)
   return (
     <>
-      <WordDefinitionPopup positionX={positionX} positionY={positionY} ref={popupRef}>
-        {response.length > 1 &&
-          response.map((entry, index) => (
-            <TabButton
-              title={String(index + 1)}
-              key={entry.dictEntry.sequence_number + " " + index}
-              onClick={() => setActiveTabIndex(index)}
-              isActive={index === activeTabIndex}
-            />
-          ))}
-        {response.map((entry, index) => (
-          <DictionaryEntryContent
-            {...entry.dictEntry}
-            isVisible={index === activeTabIndex}
-            key={entry.dictEntry.sequence_number + " " + index}
-          >
-            <>
-              <AddToAnkiButton
-                hoveredWord={hoveredWord}
-                hoveredSentence={hoveredSentence}
-                {...entry.dictEntry}
+      <WordDefinitionPopup
+        positionX={positionX}
+        positionY={positionY}
+        ref={popupRef}
+      >
+        <div>
+          <div className={styles.tabs}>
+            {Object.keys(response).map((entry, index) => (
+              <TabButton
+                title={entry}
+                key={entry}
+                onClick={() => setActiveTabIndex(index)}
+                isActive={index === activeTabIndex}
               />
-              <StatusButtons entry={entry} hoveredElement={hoveredElement} />
-              {JSON.stringify(entry.status)}
-            </>
-          </DictionaryEntryContent>
-        ))}
+            ))}
+          </div>
+          {Object.values(response).map((entries, index) => {
+            return entries.map((entry) => (
+              <DictionaryEntryContent
+                {...entry.dictEntry}
+                isVisible={index === activeTabIndex}
+                key={entry.dictEntry.sequence_number + " " + index}
+              >
+                <>
+                  <AddToAnkiButton
+                    hoveredWord={hoveredWord}
+                    hoveredSentence={hoveredSentence}
+                    {...entry.dictEntry}
+                  />
+                  <StatusButtons
+                    entry={entry}
+                    hoveredElement={hoveredElement}
+                  />
+                  {/* {JSON.stringify(entry.status)} */}
+                </>
+              </DictionaryEntryContent>
+            ));
+          })}
+        </div>
       </WordDefinitionPopup>
     </>
   );
@@ -99,17 +111,13 @@ function DictionaryEntryContent({
 
   return (
     <div style={getStyle()}>
-      <b>
-        <p>{headword}</p>
-      </b>
       {children}
-      {/*TODO display if it has been added to anki already */}
-      {/* unknown, seen, known */}
-      {/* frequency */}
+      {/* TODO display if it has been added to anki already */}
+      {/* TODO button to play TTS/forvo audio */}
       {[...Array(stars)].map((_, i) => (
         <React.Fragment key={i}>★</React.Fragment>
       ))}
-      <br />
+      {/* TODO move frequency above definition list as it will be the same for all*/}
       {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
       {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
       {reading && reading !== headword && (
@@ -121,14 +129,7 @@ function DictionaryEntryContent({
       {deinflection_rule && (
         <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
       )}
-      <ol lang="jp">
-        {tl_definitions.map((element, index) => (
-          <React.Fragment key={index}>
-            <li>{element.translation}</li>
-            {element.definition}
-          </React.Fragment>
-        ))}
-      </ol>
+      <DefinitionList definitions={tl_definitions} />
       {/* for deconjugated terms: conjugation/grammar */}
     </div>
   );
@@ -141,7 +142,7 @@ function TabButton(props: {
 }) {
   const getStyle = () => {
     if (props.isActive) {
-      return { backgroundColor: "lightblue" };
+      return { backgroundColor: "lightskyblue" };
     }
   };
 
@@ -149,5 +150,45 @@ function TabButton(props: {
     <button onClick={props.onClick} style={getStyle()}>
       {props.title}
     </button>
+  );
+}
+
+function DefinitionList(props: {
+  definitions: Array<{ translation: string; definition: string }>;
+}) {
+  if (props.definitions.length === 0) {
+    return null;
+  }
+
+  if (props.definitions.length === 1) {
+    return (
+      <details lang="jp" className={styles.definitionList}>
+        <summary className={styles.definitionListSummary}>{props.definitions[0].translation}</summary>
+        <p>{props.definitions[0].definition}</p>
+      </details>
+    );
+  }
+
+  return (
+    <details lang="jp" className={styles.definitionList}>
+      {/* Maybe have nowrap for summary line while it is closed*/}
+      <summary className={styles.definitionListSummary}>
+        <ol style={{paddingInlineStart: "2ch", marginTop: "-22px", marginBottom: "0" }}>
+        <li>{props.definitions[0].translation}</li>
+        </ol>
+      </summary>
+
+      <p style={{margin: "0", paddingLeft: "4ch"}}>{props.definitions[0].definition}</p>
+      <ol start={2} style={{marginTop: "0", paddingInlineStart: "4ch"}}>
+        {props.definitions.slice(1).map((element, index) => {
+          return (
+            <React.Fragment key={index}>
+              <li style={{paddingTop: "8px"}}>{element.translation}</li>
+              {element.definition}
+            </React.Fragment>
+          );
+        })}
+      </ol>
+    </details>
   );
 }

@@ -16,6 +16,7 @@ This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with
 
 - allow looking up partial words by selecting text
 - proper styling and a decent design
+- possibly merge definitions where the only difference is part of speech (e.g 형식적 has definition for noun and for adjective but they are almost the same)
 
 ## Getting Started
 
