@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import type { LookupResponse } from "~background/messages/lookup";
 import { POPUP_WIDTH } from "~contents/hoverController/WordDefinitionPopup";
 
+const hangulRegex = /[\uAC00-\uD7AF]/;
+
 export function useWordUnderCursor() {
   const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord } =
     useHoveredWordState();
@@ -51,7 +53,9 @@ export function useWordUnderCursor() {
     isFetchingRef.current = true;
     const response = await lookup(underCursor.word);
     isFetchingRef.current = false;
-    setResponse(response);
+    // TODO remove filtering after we filter garbage in backend
+    setResponse(response.filter((r) => r.dictEntry.tl_definitions.length > 0 &&
+      !hangulRegex.test(r.dictEntry.tl_definitions[0].translation)));
     setHoveredWord(underCursor.word);
     setHoveredSentence(underCursor.sentence);
     setHoveredElement(underCursor.element);

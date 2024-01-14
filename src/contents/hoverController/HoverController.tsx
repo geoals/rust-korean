@@ -38,6 +38,8 @@ export function HoverController() {
   //   return null;
   // }
 
+  // TODO group different senses of the same word in same tab and have tabs be for 
+  // different conjugation matches etc. (all senses of word spelled equally will have the same frequency)
   return (
     <>
       <WordDefinitionPopup positionX={positionX} positionY={positionY} ref={popupRef}>

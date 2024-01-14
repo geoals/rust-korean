@@ -85,7 +85,15 @@ import type { AnalyzeResponse } from "~background/messages/analyze";
     if (wordStatuses[word].length === 0) {
       return "unmatched";
     }
-    return wordStatuses[word][0].status;
+
+    if (wordStatuses[word].some((wordStatus) => wordStatus.status === "seen")) {
+      return "seen"
+    }
+
+    if (wordStatuses[word].some((wordStatus) => wordStatus.status === "known")) {
+      return "known"
+    }
+    return "unknown"
   }
 
   function getTextNodes(node: Node) {
@@ -129,7 +137,7 @@ import type { AnalyzeResponse } from "~background/messages/analyze";
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
           const color = underlineColor[status];
-          newHTML += `${wordStart}<span class="rust-korean" style="text-decoration: underline 0.15rem ${color}; text-underline-offset: 0.2rem;">${hangulWord}</span>${wordEnd}`;
+          newHTML += `${wordStart}<span class="rust-korean" style="text-decoration: underline 0.15rem ${color}; text-underline-offset: 0.3rem;">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
           newHTML += " ";
