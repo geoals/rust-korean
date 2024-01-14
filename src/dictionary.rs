@@ -83,7 +83,7 @@ fn tl_definition_lines(definition: &String) -> Vec<String> {
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct KrDictEntry {
-    headword: String,
+    headword: Headword,
     reading: Option<String>,
     part_of_speech: String, // TODO translate to JP (or lang of the dict)
     /// "v" or "adj or None
@@ -109,10 +109,11 @@ pub struct TargetLanguageDefinition {
 impl KrDictEntry {
     pub fn sequence_number(&self) -> &i32 { &self.sequence_number }
     pub fn frequency(&self) -> &Option<u32> { &self.frequency }
+    pub fn stars(&self) -> &u8 { &self.stars }
     pub fn headword(&self) -> &String { &self.headword }
 }
 
-type Headword = String;
+pub type Headword = String;
 
 pub struct Dictionary {
     terms_map: HashMap<Headword, Vec<KrDictEntry>>,

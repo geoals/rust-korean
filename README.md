@@ -121,7 +121,7 @@ Words not found in the dictionary have an empty array of statuses (no ID).
 - sorting improvements:
   - sort homonyms once again by number of krdict stars
   - other sorting improvements (prefer longer matches over frequency)
-  - needs sorting improvement: 떠날, 한심한, 남자, 비싼, 이름은 
+  - needs sorting improvement: 떠날, 한심한, 남자, 비싼, 이름은, 다리
 - deinflection improvements: 여길
 - search improvemnts: 야박하다 could filter 야 if 3/4 match or something
 - maybe try to incorporate grammar entries in krdict (headword contains loose jamo for some)

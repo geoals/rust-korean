@@ -1,9 +1,10 @@
+use std::collections::{HashMap, BTreeMap};
 use std::time::Instant;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use serde::Serialize;
 use tracing::debug;
-use crate::dictionary::KrDictEntry;
+use crate::dictionary::{KrDictEntry, Headword};
 use crate::resource::word_status::{WordStatus, WordStatusResponse};
 use crate::{SharedState, search};
 
@@ -62,9 +63,21 @@ pub async fn get_handler(
         })
         .collect::<Vec<LookupDTO>>();
 
-    
+    // Groups matches by headword
+    let mut matches_map: LookupResponse = LookupResponse(matches.into_iter()
+        .fold(BTreeMap::new(), |mut map: BTreeMap<Headword, Vec<LookupDTO>>, match_| {
+                map.entry(match_.dict_entry.headword().clone()).or_default().push(match_);
+                map
+            }
+        ));
 
-    let response = serde_json::to_string(&matches).unwrap();
+    // Sort list in each key by stars
+    for (_, value) in &mut matches_map.0 {
+        value.sort_by_key(|v| *v.dict_entry.stars());
+        value.reverse();
+    }
+
+    let response = serde_json::to_string(&matches_map).unwrap();
 
     debug!("Request processed in {:?}", start_time.elapsed());
     response
@@ -78,4 +91,4 @@ pub struct LookupDTO {
 }
 
 #[derive(Serialize)]
-pub struct LookupResponse(Vec<LookupDTO>);
+pub struct LookupResponse(BTreeMap<Headword, Vec<LookupDTO>>);
