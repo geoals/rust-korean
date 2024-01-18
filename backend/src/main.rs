@@ -1,9 +1,9 @@
-use std::{time::Instant, sync::Arc};
+use std::{time::Instant, collections::HashMap, sync::{Arc, Mutex}};
 
 use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
-use crate::dictionary::Dictionary;
+use crate::{dictionary::Dictionary, resource::analyze::read_from_file};
 
 mod deinflect;
 mod hangul;
@@ -16,6 +16,10 @@ mod frequency_dictionary;
 #[derive(Clone)]
 pub struct SharedState {
     dictionary: Arc<Dictionary>,
+    // Mapping from unconjugated word to sequence number/id (entry in dictionary) is cached in 
+    // a file because doing analysis on several thousand words can take several seconds
+    // TODO use async mutex/rwlock
+    analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>,
     db: sqlx::PgPool,
 }
 
@@ -28,7 +32,8 @@ impl SharedState {
         info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
             dictionary,
-            db
+            analysis_cache: read_from_file("analysis_cache.json").expect("Could not read cache file"),
+            db,
         }
     }
 }

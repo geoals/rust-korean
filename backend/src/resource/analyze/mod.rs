@@ -1,7 +1,12 @@
+use std::io::Read;
+use std::sync::{Arc, Mutex};
 use std::{time::Instant, collections::HashMap};
 
 use axum::{response::IntoResponse, extract::State, http};
-use tracing::debug;
+use serde::{Serialize, Deserialize};
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
+use tracing::{debug, info};
 
 use crate::error_handling::AppError;
 use crate::dictionary::KrDictEntry;
@@ -20,12 +25,8 @@ pub async fn post_handler(
     let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
     let words = bodytext_with_only_hangul.split_whitespace();
 
-    // TODO change to hashmap
-     let unconjugated_to_ids_tuples = words.map(|w| {
-        let matches: Vec<KrDictEntry> = search::get_all(w, &state.dictionary);
-        let ids = matches.iter().map(|m| *m.sequence_number()).collect::<Vec<i32>>();
-        (w.to_owned(), ids)
-    }).collect::<Vec<(String, Vec<i32>)>>();
+    let unconjugated_to_ids_tuples = get_unconjugated_word_to_ids_mapping(words, &state);
+    cache_ids_and_write_to_file(&unconjugated_to_ids_tuples, &state);
     
     let mut id_to_unconjugated_words_map = HashMap::<i32, Vec<String>>::new();
     unconjugated_to_ids_tuples.iter().for_each(|(word, ids)| {
@@ -77,3 +78,54 @@ pub async fn post_handler(
     debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
 }
+
+// TODO change to hashmap
+fn get_unconjugated_word_to_ids_mapping(words: std::str::SplitWhitespace<'_>, state: &SharedState) -> Vec<(String, Vec<i32>)> {
+    let unconjugated_to_ids_tuples = words.map(|word| {
+        if let Ok(cached_matches) = state.analysis_cache.lock() {
+            if (*cached_matches).contains_key(word) {
+                return (word.to_owned(), (*cached_matches).get(word).unwrap().clone());
+            }
+        }
+        let matches: Vec<KrDictEntry> = search::get_all(word, &state.dictionary);
+        let ids = matches.iter().map(|m| *m.sequence_number()).collect::<Vec<i32>>();
+        (word.to_owned(), ids)
+    }).collect::<Vec<(String, Vec<i32>)>>();
+    unconjugated_to_ids_tuples
+}
+
+fn cache_ids_and_write_to_file(unconjugated_to_ids_tuples: &Vec<(String, Vec<i32>)>, state: &SharedState) {
+    for (unconjugated, ids) in unconjugated_to_ids_tuples {
+        if let Ok(mut cached_matches) = state.analysis_cache.lock() {
+            (*cached_matches).insert(unconjugated.clone(), ids.clone());
+        }
+    }
+
+    if let Ok(cached_matches) = state.analysis_cache.lock() {
+        tokio::task::spawn({
+            write_to_file("analysis_cache.json", cached_matches.clone())
+        });
+    }
+}
+
+async fn write_to_file(file_path: &str, data: HashMap<String, Vec<i32>>) -> tokio::io::Result<()> {
+    let serialized_data = serde_json::to_string(&CachedData(data))?;
+    let mut file = File::create(file_path).await?;
+    file.write_all(serialized_data.as_bytes()).await?;
+    Ok(())
+}
+
+pub fn read_from_file(file_path: &str) -> std::io::Result<Arc<Mutex<HashMap<String, Vec<i32>>>>> {
+    let time = Instant::now();
+    let mut file = std::fs::File::open(file_path)?;
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer)?;
+    
+    let loaded_data: CachedData = serde_json::from_str(&buffer)?;
+
+    info!("Loaded cached analysis results with {} entries in {:?}", loaded_data.0.len(), time.elapsed());
+    Ok(Arc::new(Mutex::new(loaded_data.0)))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct CachedData(HashMap<String, Vec<i32>>);

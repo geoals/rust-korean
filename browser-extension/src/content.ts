@@ -126,7 +126,7 @@ async function main() {
 
     let newHTML = "";
 
-    textNode.nodeValue.split("\n").forEach((line) => {
+    textNode.nodeValue.split("\n").forEach((line, index) => {
       line.split(" ").forEach((word, index) => {
         if (!hangulRegex.test(word)) {
           newHTML += word;
@@ -137,6 +137,7 @@ async function main() {
             start: startIndex,
             end: endIndex,
           } = getConsecutiveHangulSubstring(word);
+
           const wordStart = word.substring(0, startIndex);
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
@@ -147,7 +148,9 @@ async function main() {
           newHTML += " ";
         }
       });
-      newHTML += "\n";
+      if (index < textNode.nodeValue!.split("\n").length - 1) {
+        newHTML += "\n";
+      }
     });
 
     const newSpan = document.createElement("span");
