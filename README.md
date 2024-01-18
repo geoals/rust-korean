@@ -1,128 +1,45 @@
 # WIP
-## Features
-- partial support for yomichan format of dictionaries (POC with KRDICT)
-- deinflection of verbs and adjectives using deinflection rules from [the Korean fork of yomichan](https://github.com/Lyroxide/yomichan-korean/blob/master/ext/data/deinflect.json)
-- keep track of word status (unknown, seen, known) or ignored
+This project consists of two parts: a rust backend with a REST API and postgres database, and a browser extension written using the Plasmo framework and React.
 
-## Goals
-TBD
+![demo img](demo.png)
+
+- Partial support for yomichan format of dictionaries (POC with KRDICT)
+- Deinflection of verbs and adjectives using deinflection rules from [the Korean fork of yomichan](https://github.com/Lyroxide/yomichan-korean/blob/master/ext/data/deinflect.json)
+
+## Features
+- Hover Korean words while holding shift key to search for the word in Japanese KRDICT and display the result in a popup next to the word.
+- Automatically underline Korean words on a website with colors according to status, both on pageload and for new text that is inserted. This is useful in combination with a texthooker page such as [this one](https://renji-xd.github.io/texthooker-ui/) to be able to use it with local videos or games
+- Keep track of word status (unknown, seen, known) or ignored
+- Easy sentence mining by exporting flash cards to [Anki](https://apps.ankiweb.net/)
 
 ## Development
-Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) along with CC100 (Frequency) and extract it into `dictionaries/`
-
-`docker compose up` to run a local postgres instance for development
-
-`sqlx migrate run` to run database migrations
-
-`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on localhost:3000 (must be installed with cargo install cargo-watch)
-
-alternatively you can use
-`cargo run`
-
-set environment variable `RUST_LOG=debug` to see debug logs
-
-## API
-
-### Lookup
-`GET /lookup/:term`
-
-Example response
-```json
-[
-  {
-    "dictEntry": {
-      "headword": "최상위",
-      "reading": null,
-      "part_of_speech": "명사",
-      "deinflection_rule": "n",
-      "definition_full": "최상위 〔最上位〕\nさいじょうい【最上位】\n가장 높은 지위나 등급.\n最も高い地位や等級。\n",
-      "sequence_number": 9504,
-      "hanja": "最上位",
-      "tl_definitions": [
-        {
-          "translation": "さいじょうい【最上位】",
-          "definition": "最も高い地位や等級。"
-        }
-      ],
-      "stars": 0,
-      "frequency": 123
-    },
-    "status": {
-      "id": 9504,
-      "status": "known",
-      "ignored": false,
-      "tracked": false
-    }
-  }
-]
-```
-
-### Word status
-#### `GET /word_status/:id`
-
-**Example response**
-```json
-{"id":123,"status":"unknown","ignored":false,"tracked":false}
-```
-
----
-
-#### `PATCH /word_status/:id`
-
-**Example request body** (all fields are optional)
-```json
-{
-  "ignored": true,
-  "status": "seen",
-  "tracked": false
-}
-```
-
-**Example response**
-
-`200 OK` if it updated an existing record
-
-`200 CREATED` if it inserted a new record
-
-### Analyze
-#### `POST /analyze`
-**Example request body**
-
-`"그러니까 뭐라고 소개를 했냔 말입니다!"`
-
-**Example response**
-```json
-{
-  "그러니까": [
-    {
-      "id": 47399,
-      "status": "known",
-      "ignored": false,
-      "tracked": false
-    }
-  ],
-  "말입니다!": [
-    {
-      "id": 38157,
-      "status": "seen",
-      "ignored": false,
-      "tracked": false
-    }
-  ],
-  "했냔": []
-}
-```
-
-Words without status are not included in the response, so in this example 소개를 is found but has default status.
-Words not found in the dictionary have an empty array of statuses (no ID).
+Start up the backend along with the browser extension by following the description [here](backend/README.md#development) and [here](browser-extension/README.md#getting-started)
 
 ## TODO
 
 - sorting improvements:
-  - sort homonyms once again by number of krdict stars
-  - other sorting improvements (prefer longer matches over frequency)
+  - prefer longer matches over frequency (compare number of jamo that match)
   - needs sorting improvement: 떠날, 한심한, 남자, 비싼, 이름은, 다리
-- deinflection improvements: 여길
-- search improvemnts: 야박하다 could filter 야 if 3/4 match or something
+- deinflection improvements: 
+  - 여길
+  - more than one deinflected pass to catch compound grammar rules e.g. 잃었는데
+- search improvements to remove noise: 야박하다 could exclude 야 if 3/4 match or something
 - maybe try to incorporate grammar entries in krdict (headword contains loose jamo for some)
-- mixed status
+- mixed status (i.e a word matches several headwords where some are unknown, some are known, some are seen)
+- ignore full words (not only per headword/dictionary match) (this probably requires new db table)
+
+- allow looking up partial words by selecting text
+- show name of deconjugations for inflected verbs and adjectives
+- translate part-of-speech in the definition (currently it's in korean)
+- proper styling and a decent design
+- settings page/settings in popup.tsx
+  - toggle monitoring (for underlining words)
+  - change language (japanese, english etc.)
+- possibly merge definitions where the only difference is part of speech (e.g 형식적 has definition for noun and for adjective but they are almost the same)
+- show number of stars based on CC100 frequency
+- structuring hanja/reading/Pos fields in the popup
+- merge known/seen/unknown to one button
+- show if the word has been added to anki already (maybe store this in db to be able to show it even without ankiconnect running?)
+
+- doc for anki export
+- motivation
