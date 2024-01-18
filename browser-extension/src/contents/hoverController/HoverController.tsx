@@ -5,6 +5,7 @@ import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
 import * as styles from "./style.module.css";
 import type { KrDictEntryDTO } from "~background/messages/lookup";
+import { TTSButton } from "./TTSButton";
 
 export function HoverController() {
   const {
@@ -59,26 +60,30 @@ export function HoverController() {
             ))}
           </div>
           {Object.values(response).map((entries, index) => {
-            return entries.map((entry) => (
-              <DictionaryEntryContent
-                {...entry.dictEntry}
-                isVisible={index === activeTabIndex}
-                key={entry.dictEntry.sequence_number + " " + index}
-              >
-                <>
-                  <AddToAnkiButton
-                    hoveredWord={hoveredWord}
-                    hoveredSentence={hoveredSentence}
+            return (
+              <>
+                <TTSButton headword={entries[0].dictEntry.headword} isVisible={index === activeTabIndex} />
+                {entries.map((entry) => (
+                  <DictionaryEntryContent
                     {...entry.dictEntry}
-                  />
-                  <StatusButtons
-                    entry={entry}
-                    hoveredElement={hoveredElement}
-                  />
-                  {/* {JSON.stringify(entry.status)} */}
-                </>
-              </DictionaryEntryContent>
-            ));
+                    isVisible={index === activeTabIndex}
+                    key={entry.dictEntry.sequence_number + " " + index}
+                  >
+                    <>
+                      <AddToAnkiButton
+                        hoveredWord={hoveredWord}
+                        hoveredSentence={hoveredSentence}
+                        {...entry.dictEntry}
+                      />
+                      <StatusButtons
+                        entry={entry}
+                        hoveredElement={hoveredElement}
+                      />
+                    </>
+                  </DictionaryEntryContent>
+                ))}
+              </>
+            );
           })}
         </div>
       </WordDefinitionPopup>
@@ -113,7 +118,6 @@ function DictionaryEntryContent({
     <div style={getStyle()}>
       {children}
       {/* TODO display if it has been added to anki already */}
-      {/* TODO button to play TTS/forvo audio */}
       {[...Array(stars)].map((_, i) => (
         <React.Fragment key={i}>★</React.Fragment>
       ))}
@@ -162,8 +166,11 @@ function DefinitionList(props: {
 
   if (props.definitions.length === 1) {
     return (
+      // TODO change language according to settings
       <details lang="jp" className={styles.definitionList}>
-        <summary className={styles.definitionListSummary}>{props.definitions[0].translation}</summary>
+        <summary className={styles.definitionListSummary}>
+          {props.definitions[0].translation}
+        </summary>
         <p>{props.definitions[0].definition}</p>
       </details>
     );
@@ -173,17 +180,25 @@ function DefinitionList(props: {
     <details lang="jp" className={styles.definitionList}>
       {/* Maybe have nowrap for summary line while it is closed*/}
       <summary className={styles.definitionListSummary}>
-        <ol style={{paddingInlineStart: "2ch", marginTop: "-22px", marginBottom: "0" }}>
-        <li>{props.definitions[0].translation}</li>
+        <ol
+          style={{
+            paddingInlineStart: "2ch",
+            marginTop: "-22px",
+            marginBottom: "0",
+          }}
+        >
+          <li>{props.definitions[0].translation}</li>
         </ol>
       </summary>
 
-      <p style={{margin: "0", paddingLeft: "4ch"}}>{props.definitions[0].definition}</p>
-      <ol start={2} style={{marginTop: "0", paddingInlineStart: "4ch"}}>
+      <p style={{ margin: "0", paddingLeft: "4ch" }}>
+        {props.definitions[0].definition}
+      </p>
+      <ol start={2} style={{ marginTop: "0", paddingInlineStart: "4ch" }}>
         {props.definitions.slice(1).map((element, index) => {
           return (
             <React.Fragment key={index}>
-              <li style={{paddingTop: "8px"}}>{element.translation}</li>
+              <li style={{ paddingTop: "8px" }}>{element.translation}</li>
               {element.definition}
             </React.Fragment>
           );
