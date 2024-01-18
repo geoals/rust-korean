@@ -1,12 +1,3 @@
-# WIP
-## Features
-- partial support for yomichan format of dictionaries (POC with KRDICT)
-- deinflection of verbs and adjectives using deinflection rules from [the Korean fork of yomichan](https://github.com/Lyroxide/yomichan-korean/blob/master/ext/data/deinflect.json)
-- keep track of word status (unknown, seen, known) or ignored
-
-## Goals
-TBD
-
 ## Development
 Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-korean#dictionaries) along with CC100 (Frequency) and extract it into `dictionaries/`
 
@@ -14,14 +5,14 @@ Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-kore
 
 `sqlx migrate run` to run database migrations
 
-`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on localhost:3000 (must be installed with cargo install cargo-watch)
+`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on localhost:3000 (must be installed with `cargo install cargo-watch`)
 
 alternatively you can use
 `cargo run`
 
 set environment variable `RUST_LOG=debug` to see debug logs
 
-## API
+## API example (might be outdated)
 
 ### Lookup
 `GET /lookup/:term`
@@ -115,14 +106,3 @@ Example response
 
 Words without status are not included in the response, so in this example 소개를 is found but has default status.
 Words not found in the dictionary have an empty array of statuses (no ID).
-
-## TODO
-
-- sorting improvements:
-  - sort homonyms once again by number of krdict stars
-  - other sorting improvements (prefer longer matches over frequency)
-  - needs sorting improvement: 떠날, 한심한, 남자, 비싼, 이름은, 다리
-- deinflection improvements: 여길
-- search improvemnts: 야박하다 could filter 야 if 3/4 match or something
-- maybe try to incorporate grammar entries in krdict (headword contains loose jamo for some)
-- mixed status

@@ -1,26 +1,20 @@
 ## rust-korean-plasmo
-Frontend for [rust-korean](https://github.com/geoals/rust-korean).
-Name is pending.
-
-![demo img](demo.png)
 
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
 ## Features
-- Hover Korean words while holding shift key to search for the word in Japanese KRDICT and display the result in a popup next to the word.
 - Change status of words (known, unknown, seen)
 - Ignore words (i.e. for proper nouns)
 - Underline words on a webpage based on status (known, unknown, seen)
 
-## TODO
-
-- allow looking up partial words by selecting text
-- proper styling and a decent design
-- possibly merge definitions where the only difference is part of speech (e.g 형식적 has definition for noun and for adjective but they are almost the same)
 
 ## Getting Started
+Install dependencies:
+```bash
+bun install
+```
 
-First, run the development server:
+Run the development server:
 
 ```bash
 bun run dev
