@@ -1,4 +1,4 @@
-button {
+.button {
     background-color: #546a79;
     color: #fff;
     padding: 6px 10px;
@@ -8,18 +8,12 @@ button {
     margin-right: 6px;
     margin-bottom: 6px;
 }
-    
-button:hover {
+
+.button:hover:not(.activeButton) {
     background-color: #323f48;
 }
 
-img {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-}
-
-.activeStatus {
+.activeButton {
     background-color: lightskyblue;
 }
 

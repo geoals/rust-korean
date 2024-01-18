@@ -1,7 +1,7 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import type { AnalyzeResponse } from "~background/messages/analyze";
 
-(async () => {
+async function main() {
   const hangulRegex = /[\uAC00-\uD7AF]/;
   const underlineColor = {
     seen: "#FACB6E",
@@ -172,4 +172,10 @@ import type { AnalyzeResponse } from "~background/messages/analyze";
   // To stop:
   // observer.disconnect();
   // make this a toggleswitch in popup.tsx
-})();
+}
+
+if (document.readyState !== 'complete') {
+  window.addEventListener("load", main);
+} else {
+  main();
+}

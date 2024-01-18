@@ -17,7 +17,7 @@ export function StatusButtons({
   return (
     <>
       <div>
-        <button className={`${status === "known" ? styles.activeStatus : ""}`}
+        <button className={`${styles.button} ${status === "known" ? styles.activeButton : ""}`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: "known",
@@ -29,7 +29,7 @@ export function StatusButtons({
         >
           Known
         </button>
-        <button className={`${status === "seen" ? styles.activeStatus : ""}`}
+        <button className={`${styles.button} ${status === "seen" ? styles.activeButton : ""}`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: "seen",
@@ -40,7 +40,7 @@ export function StatusButtons({
         >
           Seen
         </button>
-        <button className={`${status === "unknown" ? styles.activeStatus : ""}`}
+        <button className={`${styles.button} ${status === "unknown" ? styles.activeButton : ""}`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: "unknown",
@@ -51,7 +51,7 @@ export function StatusButtons({
         >
           Unknown
         </button>
-        <button className={`${ignored ? styles.activeStatus : ""}`}
+        <button className={`${styles.button} ${ignored ? styles.activeButton : ""}`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               ignored: !ignored,

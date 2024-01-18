@@ -62,7 +62,10 @@ export function HoverController() {
           {Object.values(response).map((entries, index) => {
             return (
               <>
-                <TTSButton headword={entries[0].dictEntry.headword} isVisible={index === activeTabIndex} />
+                <TTSButton
+                  headword={entries[0].dictEntry.headword}
+                  isVisible={index === activeTabIndex}
+                />
                 {entries.map((entry) => (
                   <DictionaryEntryContent
                     {...entry.dictEntry}
@@ -144,14 +147,13 @@ function TabButton(props: {
   onClick: () => void;
   isActive: boolean;
 }) {
-  const getStyle = () => {
-    if (props.isActive) {
-      return { backgroundColor: "lightskyblue" };
-    }
-  };
-
   return (
-    <button onClick={props.onClick} style={getStyle()}>
+    <button
+      onClick={props.onClick}
+      className={`${styles.button} ${
+        props.isActive ? styles.activeButton : ""
+      }`}
+    >
       {props.title}
     </button>
   );
