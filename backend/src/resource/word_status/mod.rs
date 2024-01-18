@@ -1,3 +1,5 @@
+pub mod count;
+
 use crate::SharedState;
 use crate::error_handling::AppError;
 use axum::extract::{Path, State};

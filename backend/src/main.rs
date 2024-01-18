@@ -22,6 +22,8 @@ pub struct SharedState {
 impl SharedState {
     fn new(db: sqlx::PgPool) -> Self {
         let start_time = Instant::now();
+        // sequence no in different languages of KRDICTs are not always the same, so we need to use sequence no of the same
+        // dict regardless of which language has been selected
         let dictionary = Arc::new(Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json"));
         info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
@@ -48,6 +50,7 @@ async fn main() -> Result<(), std::io::Error> {
         .route("/lookup/:term",     get(resource::lookup::get_handler))
         .route("/word_status/:id",  get(resource::word_status::get_handler))
         .route("/word_status/:id",  patch(resource::word_status::patch_handler))
+        .route("/word_status/count",get(resource::word_status::count::get_handler))
         .route("/analyze",          post(resource::analyze::post_handler))
         .with_state(shared_state);
 

@@ -29,6 +29,7 @@ Start up the backend along with the browser extension by following the descripti
 - ignore full words (not only per headword/dictionary match) (this probably requires new db table)
 
 - allow looking up partial words by selecting text
+  - or just search from mouse position in word to the end of the word like yomichan to easier search parts of words
 - show name of deconjugations for inflected verbs and adjectives
 - translate part-of-speech in the definition (currently it's in korean)
 - proper styling and a decent design
@@ -40,6 +41,12 @@ Start up the backend along with the browser extension by following the descripti
 - structuring hanja/reading/Pos fields in the popup
 - merge known/seen/unknown to one button
 - show if the word has been added to anki already (maybe store this in db to be able to show it even without ankiconnect running?)
+- TTS audio or forvo
+- detect 1T sentences
+- count number of known/seen/unknown on webpage, display % comprehensibility
+- display total number of known/seen 
+  - new API endpoint GET 
+- stats 
 
 - doc for anki export
 - motivation
