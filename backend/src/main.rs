@@ -1,9 +1,9 @@
-use std::{time::Instant, collections::HashMap, sync::{Arc, Mutex}};
+use std::{time::Instant, collections::HashMap, sync::{Arc, Mutex}, io::Read};
 
 use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
-use crate::{dictionary::Dictionary, resource::analyze::read_from_file};
+use crate::{dictionary::Dictionary, resource::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson}};
 
 mod deinflect;
 mod hangul;
@@ -18,7 +18,6 @@ pub struct SharedState {
     dictionary: Arc<Dictionary>,
     // Mapping from unconjugated word to sequence number/id (entry in dictionary) is cached in 
     // a file because doing analysis on several thousand words can take several seconds
-    // TODO use async mutex/rwlock
     analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>,
     db: sqlx::PgPool,
 }
@@ -32,7 +31,7 @@ impl SharedState {
         info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
             dictionary,
-            analysis_cache: read_from_file("analysis_cache.json").expect("Could not read cache file"),
+            analysis_cache: read_analysis_cache_from_file("analysis_cache.json").expect("Could not read cache file"),
             db,
         }
     }
@@ -51,6 +50,9 @@ async fn main() -> Result<(), std::io::Error> {
             .unwrap();
 
     let shared_state = SharedState::new(db);
+
+    tokio::spawn(write_analysis_cache_to_file_every_ten_minutes(shared_state.analysis_cache.clone()));
+
     let app = axum::Router::new()
         .route("/lookup/:term",     get(resource::lookup::get_handler))
         .route("/word_status/:id",  get(resource::word_status::get_handler))
@@ -65,4 +67,20 @@ async fn main() -> Result<(), std::io::Error> {
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+pub fn read_analysis_cache_from_file(file_path: &str) -> std::io::Result<Arc<Mutex<HashMap<String, Vec<i32>>>>> {
+    let time = Instant::now();
+    let mut file = std::fs::File::open(file_path)?;
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer)?;
+
+    let loaded_data: AnalysisResultJson = serde_json::from_str(&buffer)?;
+
+    info!(
+        "Loaded cached analysis results with {} entries in {:?}",
+        loaded_data.0.len(),
+        time.elapsed()
+    );
+    Ok(Arc::new(Mutex::new(loaded_data.0)))
 }

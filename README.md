@@ -38,14 +38,14 @@ Start up the backend along with the browser extension by following the descripti
   - change language (japanese, english etc.)
 - possibly merge definitions where the only difference is part of speech (e.g 형식적 has definition for noun and for adjective but they are almost the same)
 - show number of stars based on CC100 frequency
+  - display 初級, 中級 or 上級 instead of krdict stars to avoid confusion with frequency stars
 - structuring hanja/reading/Pos fields in the popup
 - merge known/seen/unknown to one button
 - show if the word has been added to anki already (maybe store this in db to be able to show it even without ankiconnect running?)
-- TTS audio or forvo
+- export flashcard without ankiconnect running and sync later
 - detect 1T sentences
 - count number of known/seen/unknown on webpage, display % comprehensibility
 - display total number of known/seen 
-  - new API endpoint GET 
 - stats 
 
 - doc for anki export
