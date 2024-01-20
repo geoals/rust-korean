@@ -31,7 +31,7 @@ impl SharedState {
         info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
             dictionary,
-            analysis_cache: read_analysis_cache_from_file("analysis_cache.json").expect("Could not read cache file"),
+            analysis_cache: read_analysis_cache_from_file("analysis_cache.json").unwrap_or_default(),
             db,
         }
     }

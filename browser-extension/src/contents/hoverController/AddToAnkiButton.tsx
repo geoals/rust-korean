@@ -2,6 +2,7 @@ import { sendToBackground } from "@plasmohq/messaging";
 import type { AddToAnkiPayload } from "~background/messages/addAnkiNote";
 import AnkiImg from './anki.png'; 
 import * as styles from "./style.module.css";
+import { markAsSeen } from "./StatusButtons";
 
 export function AddToAnkiButton({
   hoveredWord,
@@ -11,6 +12,8 @@ export function AddToAnkiButton({
   definition_full,
   reading,
   frequency,
+  sequence_number,
+  wordStatus,
 }: {
   hoveredWord: string;
   hoveredSentence: string;
@@ -19,17 +22,22 @@ export function AddToAnkiButton({
   definition_full: string;
   reading?: string;
   frequency?: number;
+  sequence_number: number;
+  wordStatus: 'known' | 'seen' | 'unknown';
 }) {
   function addToAnkiBtnHandler(): void {
     addAnkiNoteMessage({
-      hoveredWord,
-      headword,
-      hanja,
-      reading,
-      sentence: hoveredSentence,
-      definitionFull: definition_full,
-      frequency: frequency?.toString(),
-    });
+        hoveredWord,
+        headword,
+        hanja,
+        reading,
+        sentence: hoveredSentence,
+        definitionFull: definition_full,
+        frequency: frequency?.toString(),
+      }, 
+      sequence_number,
+      wordStatus,
+    );
   }
 
   return (
@@ -44,7 +52,7 @@ export function AddToAnkiButton({
   );
 }
 
-async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
+async function addAnkiNoteMessage(payload: AddToAnkiPayload, id: number, wordStatus: 'known' | 'seen' | 'unknown') {
   const { hoveredWord, sentence, headword, reading, hanja, definitionFull } = payload;
   const resp = await sendToBackground<AddToAnkiPayload>({
     name: "addAnkiNote",
@@ -59,6 +67,9 @@ async function addAnkiNoteMessage(payload: AddToAnkiPayload) {
       frequency: payload.frequency ?? undefined,
     },
   });
+  if (wordStatus === 'unknown') {
+    markAsSeen(id)
+  }
   // TODO handle errors
   return resp.message;
 }

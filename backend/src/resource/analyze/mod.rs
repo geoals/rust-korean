@@ -135,8 +135,13 @@ pub struct AnalysisResultJson(pub HashMap<String, Vec<i32>>);
 
 pub async fn write_analysis_cache_to_file_every_ten_minutes(analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>) {
     loop {
+        let number_of_cached_items = analysis_cache.lock().unwrap().len();
         sleep(Duration::from_secs(60*10)).await;
+
         if let Ok(cached_matches) = analysis_cache.lock() {
+            if cached_matches.len() == number_of_cached_items {
+                continue;
+            }
             debug!("Writing {} cached items to file", cached_matches.len());
             tokio::task::spawn(write_to_file("analysis_cache.json", cached_matches.clone()));
         }

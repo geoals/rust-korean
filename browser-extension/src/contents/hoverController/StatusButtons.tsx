@@ -78,3 +78,9 @@ async function changeWordStatus(wordId: number, wordStatus: WordStatusDTO) {
 
   return resp.message;
 }
+
+export function markAsSeen(wordId: number) {
+  changeWordStatus(wordId, {
+    status: "seen",
+  });
+}
