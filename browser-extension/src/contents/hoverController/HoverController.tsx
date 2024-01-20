@@ -76,6 +76,7 @@ export function HoverController() {
                       <AddToAnkiButton
                         hoveredWord={hoveredWord}
                         hoveredSentence={hoveredSentence}
+                        wordStatus={entry.status.status ?? "unknown"}
                         {...entry.dictEntry}
                       />
                       <StatusButtons
