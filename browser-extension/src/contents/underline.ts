@@ -1,12 +1,13 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import type { AnalyzeResponse } from "~background/messages/analyze";
+import styles from "./underline.module.css";
 
 async function main() {
   const hangulRegex = /[\uAC00-\uD7AF]/;
   const underlineColor = {
-    seen: "#FACB6E",
+    seen: "#DFCA7E",
     known: "transparent",
-    unknown: "#F38181",
+    unknown: "#C07676",
     unmatched: "gray",
   };
 
@@ -65,8 +66,7 @@ async function main() {
               if (hangulRegex.test(word)) {
                 let { hangulWord } = getConsecutiveHangulSubstring(word);
                 const status = getWordStatus(hangulWord, analysisResults);
-                const color = underlineColor[status];
-                newContent += `<span class="rust-korean ${status}" style="text-decoration: underline 0.2rem ${color}; text-underline-offset: 0.3rem;">${word}</span> `;
+                newContent += `<span class="${styles['underline']} ${styles[status]}">${word}</span> `;
               }
             });
             newContent += "\n";
@@ -141,8 +141,7 @@ async function main() {
           const wordStart = word.substring(0, startIndex);
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
-          const color = underlineColor[status];
-          newHTML += `${wordStart}<span class="rust-korean" style="text-decoration: underline 0.15rem ${color}; text-underline-offset: 0.3rem;">${hangulWord}</span>${wordEnd}`;
+          newHTML += `${wordStart}<span class="${styles['underline']} ${styles[status]}">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
           newHTML += " ";

@@ -21,7 +21,7 @@ Start up the backend along with the browser extension by following the descripti
   - prefer longer matches over frequency (compare number of jamo that match)
   - needs sorting improvement: 떠날, 한심한, 남자, 비싼, 이름은, 다리
 - deinflection improvements: 
-  - 여길
+  - 여길, 고왔답니다 should only have 1 match, not 3
   - more than one deinflected pass to catch compound grammar rules e.g. 잃었는데
 - search improvements to remove noise: 야박하다 could exclude 야 if 3/4 match or something
 - maybe try to incorporate grammar entries in krdict (headword contains loose jamo for some)
@@ -36,6 +36,7 @@ Start up the backend along with the browser extension by following the descripti
 - settings page/settings in popup.tsx
   - toggle monitoring (for underlining words)
   - change language (japanese, english etc.)
+  - change modifier key (shift) to something else or to nothing
 - possibly merge definitions where the only difference is part of speech (e.g 형식적 has definition for noun and for adjective but they are almost the same)
 - show number of stars based on CC100 frequency
   - display 初級, 中級 or 上級 instead of krdict stars to avoid confusion with frequency stars
@@ -44,9 +45,15 @@ Start up the backend along with the browser extension by following the descripti
 - show if the word has been added to anki already (maybe store this in db to be able to show it even without ankiconnect running?)
 - export flashcard without ankiconnect running and sync later
 - detect 1T sentences
+ - auto stop video playback when 1T is detected
 - count number of known/seen/unknown on webpage, display % comprehensibility
 - display total number of known/seen 
 - stats 
+- can't parse '훤칠'이
+- only have one button for anki export and a way to mark which entry should be used
+- maybe hide 하다 variant of a word and just display a note on the base word about 하다?
+- more detailed hanja info (requires graphical redesign)
+- prompt if anki export is clicked with no text selected
 
 - doc for anki export
 - motivation

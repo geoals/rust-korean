@@ -1,0 +1,38 @@
+.underline {
+    text-decoration: underline 0.15rem;
+    text-underline-offset: 0.2rem;
+    border-radius: 4px;
+}
+
+.underline.seen {
+    text-decoration-color: #DFCA7E;
+}
+
+.underline.seen:hover {
+    background: #dfca7e8a;
+}
+
+.underline.unknown {
+    text-decoration-color: #C07676;
+}
+
+.underline.unknown:hover {
+    background: #c076768a;
+}
+
+.underline.unmatched {
+    text-decoration-color: rgba(128, 128, 128);
+}
+
+.underline.unmatched:hover {
+    background: rgba(128, 128, 128, 0.5);
+}
+
+.underline.known {
+    text-decoration-color: transparent;
+}
+
+.underline.known:hover {
+    text-decoration-color: #57BB97;
+    background: #57BB978a;
+}
