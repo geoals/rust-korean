@@ -1,13 +1,12 @@
 import React, { useLayoutEffect } from "react";
-import { WordDefinitionPopup } from "./WordDefinitionPopup";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
-import * as styles from "./style.module.css";
+import styles from "./style.module.css";
 import type { KrDictEntryDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
 
-export function HoverController() {
+export function DictionaryPopup() {
   const {
     hoveredElement,
     hoveredSentence,
@@ -43,10 +42,10 @@ export function HoverController() {
 
   return (
     <>
-      <WordDefinitionPopup
-        positionX={positionX}
-        positionY={positionY}
+      <div
+        style={{ top: `${positionY}px`, left: `${positionX}px`}}
         ref={popupRef}
+        className={styles.popup}
       >
         <div>
           <div className={styles.tabs}>
@@ -90,7 +89,7 @@ export function HoverController() {
             );
           })}
         </div>
-      </WordDefinitionPopup>
+      </div>
     </>
   );
 }
@@ -121,11 +120,9 @@ function DictionaryEntryContent({
   return (
     <div style={getStyle()}>
       {children}
-      {/* TODO display if it has been added to anki already */}
       {[...Array(stars)].map((_, i) => (
         <React.Fragment key={i}>★</React.Fragment>
       ))}
-      {/* TODO move frequency above definition list as it will be the same for all*/}
       {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
       {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
       {reading && reading !== headword && (
@@ -138,7 +135,6 @@ function DictionaryEntryContent({
         <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
       )}
       <DefinitionList definitions={tl_definitions} />
-      {/* for deconjugated terms: conjugation/grammar */}
     </div>
   );
 }

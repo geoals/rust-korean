@@ -124,7 +124,8 @@ pub struct Dictionary {
 impl Dictionary {
     pub fn new(path: &str) -> Self {
         // TODO remove garbage entries like 24200
-        let terms_vec: Vec<EntryJson> = serde_json::from_str(&read_to_string(path).unwrap()).unwrap();
+        let dict_as_string = &read_to_string(path).unwrap_or_else(|e| panic!("unable to load file with path \"{}\", {}", path, e));
+        let terms_vec: Vec<EntryJson> = serde_json::from_str(&dict_as_string).unwrap();
 
         let freq_dict = FrequencyDictionary::new();
 

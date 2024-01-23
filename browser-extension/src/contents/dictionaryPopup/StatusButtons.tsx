@@ -2,7 +2,8 @@ import React from "react";
 import { sendToBackground } from "@plasmohq/messaging";
 import type { WordStatusDTO } from "~background/messages/changeWordStatus";
 import type { LookupDTO } from "~background/messages/lookup";
-import * as styles from "./style.module.css";
+import styles from "./style.module.css";
+import underlineStyles from "../underline.module.css";
 
 export function StatusButtons({
   entry,
@@ -23,7 +24,7 @@ export function StatusButtons({
               status: "known",
             });
             setStatus("known");
-            hoveredElement.style.textDecorationColor = "transparent";
+            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['known']}`;
             // TODO update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
           }}
         >
@@ -35,7 +36,7 @@ export function StatusButtons({
               status: "seen",
             });
             setStatus("seen");
-            hoveredElement.style.textDecorationColor = "#FACB6E";
+            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['seen']}`;
           }}
         >
           Seen
@@ -46,7 +47,7 @@ export function StatusButtons({
               status: "unknown",
             });
             setStatus("unknown");
-            hoveredElement.style.textDecorationColor = "#F38181";
+            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['unknown']}`;
           }}
         >
           Unknown
@@ -57,7 +58,6 @@ export function StatusButtons({
               ignored: !ignored,
             });
             setIgnored(!ignored);
-            hoveredElement.style.textDecorationColor = "transparent";
           }}
         >
           Ignore

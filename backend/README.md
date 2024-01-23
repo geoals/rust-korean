@@ -3,9 +3,11 @@ Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-kore
 
 `docker compose up` to run a local postgres instance for development
 
+`cargo install sqlx-cli` to install sqlx CLI for running database migrations
+
 `sqlx migrate run` to run database migrations
 
-`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on localhost:3000 (must be installed with `cargo install cargo-watch`)
+`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on 127.0.0.1:3000 (must be installed with `cargo install cargo-watch`)
 
 alternatively you can use
 `cargo run`

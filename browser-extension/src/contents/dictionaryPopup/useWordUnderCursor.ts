@@ -1,8 +1,8 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
 import type { LookupDTO, LookupResponse } from "~background/messages/lookup";
-import { POPUP_WIDTH } from "~contents/hoverController/WordDefinitionPopup";
 
+const POPUP_WIDTH = 400;
 const hangulRegex = /[\uAC00-\uD7AF]/;
 
 export function useWordUnderCursor() {
@@ -20,7 +20,6 @@ export function useWordUnderCursor() {
   const isFetchingRef = useRef(false);
 
   async function lookup(hoveredWord: string): Promise<LookupResponse> {
-    // TODO react-query or something?
     const resp = await sendToBackground({
       name: "lookup",
       body: {

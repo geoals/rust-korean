@@ -4,13 +4,6 @@ import styles from "./underline.module.css";
 
 async function main() {
   const hangulRegex = /[\uAC00-\uD7AF]/;
-  const underlineColor = {
-    seen: "#DFCA7E",
-    known: "transparent",
-    unknown: "#C07676",
-    unmatched: "gray",
-  };
-
   let analysisResults = {};
 
   const sendAnalyzeRequestToBackground = async (text: string) => {
