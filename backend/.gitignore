@@ -1,3 +1,4 @@
 /target
 dictionaries
 db_persistent_storage
+analysis_cache.json
