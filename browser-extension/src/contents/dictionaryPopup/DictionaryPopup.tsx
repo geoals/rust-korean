@@ -45,7 +45,7 @@ export function DictionaryPopup() {
       <div
         style={{ top: `${positionY}px`, left: `${positionX}px`}}
         ref={popupRef}
-        className={styles.popup}
+        className="bg-light-green absolute max-h-96 w-400 p-4"
       >
         <div>
           <div className={styles.tabs}>
@@ -147,9 +147,9 @@ function TabButton(props: {
   return (
     <button
       onClick={props.onClick}
-      className={`${styles.button} ${
-        props.isActive ? styles.activeButton : ""
-      }`}
+      className={`${
+        props.isActive ? "bg-green" : "bg-light-green-30"
+      } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl`}
     >
       {props.title}
     </button>
@@ -159,6 +159,8 @@ function TabButton(props: {
 function DefinitionList(props: {
   definitions: Array<{ translation: string; definition: string }>;
 }) {
+
+  const className = "bg-light-green-30 max-h-52 overflow-y-auto rounded-6 p-2 text-dark-green";
   if (props.definitions.length === 0) {
     return null;
   }
@@ -166,9 +168,9 @@ function DefinitionList(props: {
   if (props.definitions.length === 1) {
     return (
       // TODO change language according to settings
-      <details lang="jp" className={styles.definitionList}>
+      <details lang="jp" className={className}>
         <summary className={styles.definitionListSummary}>
-          {props.definitions[0].translation}
+          <b>{props.definitions[0].translation}</b>
         </summary>
         <p>{props.definitions[0].definition}</p>
       </details>
@@ -176,9 +178,9 @@ function DefinitionList(props: {
   }
 
   return (
-    <details lang="jp" className={styles.definitionList}>
+    <details lang="jp" className={className}>
       {/* Maybe have nowrap for summary line while it is closed*/}
-      <summary className={styles.definitionListSummary}>
+      <summary>
         <ol
           style={{
             paddingInlineStart: "2ch",
@@ -186,7 +188,7 @@ function DefinitionList(props: {
             marginBottom: "0",
           }}
         >
-          <li>{props.definitions[0].translation}</li>
+          <b><li>{props.definitions[0].translation}</li></b>
         </ol>
       </summary>
 
@@ -197,7 +199,7 @@ function DefinitionList(props: {
         {props.definitions.slice(1).map((element, index) => {
           return (
             <React.Fragment key={index}>
-              <li style={{ paddingTop: "8px" }}>{element.translation}</li>
+              <b><li style={{ paddingTop: "8px" }}>{element.translation}</li></b>
               {element.definition}
             </React.Fragment>
           );
