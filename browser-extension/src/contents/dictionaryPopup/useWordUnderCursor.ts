@@ -53,7 +53,6 @@ export function useWordUnderCursor() {
     const response = await lookup(underCursor.word);
     isFetchingRef.current = false;
 
-
     setResponse(filterResponse(response));
     setHoveredWord(underCursor.word);
     setHoveredSentence(underCursor.sentence);
@@ -140,6 +139,9 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
   const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO caretPositionFromPoint for firefox
 
   const textContent = range?.startContainer.textContent;
+  if (!isWithinBounds(mouseX, mouseY, range?.commonAncestorContainer?.parentElement?.getBoundingClientRect())) {
+    return undefined;
+  }
 
   if (textContent == null) {
     return undefined;
@@ -247,4 +249,12 @@ function useHidePopup(unsetHoveredWord: () => void): void {
       document.removeEventListener("click", handleOnClick);
     };
   }, []);
+}
+
+function isWithinBounds(mouseX: number, mouseY: number, textNode?: DOMRect) {
+  if (!textNode) {
+    return false;
+  }
+  const { left, right, bottom, top } = textNode;
+  return mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom;
 }
