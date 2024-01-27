@@ -1,20 +1,18 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
 import type { LookupDTO, LookupResponse } from "~background/messages/lookup";
+import styles from '../underline.module.css';
 
 const POPUP_WIDTH = 400;
 const hangulRegex = /[\uAC00-\uD7AF]/;
 
 export function useWordUnderCursor() {
-  const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord } =
+  const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord, hoveredElement, setHoveredElement, hoveredElementRef } =
     useHoveredWordState();
   const [hoveredSentence, setHoveredSentence] = useState<string | undefined>(
     undefined,
   );
-  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(
-    null,
-  );
-  useHidePopup(unsetHoveredWord);
+  useHidePopupWithEscapeKey(unsetHoveredWord);
   const [response, setResponse] = useState<LookupResponse>({});
   const getMousePosition = useMousePosition();
   const isFetchingRef = useRef(false);
@@ -30,11 +28,7 @@ export function useWordUnderCursor() {
     return resp.message;
   }
 
-  async function lookupHoveredWordHandler(e: KeyboardEvent | MouseEvent) {
-    if (!e.shiftKey) {
-      return;
-    }
-
+  async function lookupWordUnderCursorAndShowPopup() {
     const mousePosition = getMousePosition();
     const underCursor = findWordAndSentenceUnderCursor(
       mousePosition.x,
@@ -53,19 +47,48 @@ export function useWordUnderCursor() {
     const response = await lookup(underCursor.word);
     isFetchingRef.current = false;
 
+    hoveredElementRef.current?.classList.remove(styles.active);
     setResponse(filterResponse(response));
     setHoveredWord(underCursor.word);
     setHoveredSentence(underCursor.sentence);
     setHoveredElement(underCursor.element);
+    underCursor.element?.classList.add(styles.active);
+
+    return underCursor.word;
+  }
+
+  async function clickHandler(e: MouseEvent) {
+    if ((e.target as HTMLElement)?.textContent === hoveredWordRef.current) {
+      unsetHoveredWord();
+      return;
+    }
+    const newWord = await lookupWordUnderCursorAndShowPopup();
+    const plasmoCsui = document.querySelector("html > plasmo-csui");
+    if (
+      !newWord 
+      && !isWithinBounds(e.clientX, e.clientY, hoveredElement?.getBoundingClientRect()) 
+      && (e.target as HTMLElement)?.tagName != plasmoCsui?.tagName
+    ) {
+      unsetHoveredWord();
+    }
+  }
+
+  function keyDownMouseMoveHandler(e: KeyboardEvent | MouseEvent) {
+    if (!e.shiftKey) {
+      return;
+    }
+    lookupWordUnderCursorAndShowPopup();
   }
 
   useEffect(() => {
-    document.addEventListener("mousemove", lookupHoveredWordHandler);
-    document.addEventListener("keydown", lookupHoveredWordHandler);
+    document.addEventListener("mousemove", keyDownMouseMoveHandler);
+    document.addEventListener("keydown", keyDownMouseMoveHandler);
+    document.addEventListener("click", clickHandler);
 
     return () => {
-      document.removeEventListener("mousemove", lookupHoveredWordHandler);
-      document.removeEventListener("keydown", lookupHoveredWordHandler);
+    document.removeEventListener("mousemove", keyDownMouseMoveHandler);
+    document.removeEventListener("keydown", keyDownMouseMoveHandler);
+    document.removeEventListener("click", clickHandler);
     };
   }, []);
 
@@ -119,19 +142,31 @@ function clampHorizontallyWithinViewport(positionX: number, padding: number) {
 function useHoveredWordState() {
   const hoveredWordRef = useRef<string>(""); // Ref is used to capture the value of hoveredWord at the time of the event handler
   const [hoveredWord, setHoveredWord] = useState<string>("");
+  const hoveredElementRef = useRef<HTMLElement | null>(null); // Ref is used to capture the value of hoveredWord at the time of the event handler
+  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(
+    null,
+  );
   const unsetHoveredWord = () => {
     setHoveredWord("");
+    hoveredElementRef.current?.classList.remove(styles.active);
   }
 
   useEffect(() => {
     hoveredWordRef.current = hoveredWord;
   }, [hoveredWord]);
 
+  useEffect(() => {
+    hoveredElementRef.current = hoveredElement;
+  }, [hoveredElement]);
+
   return {
     hoveredWord,
     setHoveredWord,
     hoveredWordRef,
     unsetHoveredWord,
+    hoveredElement,
+    setHoveredElement,
+    hoveredElementRef
   };
 }
 
@@ -222,31 +257,22 @@ function useMousePosition() {
 }
 
 /**
- * Register event handlers on mouse click and escape key press to hide the popup
+ * Register event handler on escape key press to hide the popup
  *
  * @param unsetHoveredWord Callback function to unset the hovered word
  */
-function useHidePopup(unsetHoveredWord: () => void): void {
+function useHidePopupWithEscapeKey(unsetHoveredWord: () => void): void {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
       unsetHoveredWord();
     }
   };
 
-  const handleOnClick = (e: MouseEvent) => {
-    const plasmoCsui = document.querySelector("html > plasmo-csui"); // TODO replace with something more robust
-    if (e.target?.tagName != plasmoCsui?.tagName) {
-      unsetHoveredWord();
-    }
-  };
-
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("click", handleOnClick);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("click", handleOnClick);
     };
   }, []);
 }

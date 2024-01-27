@@ -32,7 +32,7 @@ Start up the backend along with the browser extension by following the descripti
   - or just search from mouse position in word to the end of the word like yomichan to easier search parts of words
 - show name of deconjugations for inflected verbs and adjectives
 - translate part-of-speech in the definition (currently it's in korean)
-- proper styling and a decent design
+- implement the redesign
 - settings page/settings in popup.tsx
   - toggle monitoring (for underlining words)
   - change language (japanese, english etc.)
@@ -46,6 +46,7 @@ Start up the backend along with the browser extension by following the descripti
 - export flashcard without ankiconnect running and sync later
 - detect 1T sentences
  - auto stop video playback when 1T is detected
+- highlight common unknown words in a way
 - count number of known/seen/unknown on webpage, display % comprehensibility
 - display total number of known/seen 
 - stats 
@@ -54,6 +55,7 @@ Start up the backend along with the browser extension by following the descripti
 - maybe hide 하다 variant of a word and just display a note on the base word about 하다?
 - more detailed hanja info (requires graphical redesign)
 - prompt if anki export is clicked with no text selected
+- still show a popup with something for unmatched words (links to other sources or show results from external sources)
 
 - doc for anki export
 - motivation

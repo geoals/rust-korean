@@ -2,13 +2,14 @@
     text-decoration: underline 0.15rem;
     text-underline-offset: 0.2rem;
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .underline.seen {
     text-decoration-color: #DFCA7E;
 }
 
-.underline.seen:hover {
+.underline.seen:hover, .underline.seen.active {
     background: #dfca7e8a;
 }
 
@@ -16,7 +17,7 @@
     text-decoration-color: #C07676;
 }
 
-.underline.unknown:hover {
+.underline.unknown:hover, .underline.unknown.active {
     background: #c076768a;
 }
 
@@ -24,7 +25,7 @@
     text-decoration-color: rgba(128, 128, 128);
 }
 
-.underline.unmatched:hover {
+.underline.unmatched:hover, .underline.unmatched.active {
     background: rgba(128, 128, 128, 0.5);
 }
 
@@ -32,7 +33,7 @@
     text-decoration-color: transparent;
 }
 
-.underline.known:hover {
+.underline.known:hover, .underline.known.active {
     text-decoration-color: #57BB97;
     background: #57BB978a;
 }
