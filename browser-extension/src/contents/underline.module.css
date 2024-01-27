@@ -5,6 +5,10 @@
     cursor: pointer;
 }
 
+.padding {
+    padding: 0.25rem;
+}
+
 .underline.seen {
     text-decoration-color: #DFCA7E;
 }

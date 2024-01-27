@@ -59,7 +59,7 @@ async function main() {
               if (hangulRegex.test(word)) {
                 let { hangulWord } = getConsecutiveHangulSubstring(word);
                 const status = getWordStatus(hangulWord, analysisResults);
-                newContent += `<span class="${styles['underline']} ${styles[status]}">${word}</span> `;
+                newContent += `<span class="${styles['underline']} ${styles[status]} ${styles.padding}">${word}</span> `;
               }
             });
             newContent += "\n";
