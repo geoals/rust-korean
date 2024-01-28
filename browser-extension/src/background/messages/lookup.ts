@@ -28,8 +28,17 @@ async function getLookup(word: string): Promise<LookupResponse> {
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
   const message = await getLookup(req.body.word);
 
+  // TODO move to backend
+  const sortedMessage = Object.fromEntries(
+    Object.entries(message).sort(([, a], [, b]) => {
+      const aFrequency = a[0]?.dictEntry?.frequency ?? Infinity;
+      const bFrequency = b[0]?.dictEntry?.frequency ?? Infinity;
+      return aFrequency - bFrequency;
+    })
+  );
+
   res.send({
-    message
+    message: sortedMessage,
   })
 }
 

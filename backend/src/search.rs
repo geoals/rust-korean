@@ -53,16 +53,6 @@ pub fn get_all(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
         .sorted_by_key(|m| *m.sequence_number())
         .dedup_by(|a, b| a.sequence_number() == b.sequence_number())
         .sorted_by_key(|m| m.frequency().unwrap_or(MAX))
-        .sorted_by(|a, b| {
-            if a.headword().len() > word.len() {
-                return std::cmp::Ordering::Greater;
-            }
-            if b.headword().len() > word.len() {
-                return std::cmp::Ordering::Less;
-            }
-            b.headword().len().cmp(&a.headword().len())
-        })
-        // TODO sort homonyms again by stars
         .collect::<Vec<KrDictEntry>>()
 }
 

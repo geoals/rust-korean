@@ -3,7 +3,7 @@ use std::{time::Instant, collections::HashMap, sync::{Arc, Mutex}, io::Read};
 use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
-use crate::{dictionary::Dictionary, resource::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson}};
+use crate::{dictionary::Dictionary, resource::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson}, frequency_dictionary::FrequencyDictionary};
 
 mod deinflect;
 mod hangul;
@@ -16,6 +16,7 @@ mod frequency_dictionary;
 #[derive(Clone)]
 pub struct SharedState {
     dictionary: Arc<Dictionary>,
+    frequency_dictionary: Arc<FrequencyDictionary>,
     // Mapping from unconjugated word to sequence number/id (entry in dictionary) is cached in 
     // a file because doing analysis on several thousand words can take several seconds
     analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>,
@@ -25,12 +26,17 @@ pub struct SharedState {
 impl SharedState {
     fn new(db: sqlx::PgPool) -> Self {
         let start_time = Instant::now();
+        let frequency_dictionary = FrequencyDictionary::new();
         // sequence no in different languages of KRDICTs are not always the same, so we need to use sequence no of the same
         // dict regardless of which language has been selected
-        let dictionary = Arc::new(Dictionary::new("dictionaries/[KO-JA] KRDICT/term_bank_1.json"));
+        let dictionary = Arc::new(Dictionary::new(
+            "dictionaries/[KO-JA] KRDICT/term_bank_1.json", 
+            &frequency_dictionary
+        ));
         info!("Loaded dictionary in {:.2}s", start_time.elapsed().as_secs_f32());
         Self {
             dictionary,
+            frequency_dictionary: Arc::new(frequency_dictionary),
             analysis_cache: read_analysis_cache_from_file("analysis_cache.json").unwrap_or_default(),
             db,
         }

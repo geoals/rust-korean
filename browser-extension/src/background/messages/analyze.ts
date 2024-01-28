@@ -2,7 +2,7 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
 
 export type AnalyzeResponse = {
-    [key: string]: Array<{id: number, status: "known" | "seen" | "unknown", ignored: boolean, tracked: boolean }>,
+    [key: string]: Array<{id: number, status: "known" | "seen" | "unknown", ignored: boolean, frequency_rank?: number }>,
 }
 
 async function postAnalyze(payload: string): Promise<AnalyzeResponse> {

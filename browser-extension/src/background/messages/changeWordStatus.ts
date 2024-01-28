@@ -3,7 +3,7 @@ import type { PlasmoMessaging } from "@plasmohq/messaging";
 export interface WordStatusDTO {
     status?: 'known' | 'unknown' | 'seen',
     ignored?: boolean,
-    tracked?: boolean,
+    frequency_rank?: number,
 }
 
 interface HttpResponseStatusAndBody {

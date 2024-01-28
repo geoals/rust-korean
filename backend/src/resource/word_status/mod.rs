@@ -1,7 +1,8 @@
 pub mod count;
 
-use crate::SharedState;
+use crate::{SharedState, frequency_dictionary};
 use crate::error_handling::AppError;
+use crate::frequency_dictionary::FrequencyDictionary;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::{http, Json};
@@ -85,9 +86,9 @@ pub async fn get_handler(
     debug!("New request to get id {}", id); // TODO request ID
 
     let existing_row = sqlx::query_as!(
-        WordStatusResponse, // TODO use WordStatusEntity and to response 
+        WordStatusEntity,
         // Override type of status as sqlx macros doesn't support user defined types
-        "SELECT krdict_sequence_number as id, status as \"status: WordStatus\", ignored, tracked
+        "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
         FROM WordStatus
         WHERE krdict_sequence_number = $1 AND user_id = $2;",
         id,
@@ -97,7 +98,7 @@ pub async fn get_handler(
     .await?;
 
     let response_body = if let Some(existing_row) = existing_row {
-            serde_json::to_string(&existing_row).unwrap() // TODO map error
+            serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO map error, TODO frequency rank
     } else {
         // TODO return 404 if id doesn't exist in dictionary
         // TODO single source of truth for default value
@@ -105,7 +106,7 @@ pub async fn get_handler(
             id: Some(id),
             status: WordStatus::Unknown,
             ignored: false,
-            tracked: false,
+            frequency_rank: None,
         }).unwrap() // TODO map error
     };
 
@@ -117,27 +118,50 @@ pub async fn get_handler(
     Ok(response)
 }
 
-#[derive(Debug, FromRow)]
+// TODO don't expose this, and move sql to a service (its now duplicated here and in analyze endpoint)
+#[derive(Debug, Clone, FromRow)]
 #[allow(dead_code)]
-struct WordStatusEntity {
-    id: i32,
-    krdict_sequence_number: Option<i32>,
-    status: WordStatus,
-    ignored: bool,
-    tracked: bool,
-    user_id: i32,
-    created_at: Option<chrono::DateTime<chrono::Utc>>,
-    updated_at: Option<chrono::DateTime<chrono::Utc>>,
+pub struct WordStatusEntity {
+    pub id: i32,
+    pub krdict_sequence_number: Option<i32>,
+    pub status: WordStatus,
+    pub ignored: bool,
+    pub tracked: bool,
+    pub user_id: i32,
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+impl WordStatusEntity {
+    pub fn to_dto(&self, frequency_rank: Option<u32>) -> WordStatusResponse {
+        WordStatusResponse {
+            id: self.krdict_sequence_number,
+            status: self.status.clone(),
+            ignored: self.ignored,
+            frequency_rank,
+        }
+    }
 }
 
 // TODO not public fields, use separate object for Analyze reponse
-#[derive(Debug, Clone, FromRow, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct WordStatusResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i32>,
     pub status: WordStatus,
     pub ignored: bool,
-    pub tracked: bool,
+    pub frequency_rank: Option<u32>,
+}
+
+impl WordStatusResponse {
+    pub fn new(id: i32, frequency_rank: Option<u32>) -> Self {
+        Self {
+            id: Some(id),
+            status: WordStatus::Unknown,
+            ignored: false,
+            frequency_rank,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type, Clone)]

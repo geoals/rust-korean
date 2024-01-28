@@ -4,7 +4,7 @@ import styles from "./underline.module.css";
 
 async function main() {
   const hangulRegex = /[\uAC00-\uD7AF]/;
-  let analysisResults = {};
+  let analysisResults: AnalyzeResponse = {};
 
   const sendAnalyzeRequestToBackground = async (text: string) => {
     const result = (await sendToBackground({
@@ -33,6 +33,12 @@ async function main() {
     return { hangulWord: word.substring(start, end), start, end };
   }
 
+  // TODO configure offset in settings
+  function shouldHighlightUnknownCommonWord(word: string, status: 'known' | 'seen' | 'unknown' | 'unmatched'): boolean {
+    return status === 'unknown' 
+      && analysisResults[word]?.every((wordStatus) => wordStatus.frequency_rank && wordStatus.frequency_rank <= 1000);
+  }
+
   // TODO clean up this abomination
   function mutationObserverCallback(mutations: MutationRecord[]) {
     mutations.forEach((mutation) => {
@@ -59,7 +65,8 @@ async function main() {
               if (hangulRegex.test(word)) {
                 let { hangulWord } = getConsecutiveHangulSubstring(word);
                 const status = getWordStatus(hangulWord, analysisResults);
-                newContent += `<span class="${styles['underline']} ${styles[status]} ${styles.padding}">${word}</span> `;
+                const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
+                newContent += `<span class="${styles['underline']} ${styles[status]} ${styles.padding} ${highlightClass}">${word}</span> `;
               }
             });
             newContent += "\n";
@@ -134,7 +141,8 @@ async function main() {
           const wordStart = word.substring(0, startIndex);
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
-          newHTML += `${wordStart}<span class="${styles['underline']} ${styles[status]}">${hangulWord}</span>${wordEnd}`;
+          const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
+          newHTML += `${wordStart}<span class="${styles['underline']} ${styles[status]} ${highlightClass}">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
           newHTML += " ";

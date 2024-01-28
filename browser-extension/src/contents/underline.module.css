@@ -41,3 +41,23 @@
     text-decoration-color: #57BB97;
     background: #57BB978a;
 }
+
+.highlight {
+    padding: 0.25rem;
+    transform-style: preserve-3d;
+    position: relative;
+    text-shadow: 0 0 0.1rem #000000;
+    /* background: rgba(0, 0, 0, 0.349); */
+    background: linear-gradient(-45deg, #a63aff60 0%, #3cfff554 90%);
+    border: 1px solid #14d8ce7a;
+    color: white;
+}
+
+.highlight::before {
+    content: "";
+    position: absolute;	
+    inset: 0px;
+    background: linear-gradient(-45deg, #a63aff 0%, #3cfff5 90%);
+    filter: blur(10px);
+    z-index: -1;
+}

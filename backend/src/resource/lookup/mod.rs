@@ -5,7 +5,7 @@ use axum::response::IntoResponse;
 use serde::Serialize;
 use tracing::debug;
 use crate::dictionary::{KrDictEntry, Headword};
-use crate::resource::word_status::{WordStatus, WordStatusResponse};
+use crate::resource::word_status::{WordStatus, WordStatusResponse, WordStatusEntity};
 use crate::{SharedState, search};
 
 pub async fn get_handler(
@@ -35,14 +35,15 @@ pub async fn get_handler(
 
     let ids = matches.iter().map(|m| *m.sequence_number()).collect::<Vec<i32>>();
 
-    let word_statuses = sqlx::query_as!(
-        WordStatusResponse,
-        "SELECT krdict_sequence_number as id, status as \"status: WordStatus\", ignored, tracked
+    let word_statuses: Vec<WordStatusResponse> = sqlx::query_as!(
+        WordStatusEntity,
+        "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
         FROM WordStatus
         WHERE krdict_sequence_number = ANY($1) AND user_id = $2;",
         &ids,
         1 // TODO user ID when we have more than 1 user
-    ).fetch_all(&state.db).await.unwrap();
+    ).fetch_all(&state.db).await.unwrap()
+    .iter().map(|it| it.to_dto(None)).collect(); // TODO frequency rank
 
     // TODO remove unnecessary clone
     let matches = matches.into_iter()
@@ -53,7 +54,7 @@ pub async fn get_handler(
                     id: None,
                     status: WordStatus::Unknown,
                     ignored: false,
-                    tracked: false,
+                    frequency_rank: None,
                 }).clone();
 
             LookupDTO {
