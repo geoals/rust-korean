@@ -36,7 +36,7 @@ async function main() {
   // TODO configure offset in settings
   function shouldHighlightUnknownCommonWord(word: string, status: 'known' | 'seen' | 'unknown' | 'unmatched'): boolean {
     return status === 'unknown' 
-      && analysisResults[word]?.every((wordStatus) => wordStatus.frequency_rank && wordStatus.frequency_rank <= 1000);
+      && analysisResults[word]?.every((wordStatus) => wordStatus.frequency_rank && wordStatus.frequency_rank <= 2000);
   }
 
   // TODO clean up this abomination
@@ -141,7 +141,8 @@ async function main() {
           const wordStart = word.substring(0, startIndex);
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
-          const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
+          // const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
+          const highlightClass = '';
           newHTML += `${wordStart}<span class="${styles['underline']} ${styles[status]} ${highlightClass}">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
