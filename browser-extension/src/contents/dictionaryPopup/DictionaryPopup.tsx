@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
@@ -106,7 +106,6 @@ function DictionaryEntryContent({
   stars,
   part_of_speech,
   deinflection_rule,
-  tl_definitions,
   frequency,
   isVisible,
   entry,
@@ -136,7 +135,7 @@ function DictionaryEntryContent({
       {deinflection_rule && (
         <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
       )}
-      <DefinitionList definitions={tl_definitions} entry={entry} hoveredElement={hoveredElement} />
+      <DefinitionList entry={entry} hoveredElement={hoveredElement} />
     </div>
   );
 }
@@ -158,73 +157,44 @@ function TabButton(props: {
 }
 
 function DefinitionList(props: {
-  definitions: Array<{ translation: string; definition: string }>;
   hoveredElement: HTMLElement;
   entry: LookupDTO;
 }) {
-
-  const [isOpen, setIsOpen] = useState(false);
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-  const listStyle = props.definitions.length > 1 ? "list-decimal" : "list-none";
-
-  useEffect(() => {
-    if (!detailsRef.current) {
-      return
-    }
-    setIsOpen(!isOpen);
-  }, [detailsRef.current])
-
-  if (props.definitions.length === 0) {
+  const definitions = props.entry.dictEntry.tl_definitions;
+  if (definitions.length === 0) {
     return null;
   }
 
+  const listStyle = definitions.length > 1 ? "list-decimal" : "list-none";
+  const leftMargin = definitions.length > 1 ? "ml-9" : "ml-4";
 
   return (
-    <div className="flex flex-row justify-start bg-light-green-30 max-h-52 overflow-y-auto rounded-6 p-2 text-dark-green">
-      <Arrow isOpen={isOpen} setIsOpen={setIsOpen} detailsRef={detailsRef} />
-      <details lang="jp" className={`w-full ${props.definitions.length > 1 ? "ml-5" : "ml-0"}`} ref={detailsRef}>
-        {/* Maybe have nowrap for summary line while it is closed*/}
-        <summary className="flex flex-row justify-between cursor-pointer">
-          <ol className={listStyle} onClick={() => setIsOpen(!isOpen)}>
-            <b><li>{props.definitions[0].translation}</li></b>
+    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto">
+      <summary className="cursor-pointer">
+        <div className={`flex flex-row justify-between -mt-6`}>
+          <ol className={`${listStyle} ${leftMargin}`}>
+            <li><b>{definitions[0].translation}</b></li>
           </ol>
           <StatusButtons
             entry={props.entry}
             hoveredElement={props.hoveredElement}
           />
-        </summary>
+        </div>
+      </summary>
 
-        <p>
-          {props.definitions[0].definition}
-        </p>
+      <div className={leftMargin}>
+        <p>{definitions[0].definition}</p>
         <ol start={2} className={listStyle}>
-          {props.definitions.slice(1).map((element, index) => {
+          {definitions.slice(1).map((element, index) => {
             return (
               <React.Fragment key={index}>
-                <b><li>{element.translation}</li></b>
+                <li><b>{element.translation}</b></li>
                 {element.definition}
               </React.Fragment>
             );
           })}
         </ol>
-      </details>
-    </div>
+      </div>
+    </details>
   );
 }
-
-interface ArrowProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  detailsRef: React.RefObject<HTMLDetailsElement>;
-}
-
-const Arrow = ({ isOpen, detailsRef, setIsOpen }: ArrowProps) => {
-  const arrow =  isOpen ? "▼" : "▶";
-  const toggleOpen = () => {
-    if (detailsRef.current) {
-      detailsRef.current.open = !detailsRef.current.open;
-      setIsOpen(!isOpen);
-    }
-  }
-  return <div className="px-2 cursor-pointer" onClick={toggleOpen}>{arrow}</div>
-};
