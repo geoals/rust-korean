@@ -1,9 +1,9 @@
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
 import styles from "./style.module.css";
-import type { KrDictEntryDTO } from "~background/messages/lookup";
+import type { KrDictEntryDTO, LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
 
 export function DictionaryPopup() {
@@ -43,9 +43,9 @@ export function DictionaryPopup() {
   return (
     <>
       <div
-        style={{ top: `${positionY}px`, left: `${positionX}px`}}
+        style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className="bg-light-green absolute max-h-96 w-400 p-4"
+        className="bg-light-green absolute max-h-96 w-400 p-4 rounded-6"
       >
         <div>
           <div className={styles.tabs}>
@@ -70,6 +70,8 @@ export function DictionaryPopup() {
                     {...entry.dictEntry}
                     isVisible={index === activeTabIndex}
                     key={entry.dictEntry.sequence_number + " " + index}
+                    entry={entry}
+                    hoveredElement={hoveredElement}
                   >
                     <>
                       <AddToAnkiButton
@@ -77,10 +79,6 @@ export function DictionaryPopup() {
                         hoveredSentence={hoveredSentence}
                         wordStatus={entry.status.status ?? "unknown"}
                         {...entry.dictEntry}
-                      />
-                      <StatusButtons
-                        entry={entry}
-                        hoveredElement={hoveredElement}
                       />
                     </>
                   </DictionaryEntryContent>
@@ -96,6 +94,8 @@ export function DictionaryPopup() {
 
 interface DictionaryEntryContentProps extends KrDictEntryDTO {
   isVisible: boolean;
+  entry: LookupDTO;
+  hoveredElement?: HTMLElement;
   children: React.ReactNode;
 }
 
@@ -109,6 +109,8 @@ function DictionaryEntryContent({
   tl_definitions,
   frequency,
   isVisible,
+  entry,
+  hoveredElement,
   children,
 }: DictionaryEntryContentProps) {
   const getStyle = () => {
@@ -134,7 +136,7 @@ function DictionaryEntryContent({
       {deinflection_rule && (
         <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
       )}
-      <DefinitionList definitions={tl_definitions} />
+      <DefinitionList definitions={tl_definitions} entry={entry} hoveredElement={hoveredElement} />
     </div>
   );
 }
@@ -147,9 +149,8 @@ function TabButton(props: {
   return (
     <button
       onClick={props.onClick}
-      className={`${
-        props.isActive ? "bg-green" : "bg-light-green-30"
-      } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl`}
+      className={`${props.isActive ? "bg-green" : "bg-light-green-30"
+        } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl`}
     >
       {props.title}
     </button>
@@ -158,53 +159,72 @@ function TabButton(props: {
 
 function DefinitionList(props: {
   definitions: Array<{ translation: string; definition: string }>;
+  hoveredElement: HTMLElement;
+  entry: LookupDTO;
 }) {
 
-  const className = "bg-light-green-30 max-h-52 overflow-y-auto rounded-6 p-2 text-dark-green";
+  const [isOpen, setIsOpen] = useState(false);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const listStyle = props.definitions.length > 1 ? "list-decimal" : "list-none";
+
+  useEffect(() => {
+    if (!detailsRef.current) {
+      return
+    }
+    setIsOpen(!isOpen);
+  }, [detailsRef.current])
+
   if (props.definitions.length === 0) {
     return null;
   }
 
-  if (props.definitions.length === 1) {
-    return (
-      // TODO change language according to settings
-      <details lang="jp" className={className}>
-        <summary className={styles.definitionListSummary}>
-          <b>{props.definitions[0].translation}</b>
-        </summary>
-        <p>{props.definitions[0].definition}</p>
-      </details>
-    );
-  }
 
   return (
-    <details lang="jp" className={className}>
-      {/* Maybe have nowrap for summary line while it is closed*/}
-      <summary>
-        <ol
-          style={{
-            paddingInlineStart: "2ch",
-            marginTop: "-22px",
-            marginBottom: "0",
-          }}
-        >
-          <b><li>{props.definitions[0].translation}</li></b>
-        </ol>
-      </summary>
+    <div className="flex flex-row justify-start bg-light-green-30 max-h-52 overflow-y-auto rounded-6 p-2 text-dark-green">
+      <Arrow isOpen={isOpen} setIsOpen={setIsOpen} detailsRef={detailsRef} />
+      <details lang="jp" className={`w-full ${props.definitions.length > 1 ? "ml-5" : "ml-0"}`} ref={detailsRef}>
+        {/* Maybe have nowrap for summary line while it is closed*/}
+        <summary className="flex flex-row justify-between cursor-pointer">
+          <ol className={listStyle} onClick={() => setIsOpen(!isOpen)}>
+            <b><li>{props.definitions[0].translation}</li></b>
+          </ol>
+          <StatusButtons
+            entry={props.entry}
+            hoveredElement={props.hoveredElement}
+          />
+        </summary>
 
-      <p style={{ margin: "0", paddingLeft: "4ch" }}>
-        {props.definitions[0].definition}
-      </p>
-      <ol start={2} style={{ marginTop: "0", paddingInlineStart: "4ch" }}>
-        {props.definitions.slice(1).map((element, index) => {
-          return (
-            <React.Fragment key={index}>
-              <b><li style={{ paddingTop: "8px" }}>{element.translation}</li></b>
-              {element.definition}
-            </React.Fragment>
-          );
-        })}
-      </ol>
-    </details>
+        <p>
+          {props.definitions[0].definition}
+        </p>
+        <ol start={2} className={listStyle}>
+          {props.definitions.slice(1).map((element, index) => {
+            return (
+              <React.Fragment key={index}>
+                <b><li>{element.translation}</li></b>
+                {element.definition}
+              </React.Fragment>
+            );
+          })}
+        </ol>
+      </details>
+    </div>
   );
 }
+
+interface ArrowProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  detailsRef: React.RefObject<HTMLDetailsElement>;
+}
+
+const Arrow = ({ isOpen, detailsRef, setIsOpen }: ArrowProps) => {
+  const arrow =  isOpen ? "▼" : "▶";
+  const toggleOpen = () => {
+    if (detailsRef.current) {
+      detailsRef.current.open = !detailsRef.current.open;
+      setIsOpen(!isOpen);
+    }
+  }
+  return <div className="px-2 cursor-pointer" onClick={toggleOpen}>{arrow}</div>
+};
