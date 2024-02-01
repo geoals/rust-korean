@@ -12,6 +12,7 @@ mod search;
 mod resource;
 mod error_handling;
 mod frequency_dictionary;
+mod db;
 
 #[derive(Clone)]
 pub struct SharedState {

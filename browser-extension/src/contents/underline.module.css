@@ -42,7 +42,7 @@
     background: #57BB978a;
 }
 
-.highlight:not(:hover) {
+.highlight {
     text-decoration: none;
     transform-style: preserve-3d;
     position: relative;
