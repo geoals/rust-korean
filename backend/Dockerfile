@@ -1,6 +1,7 @@
 # Use the official Rust image as the base image
 FROM rust:latest
-ENV DATABASE_URL
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
