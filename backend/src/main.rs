@@ -48,11 +48,15 @@ impl SharedState {
 async fn main() -> Result<(), std::io::Error> {
     let start_time = Instant::now();
     tracing_subscriber::fmt::init();
+
+    // Specify the name of the environment variable
+    let db_url = std::env::var("DATABASE_URL").expect("Failed to read DATABASE_URL env var");
+
     info!("Application starting...");
 
     let db = PgPoolOptions::new()
             .max_connections(128)
-            .connect("postgres://postgres:secret@localhost/postgres")
+            .connect(&db_url)
             .await
             .unwrap();
 
