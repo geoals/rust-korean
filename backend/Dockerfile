@@ -2,6 +2,7 @@
 FROM rust:latest
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
+EXPOSE 3000
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app

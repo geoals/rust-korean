@@ -73,7 +73,7 @@ async fn main() -> Result<(), std::io::Error> {
         .with_state(shared_state);
 
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
     info!("Application ready in {:.2}s - listening on {}", start_time.elapsed().as_secs_f32(), listener.local_addr().unwrap());
     axum::serve(listener, app).await?;
 
