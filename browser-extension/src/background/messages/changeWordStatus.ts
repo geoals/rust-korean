@@ -13,7 +13,7 @@ interface HttpResponseStatusAndBody {
 }
 
 async function patchWordStatus(wordId: number, wordStatus: WordStatusDTO): Promise<HttpResponseStatusAndBody> {
-  const result =  await fetch(`http://127.0.0.1:4000/word_status/${wordId}`, {
+  const result =  await fetch(`https://rust.alsvik.cloud/word_status/${wordId}`, {
     method: "PATCH",
     body: JSON.stringify(wordStatus),
     headers: {

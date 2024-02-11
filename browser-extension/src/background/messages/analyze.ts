@@ -6,7 +6,7 @@ export type AnalyzeResponse = {
 }
 
 async function postAnalyze(payload: string): Promise<AnalyzeResponse> {
-  const result = await fetch(`http://127.0.0.1:4000/analyze`, {
+  const result = await fetch(`https://rust.alsvik.cloud/analyze`, {
     method: "POST",
     body: payload,
     headers: {
