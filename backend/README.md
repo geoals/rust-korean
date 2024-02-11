@@ -7,7 +7,7 @@ Download KRDICT dictionary from [here](https://github.com/Lyroxide/yomichan-kore
 
 `sqlx migrate run` to run database migrations
 
-`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on 127.0.0.1:3000 (must be installed with `cargo install cargo-watch`)
+`cargo watch -q -c -w src/ -x run` to automatically recompile on file changes and start a HTTP server on 127.0.0.1:4000 (must be installed with `cargo install cargo-watch`)
 
 alternatively you can use
 `cargo run`
