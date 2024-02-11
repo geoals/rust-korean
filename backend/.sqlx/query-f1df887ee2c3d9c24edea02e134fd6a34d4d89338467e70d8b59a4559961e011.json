@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO WordStatus\n            (krdict_sequence_number, status, ignored, tracked, user_id)\n            VALUES ($1, $2, $3, $4, $5);",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        {
+          "Custom": {
+            "name": "word_status",
+            "kind": {
+              "Enum": [
+                "unknown",
+                "seen",
+                "known"
+              ]
+            }
+          }
+        },
+        "Bool",
+        "Bool",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1df887ee2c3d9c24edea02e134fd6a34d4d89338467e70d8b59a4559961e011"
+}

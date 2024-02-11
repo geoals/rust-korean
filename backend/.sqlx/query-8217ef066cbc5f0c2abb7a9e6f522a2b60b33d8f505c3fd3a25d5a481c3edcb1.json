@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at\n        FROM WordStatus\n        WHERE krdict_sequence_number = $1 AND user_id = $2;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "krdict_sequence_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "status: WordStatus",
+        "type_info": {
+          "Custom": {
+            "name": "word_status",
+            "kind": {
+              "Enum": [
+                "unknown",
+                "seen",
+                "known"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "ignored",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "tracked",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "8217ef066cbc5f0c2abb7a9e6f522a2b60b33d8f505c3fd3a25d5a481c3edcb1"
+}
