@@ -20,13 +20,7 @@ jobs:
 
       - name: Change directory
         run: cd backend
-
-      - name: Install sqlx-cli
-        run: cargo install sqlx-cli --no-default-features --features postgres
         
-      - name: Run migrations
-        run: sqlx migrate run
-
       - name: Build
         run: cargo build --verbose
 
