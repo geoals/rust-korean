@@ -1,4 +1,4 @@
-name: Rust and SQLx Migrate
+name: Build rust app and run tests
 
 on:
   push:
@@ -14,19 +14,16 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Change directory
-        run: cd backend
-
-      - name: Install sqlx-cli
-        run: cargo install sqlx-cli --no-default-features --features postgres
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.7.3
         
-      - name: Run migrations
-        run: sqlx migrate run
-
       - name: Build
         run: cargo build --verbose
 
