@@ -1,10 +1,8 @@
 import { sendToBackground } from "@plasmohq/messaging";
-import * as styles from "./style.module.css"
+import * as styles from "./style.module.css";
+import TextToSpeechIcon from 'react:~/../assets/audio.svg';
 
-export function TTSButton(props: { headword: string; isVisible: boolean }) {
-  if (!props.isVisible) {
-    return null;
-  }
+export function TTSButton(props: { headword: string }) {
 
   return (
     <button
@@ -21,7 +19,7 @@ export function TTSButton(props: { headword: string; isVisible: boolean }) {
         audioElement.play();
       }}
     >
-      TTS
+      <TextToSpeechIcon />
     </button>
   );
 }

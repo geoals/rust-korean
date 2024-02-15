@@ -5,6 +5,8 @@ import { StatusButtons } from "./StatusButtons";
 import type { KrDictEntryDTO, LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
 import IgnoreIcon from 'react:../../../assets/ignore.svg';
+import ExportIcon from 'react:~/../assets/export.svg';
+import AlreadyExportedIcon from 'react:~/../assets/already_exported.svg';
 
 export function DictionaryPopup() {
   const {
@@ -40,6 +42,8 @@ export function DictionaryPopup() {
     return null;
   }
 
+  const ankiExported = true;
+
   return (
     <>
       <div
@@ -47,54 +51,49 @@ export function DictionaryPopup() {
         ref={popupRef}
         className="bg-light-green absolute max-h-96 w-400 p-4 rounded-6"
       >
-        <div>
-          <div className="flex justify-between">
-            <div>
-              {Object.keys(response).map((entry, index) => (
-                <TabButton
-                  title={entry}
-                  key={entry}
-                  onClick={() => setActiveTabIndex(index)}
-                  isActive={index === activeTabIndex}
-                />
-              ))}
-            </div>
-            <div className="">
-              {/* <button><img src="../assets/ignore.svg" /></button> */}
-              <button><IgnoreIcon /></button>
-              <button>B</button>
-              <button>C</button>
-            </div>
+        <div className="flex justify-between">
+          <div>
+            {Object.keys(response).map((entry, index) => (
+              <TabButton
+                title={entry}
+                key={entry}
+                onClick={() => setActiveTabIndex(index)}
+                isActive={index === activeTabIndex}
+              />
+            ))}
           </div>
-          {Object.values(response).map((entries, index) => {
-            return (
-              <>
-                <TTSButton
-                  headword={entries[0].dictEntry.headword}
-                  isVisible={index === activeTabIndex}
-                />
-                {entries.map((entry) => (
-                  <DictionaryEntryContent
-                    {...entry.dictEntry}
-                    isVisible={index === activeTabIndex}
-                    key={entry.dictEntry.sequence_number + " " + index}
-                    entry={entry}
-                    hoveredElement={hoveredElement}
-                  >
-                    <>
-                      <AddToAnkiButton
-                        hoveredWord={hoveredWord}
-                        hoveredSentence={hoveredSentence}
-                        wordStatus={entry.status.status ?? "unknown"}
-                        {...entry.dictEntry}
-                      />
-                    </>
-                  </DictionaryEntryContent>
-                ))}
-              </>
-            );
-          })}
+          <div className="fill-dark-green flex items-center space-x-1">
+            <button><IgnoreIcon /></button>
+            <TTSButton headword={Object.keys(response)[activeTabIndex]} />
+            {ankiExported ? <button><ExportIcon /></button> : <button><AlreadyExportedIcon /></button>}
+          </div>
         </div>
+        {Object.values(response).map((entries, index) => {
+          return (
+            <>
+              {
+                index === activeTabIndex &&
+                <FrequencyStars frequency={entries[0].dictEntry.frequency} />
+              }
+              {entries.map((entry) => (
+                <DictionaryEntryContent
+                  {...entry.dictEntry}
+                  isVisible={index === activeTabIndex}
+                  key={entry.dictEntry.sequence_number + " " + index}
+                  entry={entry}
+                  hoveredElement={hoveredElement}
+                >
+                  <AddToAnkiButton
+                    hoveredWord={hoveredWord}
+                    hoveredSentence={hoveredSentence}
+                    wordStatus={entry.status.status ?? "unknown"}
+                    {...entry.dictEntry}
+                  />
+                </DictionaryEntryContent>
+              ))}
+            </>
+          );
+        })}
       </div>
     </>
   );
@@ -125,6 +124,8 @@ function DictionaryEntryContent({
       return { display: "none" };
     }
   };
+
+  console.log({ frequency })
 
   return (
     <div style={getStyle()}>
@@ -205,4 +206,64 @@ function DefinitionList(props: {
       </div>
     </details>
   );
+}
+
+function FrequencyStars(props: { frequency?: number }) {
+
+  const numberOfStars = getNumberOfStars(props?.frequency)
+  const blackStar = "★";
+  const whiteStar = "☆";
+  return (
+    <div>
+      {
+        [...Array(numberOfStars?.numberOfBlack)].map((_, i) =>
+          <>{blackStar}</>
+        )
+      }
+      {
+        [...Array(numberOfStars?.numberOfWhite)].map((_, i) =>
+        <>{whiteStar}</>
+      )
+      }
+    </div>
+  );
+}
+
+const getNumberOfStars = (frequency?: number) => {
+  if (frequency === undefined || frequency >= 20000) {
+    return {
+      numberOfBlack: 0,
+      numberOfWhite: 5,
+    }
+  }
+  if (frequency < 1000) {
+    return {
+      numberOfBlack: 5,
+      numberOfWhite: 0,
+    }
+  }
+  if (frequency < 3000) {
+    return {
+      numberOfBlack: 4,
+      numberOfWhite: 1
+    }
+  }
+  if (frequency < 5000) {
+    return {
+      numberOfBlack: 3,
+      numberOfWhite: 2
+    }
+  }
+  if (frequency < 10000) {
+    return {
+      numberOfBlack: 2,
+      numberOfWhite: 3
+    }
+  }
+  if (frequency < 20000) {
+    return {
+      numberOfBlack: 1,
+      numberOfWhite: 4
+    }
+  }
 }
