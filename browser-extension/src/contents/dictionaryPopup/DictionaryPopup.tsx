@@ -2,9 +2,9 @@ import React, { useLayoutEffect } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
-import styles from "./style.module.css";
 import type { KrDictEntryDTO, LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
+import IgnoreIcon from 'react:../../../assets/ignore.svg';
 
 export function DictionaryPopup() {
   const {
@@ -48,15 +48,23 @@ export function DictionaryPopup() {
         className="bg-light-green absolute max-h-96 w-400 p-4 rounded-6"
       >
         <div>
-          <div className={styles.tabs}>
-            {Object.keys(response).map((entry, index) => (
-              <TabButton
-                title={entry}
-                key={entry}
-                onClick={() => setActiveTabIndex(index)}
-                isActive={index === activeTabIndex}
-              />
-            ))}
+          <div className="flex justify-between">
+            <div>
+              {Object.keys(response).map((entry, index) => (
+                <TabButton
+                  title={entry}
+                  key={entry}
+                  onClick={() => setActiveTabIndex(index)}
+                  isActive={index === activeTabIndex}
+                />
+              ))}
+            </div>
+            <div className="">
+              {/* <button><img src="../assets/ignore.svg" /></button> */}
+              <button><IgnoreIcon /></button>
+              <button>B</button>
+              <button>C</button>
+            </div>
           </div>
           {Object.values(response).map((entries, index) => {
             return (
