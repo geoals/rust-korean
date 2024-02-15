@@ -36,7 +36,7 @@ export function StatusButtons({
   return (
     <>
       <div>
-        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative`}
+        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative font-sans font-bold text-sm py-1 px-2`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: nextStatus,
@@ -46,7 +46,7 @@ export function StatusButtons({
             // TODO update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
           }}
         >
-          {status}
+          {status.toUpperCase()}
         </button>
       </div>
     </>

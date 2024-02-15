@@ -1,12 +1,12 @@
 import React, { useLayoutEffect } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
-import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
-import type { KrDictEntryDTO, LookupDTO } from "~background/messages/lookup";
+import type { LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
 import IgnoreIcon from 'react:../../../assets/ignore.svg';
 import ExportIcon from 'react:~/../assets/export.svg';
 import AlreadyExportedIcon from 'react:~/../assets/already_exported.svg';
+import { FrequencyStars } from "./FrequencyStars";
 
 export function DictionaryPopup() {
   const {
@@ -49,14 +49,15 @@ export function DictionaryPopup() {
       <div
         style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className="bg-light-green absolute max-h-96 w-400 p-4 rounded-6"
+        className="bg-light-green absolute max-h-128 w-100 p-4 rounded-6"
       >
         <div className="flex justify-between">
           <div>
-            {Object.keys(response).map((entry, index) => (
+            {Object.values(response).map((entries, index) => (
               <TabButton
-                title={entry}
-                key={entry}
+                title={entries[0].dictEntry.headword}
+                reading={entries[0].dictEntry.reading}
+                key={entries[0].dictEntry.headword}
                 onClick={() => setActiveTabIndex(index)}
                 isActive={index === activeTabIndex}
               />
@@ -73,24 +74,19 @@ export function DictionaryPopup() {
             <>
               {
                 index === activeTabIndex &&
-                <FrequencyStars frequency={entries[0].dictEntry.frequency} />
+                <div className="flex justify-between my-1">
+                  <div className="text-dark-green font-extrabold">{hoveredWord}</div>
+                  <FrequencyStars frequency={entries[0].dictEntry.frequency} />
+                </div>
               }
-              {entries.map((entry) => (
-                <DictionaryEntryContent
-                  {...entry.dictEntry}
-                  isVisible={index === activeTabIndex}
-                  key={entry.dictEntry.sequence_number + " " + index}
-                  entry={entry}
-                  hoveredElement={hoveredElement}
-                >
-                  <AddToAnkiButton
-                    hoveredWord={hoveredWord}
-                    hoveredSentence={hoveredSentence}
-                    wordStatus={entry.status.status ?? "unknown"}
-                    {...entry.dictEntry}
+              <div className="space-y-4 overflow-y-auto max-h-96">
+                {entries.map((entry) => (
+                  index === activeTabIndex &&
+                  <DefinitionList entry={entry} hoveredElement={hoveredElement}
+                    key={entry.dictEntry.sequence_number + " " + index}
                   />
-                </DictionaryEntryContent>
-              ))}
+                ))}
+              </div>
             </>
           );
         })}
@@ -99,68 +95,20 @@ export function DictionaryPopup() {
   );
 }
 
-interface DictionaryEntryContentProps extends KrDictEntryDTO {
-  isVisible: boolean;
-  entry: LookupDTO;
-  hoveredElement?: HTMLElement;
-  children: React.ReactNode;
-}
-
-function DictionaryEntryContent({
-  headword,
-  hanja,
-  reading,
-  stars,
-  part_of_speech,
-  deinflection_rule,
-  frequency,
-  isVisible,
-  entry,
-  hoveredElement,
-  children,
-}: DictionaryEntryContentProps) {
-  const getStyle = () => {
-    if (!isVisible) {
-      return { display: "none" };
-    }
-  };
-
-  console.log({ frequency })
-
-  return (
-    <div style={getStyle()}>
-      {children}
-      {[...Array(stars)].map((_, i) => (
-        <React.Fragment key={i}>★</React.Fragment>
-      ))}
-      {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
-      {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
-      {reading && reading !== headword && (
-        <span style={{ paddingLeft: "8px" }}>{reading}</span>
-      )}
-      {part_of_speech && (
-        <span style={{ paddingLeft: "8px" }}>{part_of_speech}</span>
-      )}
-      {deinflection_rule && (
-        <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
-      )}
-      <DefinitionList entry={entry} hoveredElement={hoveredElement} />
-    </div>
-  );
-}
-
 function TabButton(props: {
   title: string;
+  reading: string | null;
   onClick: () => void;
   isActive: boolean;
 }) {
+
   return (
     <button
       onClick={props.onClick}
       className={`${props.isActive ? "bg-green" : "bg-light-green-30"
         } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl`}
     >
-      {props.title}
+      {props.title}{props.isActive && props.reading !== null && <span className="text-light-green-60 ml-1">{props.reading}</span>}
     </button>
   );
 }
@@ -178,11 +126,12 @@ function DefinitionList(props: {
   const leftMargin = definitions.length > 1 ? "ml-9" : "ml-4";
 
   return (
+    // TODO only one can be expanded at the time
     <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto">
       <summary className="cursor-pointer">
         <div className={`flex flex-row justify-between -mt-6`}>
-          <ol className={`${listStyle} ${leftMargin}`}>
-            <li><b>{definitions[0].translation}</b></li>
+          <ol className={`${listStyle} ${leftMargin} font-bold`}>
+            <li>{definitions[0].translation}<span className="text-light-green-60">{props.entry.dictEntry.hanja}</span></li>
           </ol>
           <StatusButtons
             entry={props.entry}
@@ -197,7 +146,7 @@ function DefinitionList(props: {
           {definitions.slice(1).map((element, index) => {
             return (
               <React.Fragment key={index}>
-                <li><b>{element.translation}</b></li>
+                <b><li>{element.translation}</li></b>
                 {element.definition}
               </React.Fragment>
             );
@@ -206,64 +155,4 @@ function DefinitionList(props: {
       </div>
     </details>
   );
-}
-
-function FrequencyStars(props: { frequency?: number }) {
-
-  const numberOfStars = getNumberOfStars(props?.frequency)
-  const blackStar = "★";
-  const whiteStar = "☆";
-  return (
-    <div>
-      {
-        [...Array(numberOfStars?.numberOfBlack)].map((_, i) =>
-          <>{blackStar}</>
-        )
-      }
-      {
-        [...Array(numberOfStars?.numberOfWhite)].map((_, i) =>
-        <>{whiteStar}</>
-      )
-      }
-    </div>
-  );
-}
-
-const getNumberOfStars = (frequency?: number) => {
-  if (frequency === undefined || frequency >= 20000) {
-    return {
-      numberOfBlack: 0,
-      numberOfWhite: 5,
-    }
-  }
-  if (frequency < 1000) {
-    return {
-      numberOfBlack: 5,
-      numberOfWhite: 0,
-    }
-  }
-  if (frequency < 3000) {
-    return {
-      numberOfBlack: 4,
-      numberOfWhite: 1
-    }
-  }
-  if (frequency < 5000) {
-    return {
-      numberOfBlack: 3,
-      numberOfWhite: 2
-    }
-  }
-  if (frequency < 10000) {
-    return {
-      numberOfBlack: 2,
-      numberOfWhite: 3
-    }
-  }
-  if (frequency < 20000) {
-    return {
-      numberOfBlack: 1,
-      numberOfWhite: 4
-    }
-  }
 }
