@@ -79,7 +79,7 @@ export function DictionaryPopup() {
                   <FrequencyStars frequency={entries[0].dictEntry.frequency} />
                 </div>
               }
-              <div className="space-y-4 overflow-y-auto max-h-96">
+              <div className="space-y-4 overflow-y-auto max-h-96 overscroll-y-contain">
                 {entries.map((entry) => (
                   index === activeTabIndex &&
                   <DefinitionList entry={entry} hoveredElement={hoveredElement}
@@ -127,7 +127,7 @@ function DefinitionList(props: {
 
   return (
     // TODO only one can be expanded at the time
-    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto">
+    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
       <summary className="cursor-pointer">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
