@@ -42,7 +42,7 @@ export function StatusButtons({
   return (
     <>
       <div>
-        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative font-sans font-bold text-sm py-1 px-2 text-nowrap`}
+        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative font-sans font-bold text-sm py-1 px-2 duration-100 hover:scale-105 text-nowrap`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: nextStatus,

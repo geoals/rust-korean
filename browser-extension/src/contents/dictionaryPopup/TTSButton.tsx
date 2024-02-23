@@ -1,12 +1,11 @@
 import { sendToBackground } from "@plasmohq/messaging";
-import * as styles from "./style.module.css";
 import TextToSpeechIcon from 'react:~/../assets/audio.svg';
 
 export function TTSButton(props: { headword: string }) {
 
   return (
     <button
-      className={styles.button}
+      className="hover:fill-light-green-60 duration-105 hover:scale-105"
       onClick={async () => {
         const response = await sendToBackground({
           name: "tts",

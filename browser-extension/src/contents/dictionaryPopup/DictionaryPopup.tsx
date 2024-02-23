@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import React, { useLayoutEffect, useState } from "react";
+=======
+import React, { useLayoutEffect, type ReactNode } from "react";
+>>>>>>> Stashed changes
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { StatusButtons } from "./StatusButtons";
 import type { LookupDTO } from "~background/messages/lookup";
@@ -41,7 +45,13 @@ export function DictionaryPopup() {
   if (Object.keys(response).length === 0 || !hoveredWord || !hoveredElement) {
     return null;
   }
+<<<<<<< Updated upstream
   const ankiExported = true;
+=======
+
+  // TODO: check AnkiConnect for status, hide button if no AnkiConnect connection
+  const ankiExported = false;
+>>>>>>> Stashed changes
 
   return (
     <>
@@ -62,10 +72,13 @@ export function DictionaryPopup() {
               />
             ))}
           </div>
-          <div className="fill-dark-green flex items-center space-x-1">
-            <button><IgnoreIcon /></button>
+          <div className="fill-dark-green flex items-center space-x-1 duration-100">
+            <button className="hover:fill-light-green-60 hover:scale-105"><IgnoreIcon /></button>
             <TTSButton headword={Object.keys(response)[activeTabIndex]} />
-            {ankiExported ? <button><ExportIcon /></button> : <button><AlreadyExportedIcon /></button>}
+            {ankiExported 
+              ? <button className="fill-light-green-60 hover:scale-105"><AlreadyExportedIcon /></button> 
+              : <button className="hover:fill-light-green-60 hover:scale-105"><ExportIcon /></button>
+            }
           </div>
         </div>
         {Object.values(response).map((entries, index) => {
@@ -93,8 +106,8 @@ function TabButton(props: {
   return (
     <button
       onClick={props.onClick}
-      className={`${props.isActive ? "bg-green" : "bg-light-green-30"
-        } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl`}
+      className={`${props.isActive ? "bg-green cursor-default" : "bg-light-green-30 cursor-pointer hover:bg-light-green-60 hover:scale-105"
+        } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl duration-100`}
     >
       {props.title}{props.isActive && props.reading !== null && <span className="text-light-green-60 ml-1">{props.reading}</span>}
     </button>
