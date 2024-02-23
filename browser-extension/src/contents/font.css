@@ -1,15 +1,15 @@
 @font-face {
-    font-family: "Inter";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url(data-base64:~assets/Inter/static/Inter-Regular.ttf) format("ttf");
-  }
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(data-base64:~assets/Inter/static/Inter-Regular.ttf) format("ttf");
+}
 
 @font-face {
-    font-family: "Noto Sans KR";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url(data-base64:~assets/Noto_Sans_KR/static/NotoSansKR-Regular.ttf) format("ttf");
-  }
+  font-family: "Noto Sans KR";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(data-base64:~assets/Noto_Sans_KR/static/NotoSansKR-Regular.ttf) format("ttf");
+}

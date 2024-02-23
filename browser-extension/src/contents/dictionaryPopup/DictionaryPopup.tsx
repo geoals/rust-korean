@@ -3,9 +3,9 @@ import { useWordUnderCursor } from "./useWordUnderCursor";
 import { StatusButtons } from "./StatusButtons";
 import type { LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
-import IgnoreIcon from 'react:../../../assets/ignore.svg';
-import ExportIcon from 'react:~/../assets/export.svg';
-import AlreadyExportedIcon from 'react:~/../assets/already_exported.svg';
+import IgnoreIcon from "react:../../../assets/ignore.svg";
+import ExportIcon from "react:~/../assets/export.svg";
+import AlreadyExportedIcon from "react:~/../assets/already_exported.svg";
 import { FrequencyText } from "./FrequencyText";
 
 export function DictionaryPopup() {
@@ -64,12 +64,19 @@ export function DictionaryPopup() {
             ))}
           </div>
           <div className="fill-dark-green flex items-center space-x-1 duration-100">
-            <button className="hover:fill-light-green-60 hover:scale-105"><IgnoreIcon /></button>
+            <button className="hover:fill-light-green-60 hover:scale-105">
+              <IgnoreIcon />
+            </button>
             <TTSButton headword={Object.keys(response)[activeTabIndex]} />
-            {ankiExported 
-              ? <button className="fill-light-green-60 hover:scale-105"><AlreadyExportedIcon /></button> 
-              : <button className="hover:fill-light-green-60 hover:scale-105"><ExportIcon /></button>
-            }
+            {ankiExported ? (
+              <button className="fill-light-green-60 hover:scale-105">
+                <AlreadyExportedIcon />
+              </button>
+            ) : (
+              <button className="hover:fill-light-green-60 hover:scale-105">
+                <ExportIcon />
+              </button>
+            )}
           </div>
         </div>
         {Object.values(response).map((entries, index) => {
@@ -93,27 +100,34 @@ function TabButton(props: {
   onClick: () => void;
   isActive: boolean;
 }) {
-
   return (
     <button
       onClick={props.onClick}
-      className={`${props.isActive ? "bg-green cursor-default" : "bg-light-green-30 cursor-pointer hover:bg-light-green-60 hover:scale-105"
-        } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl duration-100`}
+      className={`${
+        props.isActive
+          ? "bg-green cursor-default"
+          : "bg-light-green-30 cursor-pointer hover:bg-light-green-60 hover:scale-105"
+      } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl duration-100`}
     >
-      {props.title}{props.isActive && props.reading !== null && <span className="text-light-green-60 ml-1">{props.reading}</span>}
+      {props.title}
+      {props.isActive && props.reading !== null && (
+        <span className="text-light-green-60 ml-1">{props.reading}</span>
+      )}
     </button>
   );
 }
 
-
-
-function DefinitionListList({ isVisible, hoveredWord, entries, hoveredElement }: {
-  isVisible: boolean,
-  hoveredWord: string,
-  entries: LookupDTO[],
-  hoveredElement: HTMLElement
+function DefinitionListList({
+  isVisible,
+  hoveredWord,
+  entries,
+  hoveredElement,
+}: {
+  isVisible: boolean;
+  hoveredWord: string;
+  entries: LookupDTO[];
+  hoveredElement: HTMLElement;
 }) {
-
   if (!isVisible) {
     return null;
   }
@@ -122,19 +136,21 @@ function DefinitionListList({ isVisible, hoveredWord, entries, hoveredElement }:
 
   return (
     <>
-        <div className="flex justify-between my-1">
-          <div>
-            {ignoredClicked &&
-              <div className="text-nowrap">
-                <span className="text-dark-green font-extrabold">{hoveredWord}</span>
-                <span className="text-white bg-light-green-30 px-1.5 py-0.5 mr-2 rounded-6 ml-1">学習しない</span>
-              </div>
-            }
-          </div>
-          <FrequencyText frequency={entries[0].dictEntry.frequency} />
+      <div className="flex justify-between my-1">
+        <div>
+          {ignoredClicked && (
+            <div className="text-nowrap">
+              <span className="text-dark-green font-extrabold">{hoveredWord}</span>
+              <span className="text-white bg-light-green-30 px-1.5 py-0.5 mr-2 rounded-6 ml-1">
+                学習しない
+              </span>
+            </div>
+          )}
         </div>
-      
-      <div className="space-y-4 overflow-y-auto max-h-96 overscroll-y-contain">
+        <FrequencyText frequency={entries[0].dictEntry.frequency} />
+      </div>
+
+      <div className="space-y-4 overflow-y-auto max-h-94 overscroll-y-contain">
         {entries.map((entry) => (
           <DefinitionList
             entry={entry}
@@ -147,10 +163,7 @@ function DefinitionListList({ isVisible, hoveredWord, entries, hoveredElement }:
   );
 }
 
-function DefinitionList(props: {
-  hoveredElement: HTMLElement;
-  entry: LookupDTO;
-}) {
+function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }) {
   const definitions = props.entry.dictEntry.tl_definitions;
   if (definitions.length === 0) {
     return null;
@@ -161,16 +174,19 @@ function DefinitionList(props: {
 
   return (
     // TODO only one can be expanded at the time
-    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
+    <details
+      lang="jp"
+      className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain"
+    >
       <summary className="cursor-pointer">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
-            <li>{definitions[0].translation}<span className="text-light-green-60 select-none">{props.entry.dictEntry.hanja}</span></li>
+            <li>
+              {definitions[0].translation}
+              <span className="text-light-green-60 select-none">{props.entry.dictEntry.hanja}</span>
+            </li>
           </ol>
-          <StatusButtons
-            entry={props.entry}
-            hoveredElement={props.hoveredElement}
-          />
+          <StatusButtons entry={props.entry} hoveredElement={props.hoveredElement} />
         </div>
       </summary>
 
@@ -180,7 +196,9 @@ function DefinitionList(props: {
           {definitions.slice(1).map((element, index) => {
             return (
               <React.Fragment key={index}>
-                <b><li>{element.translation}</li></b>
+                <b>
+                  <li>{element.translation}</li>
+                </b>
                 {element.definition}
               </React.Fragment>
             );

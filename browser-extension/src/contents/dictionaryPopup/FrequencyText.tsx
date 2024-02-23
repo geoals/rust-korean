@@ -6,9 +6,7 @@ export function FrequencyText({ frequency }: { frequency: number | null }) {
   }
 
   const roundedFrequency =
-    frequency < 20000
-      ? roundToNearest500(frequency)
-      : roundToNearest1000(frequency);
+    frequency < 20000 ? roundToNearest500(frequency) : roundToNearest1000(frequency);
 
   return (
     <div className="mr-2 font-sans text-dark-green text-xs mt-auto">

@@ -1,8 +1,7 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
 
 const apiKey = process.env.PLASMO_PUBLIC_TTS_KEY ?? "";
-const ttsEndpoint =
-  "https://api.narakeet.com/text-to-speech/mp3?voice=yoo-jung";
+const ttsEndpoint = "https://api.narakeet.com/text-to-speech/mp3?voice=yoo-jung";
 
 function fetch_and_play_tts(word: string) {
   const headers = new Headers();
@@ -14,9 +13,8 @@ function fetch_and_play_tts(word: string) {
     method: "POST",
     headers: headers,
     body: word,
-  })
-    .then((response) => response.arrayBuffer())
-  }
+  }).then((response) => response.arrayBuffer());
+}
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   const binary = String.fromCharCode.apply(null, Array.from(new Uint8Array(buffer)));

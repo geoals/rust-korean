@@ -1,68 +1,72 @@
 .underline {
-    text-decoration: underline 0.15rem;
-    text-underline-offset: 0.2rem;
-    border-radius: 4px;
-    cursor: pointer;
+  text-decoration: underline 0.15rem;
+  text-underline-offset: 0.2rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .padding {
-    padding: 0.25rem;
+  padding: 0.25rem;
 }
 
 .underline.seen {
-    text-decoration-color: #DFCA7E;
+  text-decoration-color: #dfca7e;
 }
 
-.underline.seen:hover, .underline.seen.active {
-    background: #dfca7e8a;
+.underline.seen:hover,
+.underline.seen.active {
+  background: #dfca7e8a;
 }
 
 .underline.unknown {
-    text-decoration-color: #C07676;
+  text-decoration-color: #c07676;
 }
 
-.underline.unknown:hover, .underline.unknown.active {
-    background: #c076768a;
+.underline.unknown:hover,
+.underline.unknown.active {
+  background: #c076768a;
 }
 
 .underline.unmatched {
-    text-decoration-color: rgba(128, 128, 128);
+  text-decoration-color: rgba(128, 128, 128);
 }
 
-.underline.unmatched:hover, .underline.unmatched.active {
-    background: rgba(128, 128, 128, 0.5);
+.underline.unmatched:hover,
+.underline.unmatched.active {
+  background: rgba(128, 128, 128, 0.5);
 }
 
 .underline.known {
-    text-decoration-color: transparent;
+  text-decoration-color: transparent;
 }
 
-.underline.known:hover, .underline.known.active {
-    text-decoration-color: #57BB97;
-    background: #57BB978a;
+.underline.known:hover,
+.underline.known.active {
+  text-decoration-color: #57bb97;
+  background: #57bb978a;
 }
 
 .highlight {
-    text-decoration: none;
-    transform-style: preserve-3d;
-    position: relative;
-    text-shadow: black 0 1px 6px;
-    text-shadow: 0 0 0.2rem #000000;
-    /* background: rgba(0, 0, 0, 0.349); */
-    background: linear-gradient(-45deg, #a63aff 0%, #3cfff5 90%);
-    border: 1px solid #14d8ce7a;
-    color: white;
+  text-decoration: none;
+  transform-style: preserve-3d;
+  position: relative;
+  text-shadow: black 0 1px 6px;
+  text-shadow: 0 0 0.2rem #000000;
+  /* background: rgba(0, 0, 0, 0.349); */
+  background: linear-gradient(-45deg, #a63aff 0%, #3cfff5 90%);
+  border: 1px solid #14d8ce7a;
+  color: white;
 }
 
 .highlight:not(.padding) {
-    padding: 0.1rem;
+  padding: 0.1rem;
 }
 
 .highlight::before {
-    content: "";
-    position: absolute;	
-    inset: 0px;
-    background: linear-gradient(-45deg, #a63aff 0%, #3cfff5 90%);
-    filter: blur(10px);
-    z-index: -1;
+  content: "";
+  position: absolute;
+  inset: 0px;
+  background: linear-gradient(-45deg, #a63aff 0%, #3cfff5 90%);
+  filter: blur(10px);
+  z-index: -1;
 }

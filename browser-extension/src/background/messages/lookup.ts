@@ -1,4 +1,4 @@
-import type { PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging";
 import type { WordStatusDTO } from "./changeWordStatus";
 
 export interface KrDictEntryDTO {
@@ -12,17 +12,16 @@ export interface KrDictEntryDTO {
   tl_definitions: {
     translation: string;
     definition: string;
-  }[],
+  }[];
   stars: number;
   frequency: number | null;
 }
 
-export type LookupDTO = { dictEntry: KrDictEntryDTO, status: WordStatusDTO };
+export type LookupDTO = { dictEntry: KrDictEntryDTO; status: WordStatusDTO };
 export type LookupResponse = Record<string, Array<LookupDTO>>;
 
 async function getLookup(word: string): Promise<LookupResponse> {
-  return fetch(`https://rust.alsvik.cloud/lookup/${word}`)
-    .then(res => res.json()) // TODO error handling
+  return fetch(`https://rust.alsvik.cloud/lookup/${word}`).then((res) => res.json()); // TODO error handling
 }
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
@@ -34,12 +33,12 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
       const aFrequency = a[0]?.dictEntry?.frequency ?? Infinity;
       const bFrequency = b[0]?.dictEntry?.frequency ?? Infinity;
       return aFrequency - bFrequency;
-    })
+    }),
   );
 
   res.send({
     message: sortedMessage,
-  })
-}
+  });
+};
 
-export default handler
+export default handler;

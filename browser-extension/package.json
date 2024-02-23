@@ -32,6 +32,6 @@
     ]
   },
   "prettier": {
-    "lineWidth": 100
+    "printWidth": 100
   }
 }

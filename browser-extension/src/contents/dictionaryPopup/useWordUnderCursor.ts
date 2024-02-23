@@ -1,17 +1,22 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useEffect, useRef, useState } from "react";
 import type { LookupDTO, LookupResponse } from "~background/messages/lookup";
-import styles from '../underline.module.css';
+import styles from "../underline.module.css";
 
 const POPUP_WIDTH = 456;
 const hangulRegex = /[\uAC00-\uD7AF]/;
 
 export function useWordUnderCursor() {
-  const { hoveredWord, setHoveredWord, hoveredWordRef, unsetHoveredWord, hoveredElement, setHoveredElement, hoveredElementRef } =
-    useHoveredWordState();
-  const [hoveredSentence, setHoveredSentence] = useState<string | undefined>(
-    undefined,
-  );
+  const {
+    hoveredWord,
+    setHoveredWord,
+    hoveredWordRef,
+    unsetHoveredWord,
+    hoveredElement,
+    setHoveredElement,
+    hoveredElementRef,
+  } = useHoveredWordState();
+  const [hoveredSentence, setHoveredSentence] = useState<string | undefined>(undefined);
   useHidePopupWithEscapeKey(unsetHoveredWord);
   const [response, setResponse] = useState<LookupResponse>({});
   const getMousePosition = useMousePosition();
@@ -30,10 +35,7 @@ export function useWordUnderCursor() {
 
   async function lookupWordUnderCursorAndShowPopup() {
     const mousePosition = getMousePosition();
-    const underCursor = findWordAndSentenceUnderCursor(
-      mousePosition.x,
-      mousePosition.y,
-    );
+    const underCursor = findWordAndSentenceUnderCursor(mousePosition.x, mousePosition.y);
 
     if (
       underCursor?.word === hoveredWordRef.current ||
@@ -65,9 +67,9 @@ export function useWordUnderCursor() {
     const newWord = await lookupWordUnderCursorAndShowPopup();
     const plasmoCsui = document.querySelector("html > plasmo-csui");
     if (
-      !newWord 
-      && !isWithinBounds(e.clientX, e.clientY, hoveredElement?.getBoundingClientRect()) 
-      && (e.target as HTMLElement)?.tagName != plasmoCsui?.tagName
+      !newWord &&
+      !isWithinBounds(e.clientX, e.clientY, hoveredElement?.getBoundingClientRect()) &&
+      (e.target as HTMLElement)?.tagName != plasmoCsui?.tagName
     ) {
       unsetHoveredWord();
     }
@@ -86,9 +88,9 @@ export function useWordUnderCursor() {
     document.addEventListener("click", clickHandler);
 
     return () => {
-    document.removeEventListener("mousemove", keyDownMouseMoveHandler);
-    document.removeEventListener("keydown", keyDownMouseMoveHandler);
-    document.removeEventListener("click", clickHandler);
+      document.removeEventListener("mousemove", keyDownMouseMoveHandler);
+      document.removeEventListener("keydown", keyDownMouseMoveHandler);
+      document.removeEventListener("click", clickHandler);
     };
   }, []);
 
@@ -106,16 +108,17 @@ export function useWordUnderCursor() {
 }
 
 function filterResponse(response: LookupResponse) {
-    // TODO remove filtering after we filter garbage in backend
-    const filterPredicate = (it: LookupDTO) => it.dictEntry.tl_definitions.length > 0
-      && it.dictEntry.tl_definitions[0].translation.length > 0 
-      && !hangulRegex.test(it.dictEntry.tl_definitions[0].translation);
+  // TODO remove filtering after we filter garbage in backend
+  const filterPredicate = (it: LookupDTO) =>
+    it.dictEntry.tl_definitions.length > 0 &&
+    it.dictEntry.tl_definitions[0].translation.length > 0 &&
+    !hangulRegex.test(it.dictEntry.tl_definitions[0].translation);
 
-    return Object.fromEntries(
-      Object.entries(response)
-        .map(([key, value]) => [key, value.filter(filterPredicate)])
-        .filter(([_, value]) => value.length > 0)
-    );
+  return Object.fromEntries(
+    Object.entries(response)
+      .map(([key, value]) => [key, value.filter(filterPredicate)])
+      .filter(([_, value]) => value.length > 0),
+  );
 }
 
 function getPosition(element: HTMLElement | null) {
@@ -123,33 +126,36 @@ function getPosition(element: HTMLElement | null) {
     return { x: 0, y: 0, y2: 0 };
   }
   const { x, top, bottom, left, right } = element.getBoundingClientRect();
-  const centeredX = x + window.scrollX + ((right - left) / 2);
+  const centeredX = x + window.scrollX + (right - left) / 2;
   // 300 is the height of the popup, 16 is the padding?
   // const y = bottom + 316 >= window.innerHeight ? top - 332: bottom;
-  return { x: clampHorizontallyWithinViewport(centeredX, 16), y: bottom + window.scrollY, y2: top + window.scrollY };
+  return {
+    x: clampHorizontallyWithinViewport(centeredX, 16),
+    y: bottom + window.scrollY,
+    y2: top + window.scrollY,
+  };
 }
 
 function clampHorizontallyWithinViewport(positionX: number, padding: number) {
-  if (positionX - (POPUP_WIDTH / 2) <= padding) {
+  if (positionX - POPUP_WIDTH / 2 <= padding) {
     return padding;
   }
-  if (positionX - (POPUP_WIDTH / 2) + POPUP_WIDTH + padding >= document.documentElement.clientWidth) { // TODO react to window resize
+  if (positionX - POPUP_WIDTH / 2 + POPUP_WIDTH + padding >= document.documentElement.clientWidth) {
+    // TODO react to window resize
     return document.documentElement.clientWidth - padding * 2 - POPUP_WIDTH;
   }
-  return positionX - (POPUP_WIDTH / 2);
+  return positionX - POPUP_WIDTH / 2;
 }
 
 function useHoveredWordState() {
   const hoveredWordRef = useRef<string>(""); // Ref is used to capture the value of hoveredWord at the time of the event handler
   const [hoveredWord, setHoveredWord] = useState<string>("");
   const hoveredElementRef = useRef<HTMLElement | null>(null); // Ref is used to capture the value of hoveredWord at the time of the event handler
-  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(
-    null,
-  );
+  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
   const unsetHoveredWord = () => {
     setHoveredWord("");
     hoveredElementRef.current?.classList.remove(styles.active);
-  }
+  };
 
   useEffect(() => {
     hoveredWordRef.current = hoveredWord;
@@ -166,7 +172,7 @@ function useHoveredWordState() {
     unsetHoveredWord,
     hoveredElement,
     setHoveredElement,
-    hoveredElementRef
+    hoveredElementRef,
   };
 }
 
@@ -174,7 +180,13 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
   const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO caretPositionFromPoint for firefox
 
   const textContent = range?.startContainer.textContent;
-  if (!isWithinBounds(mouseX, mouseY, range?.commonAncestorContainer?.parentElement?.getBoundingClientRect())) {
+  if (
+    !isWithinBounds(
+      mouseX,
+      mouseY,
+      range?.commonAncestorContainer?.parentElement?.getBoundingClientRect(),
+    )
+  ) {
     return undefined;
   }
 
@@ -196,10 +208,7 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
 
   // Move forward to find the end of the word
   let end = offset;
-  while (
-    end < textContent.length &&
-    isHangulCharacter(textContent.charAt(end))
-  ) {
+  while (end < textContent.length && isHangulCharacter(textContent.charAt(end))) {
     end++;
   }
 
@@ -212,7 +221,7 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
   const sentences = findFullParagraph(range.startContainer).split(/[.!?]/);
   // TODO  don't remove .!? from the sentence
   // TODO this will return the wrong sentence if there are multiple sentences with the same word
-  const sentence = sentences.find((sentence) => sentence.includes(word))?.replaceAll('\n', ''); 
+  const sentence = sentences.find((sentence) => sentence.includes(word))?.replaceAll("\n", "");
 
   return { word, sentence, element: range.startContainer.parentElement };
 };
@@ -220,7 +229,10 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
 // TODO this needs more testing and work
 function findFullParagraph(node: Node): string {
   let newNode = node;
-  while (['a', 'span'].includes(newNode.nodeName.toLocaleLowerCase()) || newNode.nodeType === Node.TEXT_NODE) {
+  while (
+    ["a", "span"].includes(newNode.nodeName.toLocaleLowerCase()) ||
+    newNode.nodeType === Node.TEXT_NODE
+  ) {
     newNode = newNode.parentNode!;
   }
   if (!newNode.textContent) {

@@ -34,9 +34,16 @@ async function main() {
   }
 
   // TODO configure offset in settings
-  function shouldHighlightUnknownCommonWord(word: string, status: 'known' | 'seen' | 'unknown' | 'unmatched'): boolean {
-    return status === 'unknown' 
-      && analysisResults[word]?.every((wordStatus) => wordStatus.frequency_rank && wordStatus.frequency_rank <= 2000);
+  function shouldHighlightUnknownCommonWord(
+    word: string,
+    status: "known" | "seen" | "unknown" | "unmatched",
+  ): boolean {
+    return (
+      status === "unknown" &&
+      analysisResults[word]?.every(
+        (wordStatus) => wordStatus.frequency_rank && wordStatus.frequency_rank <= 2000,
+      )
+    );
   }
 
   // TODO clean up this abomination
@@ -53,9 +60,7 @@ async function main() {
             return;
           }
 
-          let result = await sendAnalyzeRequestToBackground(
-            addedNode.textContent,
-          );
+          let result = await sendAnalyzeRequestToBackground(addedNode.textContent);
           analysisResults = { ...analysisResults, ...result };
 
           let newContent = "";
@@ -65,8 +70,10 @@ async function main() {
               if (hangulRegex.test(word)) {
                 let { hangulWord } = getConsecutiveHangulSubstring(word);
                 const status = getWordStatus(hangulWord, analysisResults);
-                const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
-                newContent += `<span class="${styles['underline']} ${styles[status]} ${styles.padding} ${highlightClass}">${word}</span> `;
+                const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status)
+                  ? styles.highlight
+                  : "";
+                newContent += `<span class="${styles["underline"]} ${styles[status]} ${styles.padding} ${highlightClass}">${word}</span> `;
               }
             });
             newContent += "\n";
@@ -90,14 +97,14 @@ async function main() {
     const filteredWordStatuses = wordStatuses[word].filter((wordStatus) => !wordStatus.ignored);
 
     if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "known")) {
-      return "known"
+      return "known";
     }
 
     if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "seen")) {
-      return "seen"
+      return "seen";
     }
 
-    return "unknown"
+    return "unknown";
   }
 
   function getTextNodes(node: Node) {
@@ -117,10 +124,7 @@ async function main() {
   }
 
   function underlineHangulWords(textNode: Node) {
-    if (
-      textNode.nodeValue === null ||
-      !(textNode.parentNode instanceof HTMLElement)
-    ) {
+    if (textNode.nodeValue === null || !(textNode.parentNode instanceof HTMLElement)) {
       return;
     }
 
@@ -142,8 +146,8 @@ async function main() {
           const wordEnd = word.substring(endIndex);
           const status = getWordStatus(hangulWord, analysisResults);
           // const highlightClass = shouldHighlightUnknownCommonWord(hangulWord, status) ? styles.highlight : '';
-          const highlightClass = '';
-          newHTML += `${wordStart}<span class="${styles['underline']} ${styles[status]} ${highlightClass}">${hangulWord}</span>${wordEnd}`;
+          const highlightClass = "";
+          newHTML += `${wordStart}<span class="${styles["underline"]} ${styles[status]} ${highlightClass}">${hangulWord}</span>${wordEnd}`;
         }
         if (index < line.split(" ").length - 1) {
           newHTML += " ";
@@ -178,7 +182,7 @@ async function main() {
   // make this a toggleswitch in popup.tsx
 }
 
-if (document.readyState !== 'complete') {
+if (document.readyState !== "complete") {
   window.addEventListener("load", main);
 } else {
   main();

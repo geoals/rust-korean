@@ -1,44 +1,44 @@
 .button {
-    background-color: #546a79;
-    color: #fff;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    margin-right: 6px;
-    margin-bottom: 6px;
+  background-color: #546a79;
+  color: #fff;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-right: 6px;
+  margin-bottom: 6px;
 }
 
 .button:hover:not(.activeButton) {
-    background-color: #323f48;
+  background-color: #323f48;
 }
 
 .activeButton {
-    background-color: lightskyblue;
+  background-color: lightskyblue;
 }
 
 .tabs {
-    position: sticky;
-    top: 0;
-    padding-top: 8px;
-    background: white;
+  position: sticky;
+  top: 0;
+  padding-top: 8px;
+  background: white;
 }
 
 .tabs > button {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 
 .definitionList {
-    margin-bottom: 16px;
-    margin-top: 16px;
+  margin-bottom: 16px;
+  margin-top: 16px;
 }
 
 .definitionListSummary {
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
 }
 
 .definitionListSummary:hover {
-    background-color: lightgray;
+  background-color: lightgray;
 }
