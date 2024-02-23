@@ -1,10 +1,12 @@
 import React, { useLayoutEffect } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
-import { AddToAnkiButton } from "./AddToAnkiButton";
 import { StatusButtons } from "./StatusButtons";
-import styles from "./style.module.css";
-import type { KrDictEntryDTO } from "~background/messages/lookup";
+import type { LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
+import IgnoreIcon from 'react:../../../assets/ignore.svg';
+import ExportIcon from 'react:~/../assets/export.svg';
+import AlreadyExportedIcon from 'react:~/../assets/already_exported.svg';
+import { FrequencyText } from "./FrequencyText";
 
 export function DictionaryPopup() {
   const {
@@ -36,173 +38,155 @@ export function DictionaryPopup() {
   }
 
   // TODO loading
-  if (Object.keys(response).length === 0 || !hoveredWord) {
+  if (Object.keys(response).length === 0 || !hoveredWord || !hoveredElement) {
     return null;
   }
+
+  const ankiExported = false;
 
   return (
     <>
       <div
-        style={{ top: `${positionY}px`, left: `${positionX}px`}}
+        style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className={styles.popup}
+        className="bg-light-green absolute max-h-114 w-114 p-4 rounded-6"
       >
-        <div>
-          <div className={styles.tabs}>
-            {Object.keys(response).map((entry, index) => (
+        <div className="flex justify-between">
+          <div>
+            {Object.values(response).map((entries, index) => (
               <TabButton
-                title={entry}
-                key={entry}
+                title={entries[0].dictEntry.headword}
+                reading={entries[0].dictEntry.reading}
+                key={entries[0].dictEntry.headword}
                 onClick={() => setActiveTabIndex(index)}
                 isActive={index === activeTabIndex}
               />
             ))}
           </div>
-          {Object.values(response).map((entries, index) => {
-            return (
-              <>
-                <TTSButton
-                  headword={entries[0].dictEntry.headword}
-                  isVisible={index === activeTabIndex}
-                />
-                {entries.map((entry) => (
-                  <DictionaryEntryContent
-                    {...entry.dictEntry}
-                    isVisible={index === activeTabIndex}
-                    key={entry.dictEntry.sequence_number + " " + index}
-                  >
-                    <>
-                      <AddToAnkiButton
-                        hoveredWord={hoveredWord}
-                        hoveredSentence={hoveredSentence}
-                        wordStatus={entry.status.status ?? "unknown"}
-                        {...entry.dictEntry}
-                      />
-                      <StatusButtons
-                        entry={entry}
-                        hoveredElement={hoveredElement}
-                      />
-                    </>
-                  </DictionaryEntryContent>
-                ))}
-              </>
-            );
-          })}
+          <div className="fill-dark-green flex items-center space-x-1 duration-100">
+            <button className="hover:fill-light-green-60 hover:scale-105"><IgnoreIcon /></button>
+            <TTSButton headword={Object.keys(response)[activeTabIndex]} />
+            {ankiExported 
+              ? <button className="fill-light-green-60 hover:scale-105"><AlreadyExportedIcon /></button> 
+              : <button className="hover:fill-light-green-60 hover:scale-105"><ExportIcon /></button>
+            }
+          </div>
         </div>
+        {Object.values(response).map((entries, index) => {
+          return (
+            <DefinitionListList
+              isVisible={index === activeTabIndex}
+              hoveredWord={Object.keys(response)[activeTabIndex]}
+              entries={entries}
+              hoveredElement={hoveredElement}
+            />
+          );
+        })}
       </div>
     </>
   );
 }
 
-interface DictionaryEntryContentProps extends KrDictEntryDTO {
-  isVisible: boolean;
-  children: React.ReactNode;
-}
-
-function DictionaryEntryContent({
-  headword,
-  hanja,
-  reading,
-  stars,
-  part_of_speech,
-  deinflection_rule,
-  tl_definitions,
-  frequency,
-  isVisible,
-  children,
-}: DictionaryEntryContentProps) {
-  const getStyle = () => {
-    if (!isVisible) {
-      return { display: "none" };
-    }
-  };
-
-  return (
-    <div style={getStyle()}>
-      {children}
-      {[...Array(stars)].map((_, i) => (
-        <React.Fragment key={i}>★</React.Fragment>
-      ))}
-      {frequency && <span style={{ paddingLeft: "8px" }}>{frequency}</span>}
-      {hanja && <span style={{ paddingLeft: "8px" }}>{hanja}</span>}
-      {reading && reading !== headword && (
-        <span style={{ paddingLeft: "8px" }}>{reading}</span>
-      )}
-      {part_of_speech && (
-        <span style={{ paddingLeft: "8px" }}>{part_of_speech}</span>
-      )}
-      {deinflection_rule && (
-        <span style={{ paddingLeft: "8px" }}>{deinflection_rule}</span>
-      )}
-      <DefinitionList definitions={tl_definitions} />
-    </div>
-  );
-}
-
 function TabButton(props: {
   title: string;
+  reading: string | null;
   onClick: () => void;
   isActive: boolean;
 }) {
+
   return (
     <button
       onClick={props.onClick}
-      className={`${styles.button} ${
-        props.isActive ? styles.activeButton : ""
-      }`}
+      className={`${props.isActive ? "bg-green cursor-default" : "bg-light-green-30 cursor-pointer hover:bg-light-green-60 hover:scale-105"
+        } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl duration-100`}
     >
-      {props.title}
+      {props.title}{props.isActive && props.reading !== null && <span className="text-light-green-60 ml-1">{props.reading}</span>}
     </button>
   );
 }
 
-function DefinitionList(props: {
-  definitions: Array<{ translation: string; definition: string }>;
+
+
+function DefinitionListList({ isVisible, hoveredWord, entries, hoveredElement }: {
+  isVisible: boolean,
+  hoveredWord: string,
+  entries: LookupDTO[],
+  hoveredElement: HTMLElement
 }) {
-  if (props.definitions.length === 0) {
+
+  if (!isVisible) {
     return null;
   }
 
-  if (props.definitions.length === 1) {
-    return (
-      // TODO change language according to settings
-      <details lang="jp" className={styles.definitionList}>
-        <summary className={styles.definitionListSummary}>
-          {props.definitions[0].translation}
-        </summary>
-        <p>{props.definitions[0].definition}</p>
-      </details>
-    );
-  }
+  const ignoredClicked = false;
 
   return (
-    <details lang="jp" className={styles.definitionList}>
-      {/* Maybe have nowrap for summary line while it is closed*/}
-      <summary className={styles.definitionListSummary}>
-        <ol
-          style={{
-            paddingInlineStart: "2ch",
-            marginTop: "-22px",
-            marginBottom: "0",
-          }}
-        >
-          <li>{props.definitions[0].translation}</li>
-        </ol>
+    <>
+        <div className="flex justify-between my-1">
+          <div>
+            {ignoredClicked &&
+              <div className="text-nowrap">
+                <span className="text-dark-green font-extrabold">{hoveredWord}</span>
+                <span className="text-white bg-light-green-30 px-1.5 py-0.5 mr-2 rounded-6 ml-1">学習しない</span>
+              </div>
+            }
+          </div>
+          <FrequencyText frequency={entries[0].dictEntry.frequency} />
+        </div>
+      
+      <div className="space-y-4 overflow-y-auto max-h-96 overscroll-y-contain">
+        {entries.map((entry) => (
+          <DefinitionList
+            entry={entry}
+            hoveredElement={hoveredElement}
+            key={entry.dictEntry.sequence_number}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function DefinitionList(props: {
+  hoveredElement: HTMLElement;
+  entry: LookupDTO;
+}) {
+  const definitions = props.entry.dictEntry.tl_definitions;
+  if (definitions.length === 0) {
+    return null;
+  }
+
+  const listStyle = definitions.length > 1 ? "list-decimal" : "list-none";
+  const leftMargin = definitions.length > 1 ? "ml-9" : "ml-4";
+
+  return (
+    // TODO only one can be expanded at the time
+    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
+      <summary className="cursor-pointer">
+        <div className={`flex flex-row justify-between -mt-6`}>
+          <ol className={`${listStyle} ${leftMargin} font-bold`}>
+            <li>{definitions[0].translation}<span className="text-light-green-60 select-none">{props.entry.dictEntry.hanja}</span></li>
+          </ol>
+          <StatusButtons
+            entry={props.entry}
+            hoveredElement={props.hoveredElement}
+          />
+        </div>
       </summary>
 
-      <p style={{ margin: "0", paddingLeft: "4ch" }}>
-        {props.definitions[0].definition}
-      </p>
-      <ol start={2} style={{ marginTop: "0", paddingInlineStart: "4ch" }}>
-        {props.definitions.slice(1).map((element, index) => {
-          return (
-            <React.Fragment key={index}>
-              <li style={{ paddingTop: "8px" }}>{element.translation}</li>
-              {element.definition}
-            </React.Fragment>
-          );
-        })}
-      </ol>
+      <div className={leftMargin}>
+        <p>{definitions[0].definition}</p>
+        <ol start={2} className={listStyle}>
+          {definitions.slice(1).map((element, index) => {
+            return (
+              <React.Fragment key={index}>
+                <b><li>{element.translation}</li></b>
+                {element.definition}
+              </React.Fragment>
+            );
+          })}
+        </ol>
+      </div>
     </details>
   );
 }

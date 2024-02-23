@@ -13,54 +13,46 @@ export function StatusButtons({
   hoveredElement: Element;
 }) {
   const [status, setStatus] = React.useState(entry.status.status ?? "unknown");
-  const [ignored, setIgnored] = React.useState(entry.status.ignored ?? false);
+
+  const color = {
+    "known": "bg-green",
+    "seen": "bg-yellow",
+    "unknown": "bg-red",
+  }
+
+  const statusI18n = {
+    "known": "学習済",
+    "seen": "学習中",
+    "unknown": "未学習",
+  }
+
+  const getNextStatus = (status: "unknown" | "known" | "seen") => {
+    switch (status) {
+      case "unknown":
+        return "seen";
+      case "seen":
+        return "known";
+      case "known":
+        return "unknown";
+    }
+  }
+
+  const nextStatus = getNextStatus(status);
 
   return (
     <>
       <div>
-        <button className={`${styles.button} ${status === "known" ? styles.activeButton : ""}`}
+        <button className={`text-white rounded-6 ${color[status]} font-sans font-bold text-sm px-2 py-1 duration-100 hover:scale-105 text-nowrap select-none`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
-              status: "known",
+              status: nextStatus,
             });
-            setStatus("known");
-            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['known']}`;
+            setStatus(nextStatus)
+            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles[nextStatus]}`;
             // TODO update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
           }}
         >
-          Known
-        </button>
-        <button className={`${styles.button} ${status === "seen" ? styles.activeButton : ""}`}
-          onClick={() => {
-            changeWordStatus(entry.dictEntry.sequence_number, {
-              status: "seen",
-            });
-            setStatus("seen");
-            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['seen']}`;
-          }}
-        >
-          Seen
-        </button>
-        <button className={`${styles.button} ${status === "unknown" ? styles.activeButton : ""}`}
-          onClick={() => {
-            changeWordStatus(entry.dictEntry.sequence_number, {
-              status: "unknown",
-            });
-            setStatus("unknown");
-            hoveredElement.className = `${underlineStyles['underline']} ${underlineStyles['unknown']}`;
-          }}
-        >
-          Unknown
-        </button>
-        <button className={`${styles.button} ${ignored ? styles.activeButton : ""}`}
-          onClick={() => {
-            changeWordStatus(entry.dictEntry.sequence_number, {
-              ignored: !ignored,
-            });
-            setIgnored(!ignored);
-          }}
-        >
-          Ignore
+          {statusI18n[status]}
         </button>
       </div>
     </>
