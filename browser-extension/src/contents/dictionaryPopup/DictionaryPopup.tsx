@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { StatusButtons } from "./StatusButtons";
 import type { LookupDTO } from "~background/messages/lookup";
@@ -38,10 +38,9 @@ export function DictionaryPopup() {
   }
 
   // TODO loading
-  if (Object.keys(response).length === 0 || !hoveredWord) {
+  if (Object.keys(response).length === 0 || !hoveredWord || !hoveredElement) {
     return null;
   }
-
   const ankiExported = true;
 
   return (
@@ -49,7 +48,7 @@ export function DictionaryPopup() {
       <div
         style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className="bg-light-green absolute max-h-128 w-100 p-4 rounded-6"
+        className="bg-light-green absolute max-h-114 w-114 p-4 rounded-6"
       >
         <div className="flex justify-between">
           <div>
@@ -71,23 +70,12 @@ export function DictionaryPopup() {
         </div>
         {Object.values(response).map((entries, index) => {
           return (
-            <>
-              {
-                index === activeTabIndex &&
-                <div className="flex justify-between my-1">
-                  <div className="text-dark-green font-extrabold">{hoveredWord}</div>
-                  <FrequencyStars frequency={entries[0].dictEntry.frequency} />
-                </div>
-              }
-              <div className="space-y-4 overflow-y-auto max-h-96 overscroll-y-contain">
-                {entries.map((entry) => (
-                  index === activeTabIndex &&
-                  <DefinitionList entry={entry} hoveredElement={hoveredElement}
-                    key={entry.dictEntry.sequence_number + " " + index}
-                  />
-                ))}
-              </div>
-            </>
+            <DefinitionListList
+              isVisible={index === activeTabIndex}
+              hoveredWord={Object.keys(response)[activeTabIndex]}
+              entries={entries}
+              hoveredElement={hoveredElement}
+            />
           );
         })}
       </div>
@@ -113,6 +101,48 @@ function TabButton(props: {
   );
 }
 
+
+
+function DefinitionListList({ isVisible, hoveredWord, entries, hoveredElement }: {
+  isVisible: boolean,
+  hoveredWord: string,
+  entries: LookupDTO[],
+  hoveredElement: HTMLElement
+}) {
+
+  if (!isVisible) {
+    return null;
+  }
+
+  const ignoredClicked = false;
+
+  return (
+    <>
+        <div className="flex justify-between my-1">
+          <div>
+            {ignoredClicked &&
+              <div className="text-nowrap">
+                <span className="text-dark-green font-extrabold">{hoveredWord}</span>
+                <span className="text-white bg-light-green-30 px-1.5 py-0.5 mr-2 rounded-6 ml-1">学習しない</span>
+              </div>
+            }
+          </div>
+          <FrequencyStars frequency={entries[0].dictEntry.frequency} />
+        </div>
+      
+      <div className="space-y-4 overflow-y-auto max-h-96 overscroll-y-contain">
+        {entries.map((entry) => (
+          <DefinitionList
+            entry={entry}
+            hoveredElement={hoveredElement}
+            key={entry.dictEntry.sequence_number}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
 function DefinitionList(props: {
   hoveredElement: HTMLElement;
   entry: LookupDTO;
@@ -127,7 +157,7 @@ function DefinitionList(props: {
 
   return (
     // TODO only one can be expanded at the time
-    <details lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
+    <details open={true} lang="jp" className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
       <summary className="cursor-pointer">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>

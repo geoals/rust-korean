@@ -15,16 +15,8 @@ export function FrequencyStars(props: { frequency: number | null; }) {
     ? "Very uncommon word" 
     : `上位約${numberOfStars.upperFrequency}のよく使われる単語`;
 
-  const titleText = numberOfStars.upperFrequency === undefined
-    ? "Very uncommon"
-    : `Top 〜${numberOfStars.upperFrequency} frequent word`;
-
   return (
-    <div className="flex" title={titleText}>
-      <div className="mr-2 font-sans text-dark-green">{frequencyText}</div>
-      {/* {[...Array(numberOfStars?.numberOfBlack)].map((_, i) => <span className="text-dark-green">◼</span>)} */}
-      {/* {[...Array(numberOfStars?.numberOfWhite)].map((_, i) => <span className="text-light-green-30">◼</span>)} */}
-    </div>
+      <div className="mr-2 font-sans text-dark-green text-xs mt-auto">{frequencyText}</div>
   );
 }
 

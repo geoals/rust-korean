@@ -20,6 +20,12 @@ export function StatusButtons({
     "unknown": "bg-red",
   }
 
+  const statusI18n = {
+    "known": "学習済",
+    "seen": "学習中",
+    "unknown": "未学習",
+  }
+
   const getNextStatus = (status: "unknown" | "known" | "seen") => {
     switch (status) {
       case "unknown":
@@ -36,7 +42,7 @@ export function StatusButtons({
   return (
     <>
       <div>
-        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative font-sans font-bold text-sm py-1 px-2`}
+        <button className={`text-white px-1 rounded-6 ${color[status]} z-10 relative font-sans font-bold text-sm py-1 px-2 text-nowrap`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: nextStatus,
@@ -46,7 +52,7 @@ export function StatusButtons({
             // TODO update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
           }}
         >
-          {status.toUpperCase()}
+          {statusI18n[status]}
         </button>
       </div>
     </>

@@ -90,14 +90,14 @@ async function main() {
     const filteredWordStatuses = wordStatuses[word].filter((wordStatus) => !wordStatus.ignored);
 
     if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "known")) {
-      return "未知"
+      return "known"
     }
 
     if (filteredWordStatuses.some((wordStatus) => wordStatus.status === "seen")) {
-      return "学習中"
+      return "seen"
     }
 
-    return "既知"
+    return "unknown"
   }
 
   function getTextNodes(node: Node) {
