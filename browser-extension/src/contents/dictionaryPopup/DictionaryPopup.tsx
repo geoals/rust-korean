@@ -1,12 +1,11 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState, type ReactNode } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { StatusButtons } from "./StatusButtons";
 import type { LookupDTO } from "~background/messages/lookup";
 import { TTSButton } from "./TTSButton";
-import IgnoreIcon from "react:../../../assets/ignore.svg";
-import ExportIcon from "react:~/../assets/export.svg";
-import AlreadyExportedIcon from "react:~/../assets/already_exported.svg";
 import { FrequencyText } from "./FrequencyText";
+import { AddToAnkiButton } from "./AddToAnkiButton";
+import { IgnoreButton } from "./IgnoreButton";
 
 export function DictionaryPopup() {
   const {
@@ -21,6 +20,10 @@ export function DictionaryPopup() {
   const [activeTabIndex, setActiveTabIndex] = React.useState(0);
   const previousHoveredWord = React.useRef<string | null>(null);
   const popupRef = React.useRef<HTMLDivElement>(null);
+  const [isIgnored, setIsIgnored] = useState(false);
+  const [selectedEntryIndexForAnkiExport, setSelectedEntryIndexForAnkiExport] = useState<
+    number | undefined
+  >(undefined);
 
   // Position popup above hovered word if it would otherwise go offscreen
   useLayoutEffect(() => {
@@ -35,6 +38,7 @@ export function DictionaryPopup() {
   if (hoveredWord !== previousHoveredWord.current) {
     setActiveTabIndex(0);
     previousHoveredWord.current = hoveredWord;
+    setSelectedEntryIndexForAnkiExport(undefined);
   }
 
   // TODO loading
@@ -42,7 +46,11 @@ export function DictionaryPopup() {
     return null;
   }
 
-  const ankiExported = false;
+  const entriesOfActiveTab = Object.values(response)[activeTabIndex];
+  const entryForAnkiExport =
+    selectedEntryIndexForAnkiExport === undefined
+      ? undefined
+      : Object.values(response)[activeTabIndex][selectedEntryIndexForAnkiExport];
 
   return (
     <>
@@ -59,37 +67,39 @@ export function DictionaryPopup() {
                 title={entries[0].dictEntry.headword}
                 reading={entries[0].dictEntry.reading}
                 key={entries[0].dictEntry.headword}
-                onClick={() => setActiveTabIndex(index)}
+                onClick={() => {
+                  setActiveTabIndex(index);
+                  setSelectedEntryIndexForAnkiExport(undefined);
+                }}
                 isActive={index === activeTabIndex}
               />
             ))}
           </div>
           <div className="fill-dark-green flex items-center space-x-1 duration-100">
-            <button className="hover:fill-light-green-60 hover:scale-105">
-              <IgnoreIcon />
-            </button>
+            <IgnoreButton isIgnored={isIgnored} setIsIgnored={setIsIgnored} />
             <TTSButton headword={Object.keys(response)[activeTabIndex]} />
-            {ankiExported ? (
-              <button className="fill-light-green-60 hover:scale-105">
-                <AlreadyExportedIcon />
-              </button>
-            ) : (
-              <button className="hover:fill-light-green-60 hover:scale-105">
-                <ExportIcon />
-              </button>
-            )}
+            <AddToAnkiButton
+              hoveredWord={hoveredWord}
+              hoveredSentence={hoveredSentence ?? ""}
+              entry={entryForAnkiExport}
+            />
           </div>
         </div>
-        {Object.values(response).map((entries, index) => {
-          return (
-            <DefinitionListList
-              isVisible={index === activeTabIndex}
-              hoveredWord={Object.keys(response)[activeTabIndex]}
-              entries={entries}
+        <EntriesList
+          hoveredWord={hoveredWord}
+          frequency={entriesOfActiveTab[0].dictEntry.frequency}
+          isIgnored={isIgnored}
+        >
+          {entriesOfActiveTab.map((entry, index) => (
+            <DefinitionList
+              entry={entry}
               hoveredElement={hoveredElement}
+              key={entry.dictEntry.sequence_number}
+              setSelectedEntryForAnkiExport={() => setSelectedEntryIndexForAnkiExport(index)}
+              isSelectedForAnkiExport={selectedEntryIndexForAnkiExport === index}
             />
-          );
-        })}
+          ))}
+        </EntriesList>
       </div>
     </>
   );
@@ -119,28 +129,22 @@ function TabButton(props: {
   );
 }
 
-function DefinitionListList({
-  isVisible,
+function EntriesList({
   hoveredWord,
-  entries,
-  hoveredElement,
+  frequency,
+  isIgnored,
+  children,
 }: {
-  isVisible: boolean;
   hoveredWord: string;
-  entries: LookupDTO[];
-  hoveredElement: HTMLElement;
+  frequency: number | null;
+  isIgnored: boolean;
+  children: ReactNode;
 }) {
-  if (!isVisible) {
-    return null;
-  }
-
-  const ignoredClicked = false;
-
   return (
     <>
-      <div className="flex justify-between my-2">
+      <div className="flex justify-between my-1.5">
         <div>
-          {ignoredClicked && (
+          {isIgnored && (
             <div className="text-nowrap">
               <span className="text-dark-green font-extrabold">{hoveredWord}</span>
               <span className="text-white bg-light-green-30 px-1.5 py-0.5 rounded-6 ml-1">
@@ -149,24 +153,23 @@ function DefinitionListList({
             </div>
           )}
         </div>
-        <FrequencyText frequency={entries[0].dictEntry.frequency} />
+        <FrequencyText frequency={frequency} />
       </div>
 
-      <div className="space-y-3 max-h-94 overflow-y-auto overscroll-y-contain">
-        {entries.map((entry) => (
-          <DefinitionList
-            entry={entry}
-            hoveredElement={hoveredElement}
-            key={entry.dictEntry.sequence_number}
-          />
-        ))}
-      </div>
+      <div className="space-y-3 max-h-94 overflow-y-auto overscroll-y-contain">{children}</div>
     </>
   );
 }
 
-function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }) {
+function DefinitionList(props: {
+  hoveredElement: HTMLElement;
+  entry: LookupDTO;
+  setSelectedEntryForAnkiExport: () => void;
+  isSelectedForAnkiExport: boolean;
+}) {
   const definitions = props.entry.dictEntry.tl_definitions;
+  const hanja = props.entry.dictEntry.hanja;
+
   if (definitions.length === 0) {
     return null;
   }
@@ -177,13 +180,16 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
   // TODO add margin between scroll bars only when content is overflowing (have to use JS)
   return (
     // TODO only one can be expanded at the time
-    <details className="bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto">
+    <details
+      className={`bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-medium-green" : ""}`}
+      onClick={props.setSelectedEntryForAnkiExport}
+    >
       <summary className="cursor-pointer p-2 hover:bg-medium-green rounded-6 duration-100 has-[button:hover]:hover:bg-transparent">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
             <li>
               {definitions[0].translation}
-              <span className="text-light-green-60 select-none">{props.entry.dictEntry.hanja}</span>
+              <span className="text-light-green-60 select-none">{hanja}</span>
             </li>
           </ol>
           <StatusButtons entry={props.entry} hoveredElement={props.hoveredElement} />
@@ -196,9 +202,7 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
           {definitions.slice(1).map((element, index) => {
             return (
               <React.Fragment key={index}>
-                <b>
-                  <li>{element.translation}</li>
-                </b>
+                <li className="font-bold">{element.translation}</li>
                 {element.definition}
               </React.Fragment>
             );

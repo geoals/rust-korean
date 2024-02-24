@@ -1,63 +1,52 @@
+import ExportIcon from "react:~/../assets/export.svg";
+import AlreadyExportedIcon from "react:~/../assets/already_exported.svg";
 import { sendToBackground } from "@plasmohq/messaging";
+
 import type { AddToAnkiPayload } from "~background/messages/addAnkiNote";
-import * as styles from "./style.module.css";
 import { markAsSeen } from "./StatusButtons";
+import { useState } from "react";
+import type { LookupDTO } from "~background/messages/lookup";
 
 export function AddToAnkiButton({
   hoveredWord,
   hoveredSentence,
-  headword,
-  hanja,
-  definition_full,
-  reading,
-  frequency,
-  sequence_number,
-  wordStatus,
+  entry,
 }: {
   hoveredWord: string;
   hoveredSentence: string;
-  headword: string;
-  hanja?: string;
-  definition_full: string;
-  reading?: string;
-  frequency?: number;
-  sequence_number: number;
-  wordStatus: "known" | "seen" | "unknown";
+  entry?: LookupDTO;
 }) {
+  // TODO check status from ankiconnect instead
+  const [ankiExported, setAnkiExported] = useState(false);
+
   function addToAnkiBtnHandler(): void {
+    if (!entry) {
+      return;
+    }
+
     addAnkiNoteMessage(
       {
         hoveredWord,
-        headword,
-        hanja,
-        reading,
+        headword: entry.dictEntry.headword,
+        hanja: entry.dictEntry.hanja !== null ? entry.dictEntry.hanja : undefined,
+        reading: entry.dictEntry.reading !== null ? entry.dictEntry.reading : undefined,
         sentence: hoveredSentence,
-        definitionFull: definition_full,
-        frequency: frequency?.toString(),
+        definitionFull: entry.dictEntry.definition_full,
+        frequency:
+          entry.dictEntry.frequency !== null ? entry.dictEntry.frequency.toString() : undefined,
       },
-      sequence_number,
-      wordStatus,
+      entry.dictEntry.sequence_number,
+      entry.status.status ?? "unknown",
     );
+    setAnkiExported(true);
   }
 
   return (
     <button
-      style={{
-        position: "absolute",
-        right: "8px",
-        display: "flex",
-        alignItems: "center",
-      }}
       onClick={addToAnkiBtnHandler}
-      className={styles.button}
+      className={`hover:scale-105 ${ankiExported ? "" : "hover:"}fill-light-green-60`}
     >
-      <img
-        className="anki-img"
-        src={AnkiImg}
-        alt="add to anki"
-        style={{ width: "20px", height: "20px", borderRadius: "50%" }}
-      />
-      <span style={{ marginLeft: "4px" }}>Export</span>
+      {ankiExported ? <AlreadyExportedIcon /> : <ExportIcon />}
     </button>
   );
 }
