@@ -174,6 +174,7 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
   const listStyle = definitions.length > 1 ? "list-decimal" : "list-none";
   const leftMargin = definitions.length > 1 ? "ml-9" : "ml-4";
 
+  // TODO add margin between scroll bars only when content is overflowing (have to use JS)
   return (
     // TODO only one can be expanded at the time
     <details className="bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto">
@@ -189,7 +190,7 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
         </div>
       </summary>
 
-      <div className={`${leftMargin}`}>
+      <div className={`${leftMargin} px-2 pb-2`}>
         <p>{definitions[0].definition}</p>
         <ol start={2} className={listStyle}>
           {definitions.slice(1).map((element, index) => {

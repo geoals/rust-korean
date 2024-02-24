@@ -10,7 +10,7 @@ export function FrequencyText({ frequency }: { frequency: number | null }) {
 
   return (
     <div className="text-dark-green text-xs mt-auto">
-      上位約{roundedFrequency}のよく使われる単語
+      上位約{roundedFrequency > 500 ? roundedFrequency : frequency}のよく使われる単語
     </div>
   );
 }
