@@ -176,8 +176,8 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
 
   return (
     // TODO only one can be expanded at the time
-    <details className="group bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
-      <summary className="cursor-pointer hover:bg-medium-green p-2 rounded-6 duration-100">
+    <details className="bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
+      <summary className="cursor-pointer hover:bg-medium-green p-2 rounded-6 duration-100 has-[button:hover]:hover:bg-transparent">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
             <li>
