@@ -49,7 +49,8 @@ export function DictionaryPopup() {
       <div
         style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className="bg-light-green absolute max-h-114 w-114 p-4 rounded-6"
+        className="bg-light-green absolute max-h-112 w-112 p-4 rounded-6 duration-100"
+        lang="ja"
       >
         <div className="flex justify-between">
           <div>
@@ -102,6 +103,7 @@ function TabButton(props: {
 }) {
   return (
     <button
+      lang="ko"
       onClick={props.onClick}
       className={`${
         props.isActive
@@ -136,12 +138,12 @@ function DefinitionListList({
 
   return (
     <>
-      <div className="flex justify-between my-1">
+      <div className="flex justify-between my-2">
         <div>
           {ignoredClicked && (
             <div className="text-nowrap">
               <span className="text-dark-green font-extrabold">{hoveredWord}</span>
-              <span className="text-white bg-light-green-30 px-1.5 py-0.5 mr-2 rounded-6 ml-1">
+              <span className="text-white bg-light-green-30 px-1.5 py-0.5 rounded-6 ml-1">
                 学習しない
               </span>
             </div>
@@ -174,11 +176,8 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
 
   return (
     // TODO only one can be expanded at the time
-    <details
-      lang="jp"
-      className="bg-light-green-30 rounded-6 p-2 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain"
-    >
-      <summary className="cursor-pointer">
+    <details className="group bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
+      <summary className="cursor-pointer hover:bg-medium-green p-2 rounded-6 duration-100">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
             <li>
@@ -190,7 +189,7 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
         </div>
       </summary>
 
-      <div className={leftMargin}>
+      <div className={`${leftMargin} px-2 pb-2`}>
         <p>{definitions[0].definition}</p>
         <ol start={2} className={listStyle}>
           {definitions.slice(1).map((element, index) => {

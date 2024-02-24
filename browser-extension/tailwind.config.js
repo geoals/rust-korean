@@ -4,30 +4,27 @@ module.exports = {
   darkMode: "class",
   content: ["./**/*.tsx"],
   theme: {
-    fontFamily: {
-      'sans': ['Inter', 'sans-serif'],
-    },
     extend: {
       spacing: {
-        '94': '22rem',
-        '100': '25rem',
-        '114': '28rem',
-        '128': '32rem',
+        94: "22rem",
+        100: "25rem",
+        112: "28rem",
+        128: "32rem",
       },
       borderRadius: {
-        '6': '6px',
+        6: "6px",
       },
       colors: {
-        'light-green': '#C8ECDF',
-        'light-green-30': '#43695C4D',
-        'light-green-60': '#2b463d99',
-        'green': '#57BB97',
-        'dark-green': '#2B463D',
-        'red': '#c07676',
-        'yellow': '#dfca7e',
-      }
+        "light-green": "#C8ECDF",
+        "light-green-30": "#43695C4D",
+        "light-green-60": "#2b463d99",
+        "medium-green": "#2b463d4a",
+        green: "#57BB97",
+        "dark-green": "#2B463D",
+        red: "#c07676",
+        yellow: "#dfca7e",
+      },
     },
   },
   plugins: [],
-}
-
+};

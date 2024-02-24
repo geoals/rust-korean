@@ -2,7 +2,6 @@ import React from "react";
 import { sendToBackground } from "@plasmohq/messaging";
 import type { WordStatusDTO } from "~background/messages/changeWordStatus";
 import type { LookupDTO } from "~background/messages/lookup";
-import styles from "./style.module.css";
 import underlineStyles from "../underline.module.css";
 
 export function StatusButtons({
@@ -43,7 +42,7 @@ export function StatusButtons({
     <>
       <div>
         <button
-          className={`text-white rounded-6 ${color[status]} font-sans font-bold text-sm px-2 py-1 duration-100 hover:scale-105 text-nowrap select-none`}
+          className={`text-white rounded-6 ${color[status]} font-sans font-bold text-sm px-2 py-1 duration-100 hover:scale-105 text-nowrap select-none right-2 top-2 hover:group-pointer-events-none`}
           onClick={() => {
             changeWordStatus(entry.dictEntry.sequence_number, {
               status: nextStatus,
