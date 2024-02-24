@@ -152,7 +152,7 @@ function DefinitionListList({
         <FrequencyText frequency={entries[0].dictEntry.frequency} />
       </div>
 
-      <div className="space-y-4 overflow-y-auto max-h-94 overscroll-y-contain">
+      <div className="space-y-3 max-h-94 overflow-y-auto overscroll-y-contain">
         {entries.map((entry) => (
           <DefinitionList
             entry={entry}
@@ -176,8 +176,8 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
 
   return (
     // TODO only one can be expanded at the time
-    <details className="bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto overscroll-y-contain">
-      <summary className="cursor-pointer hover:bg-medium-green p-2 rounded-6 duration-100 has-[button:hover]:hover:bg-transparent">
+    <details className="bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto">
+      <summary className="cursor-pointer p-2 hover:bg-medium-green rounded-6 duration-100 has-[button:hover]:hover:bg-transparent">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
             <li>
@@ -189,7 +189,7 @@ function DefinitionList(props: { hoveredElement: HTMLElement; entry: LookupDTO }
         </div>
       </summary>
 
-      <div className={`${leftMargin} px-2 pb-2`}>
+      <div className={`${leftMargin}`}>
         <p>{definitions[0].definition}</p>
         <ol start={2} className={listStyle}>
           {definitions.slice(1).map((element, index) => {

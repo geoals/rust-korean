@@ -1,4 +1,5 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
+import { API_URL } from "~background/apiUrl";
 
 export interface WordStatusDTO {
   status?: "known" | "unknown" | "seen";
@@ -16,7 +17,7 @@ async function patchWordStatus(
   wordId: number,
   wordStatus: WordStatusDTO,
 ): Promise<HttpResponseStatusAndBody> {
-  const result = await fetch(`https://rust.alsvik.cloud/word_status/${wordId}`, {
+  const result = await fetch(`${API_URL}/word_status/${wordId}`, {
     method: "PATCH",
     body: JSON.stringify(wordStatus),
     headers: {

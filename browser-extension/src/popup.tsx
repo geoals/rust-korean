@@ -1,3 +1,5 @@
+import { API_URL } from "~background/apiUrl";
+
 function IndexPopup() {
   return (
     <div
@@ -9,7 +11,7 @@ function IndexPopup() {
       <button
         onClick={async () => {
           const result = await window
-            .fetch("https://rust.alsvik.cloud/analyze", {
+            .fetch(`${API_URL}/analyze`, {
               method: "POST",
               body: "그러니까 뭐라고 소개를 했냔 말입니다!다언어판 가운데 하나로서",
             })

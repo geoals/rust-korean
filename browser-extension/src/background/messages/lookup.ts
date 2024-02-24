@@ -1,5 +1,6 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
 import type { WordStatusDTO } from "./changeWordStatus";
+import { API_URL } from "~background/apiUrl";
 
 export interface KrDictEntryDTO {
   headword: string;
@@ -21,7 +22,7 @@ export type LookupDTO = { dictEntry: KrDictEntryDTO; status: WordStatusDTO };
 export type LookupResponse = Record<string, Array<LookupDTO>>;
 
 async function getLookup(word: string): Promise<LookupResponse> {
-  return fetch(`https://rust.alsvik.cloud/lookup/${word}`).then((res) => res.json()); // TODO error handling
+  return fetch(`${API_URL}/lookup/${word}`).then((res) => res.json()); // TODO error handling
 }
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {

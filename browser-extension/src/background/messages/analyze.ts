@@ -1,4 +1,5 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
+import { API_URL } from "~background/apiUrl";
 
 export type AnalyzeResponse = {
   [key: string]: Array<{
@@ -10,7 +11,7 @@ export type AnalyzeResponse = {
 };
 
 async function postAnalyze(payload: string): Promise<AnalyzeResponse> {
-  const result = await fetch(`https://rust.alsvik.cloud/analyze`, {
+  const result = await fetch(`${API_URL}/analyze`, {
     method: "POST",
     body: payload,
     headers: {
