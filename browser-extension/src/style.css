@@ -2,17 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :host {
+    --background: 158 48% 86%;
+    --foreground: 158 24% 22%;
+    --primary: 158 22% 34% / 0.3;
+    --muted: 158 22% 34% / 0.6;
+    --accent: 158 42% 54%;
+
+    --radius: 6px;
+  }
+}
+
+@layer base {
+  * {
+    @apply duration-100;
+  }
+  #plasmo-shadow-container {
+    @apply text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #43695c99;
+  background: hsl(var(--muted));
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c8ecdf;
+  background: hsl(var(--background));
   border-radius: 6px;
   background-clip: content-box;
   border: 2px solid transparent;

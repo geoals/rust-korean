@@ -9,7 +9,7 @@ export function FrequencyText({ frequency }: { frequency: number | null }) {
     frequency < 20000 ? roundToNearest500(frequency) : roundToNearest1000(frequency);
 
   return (
-    <div className="text-dark-green text-xs mt-auto">
+    <div className="text-xs">
       上位約{roundedFrequency > 500 ? roundedFrequency : frequency}のよく使われる単語
     </div>
   );

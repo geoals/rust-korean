@@ -2,27 +2,36 @@
 module.exports = {
   mode: "jit",
   darkMode: "class",
-  content: ["./**/*.tsx"],
+  content: ["./**/*.{ts,tsx}"],
   theme: {
     extend: {
       spacing: {
         94: "22rem",
-        100: "25rem",
+        104: "26rem",
         112: "28rem",
-        128: "32rem",
       },
       borderRadius: {
-        6: "6px",
+        DEFAULT: "6px",
       },
       colors: {
-        "light-green": "#C8ECDF",
-        "light-green-30": "#43695C4D",
-        "light-green-60": "#2b463d99",
-        "medium-green": "#2b463d4a",
         green: "#57BB97",
-        "dark-green": "#2B463D",
         red: "#c07676",
         yellow: "#dfca7e",
+
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsla(var(--primary))",
+          // foreground: "hsl(var(--primary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsla(var(--muted))",
+          // foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          // foreground: "hsl(var(--accent-foreground))",
+        },
       },
     },
   },

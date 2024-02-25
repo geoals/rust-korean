@@ -10,10 +10,10 @@ export function IgnoreButton({
 }) {
   return (
     <button
-      className={`${isIgnored ? "fill-light-green-60" : "hover:fill-light-green-60"} hover:scale-105`}
+      className={`${isIgnored ? "fill-muted" : "hover:fill-muted"} hover:scale-105`}
       onClick={() => setIsIgnored(!isIgnored)}
     >
-      <IgnoreIcon />
+      <IgnoreIcon className="duration-0" />
     </button>
   );
 }

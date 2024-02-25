@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { LookupDTO, LookupResponse } from "~background/messages/lookup";
 import styles from "../underline.module.css";
 
-const POPUP_WIDTH = 448;
+const POPUP_WIDTH = 416;
 const hangulRegex = /[\uAC00-\uD7AF]/;
 
 export function useWordUnderCursor() {

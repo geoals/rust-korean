@@ -44,9 +44,13 @@ export function AddToAnkiButton({
   return (
     <button
       onClick={addToAnkiBtnHandler}
-      className={`hover:scale-105 ${ankiExported ? "" : "hover:"}fill-light-green-60`}
+      className={`hover:scale-105 ${ankiExported ? "" : "hover:"}fill-muted`}
     >
-      {ankiExported ? <AlreadyExportedIcon /> : <ExportIcon />}
+      {ankiExported ? (
+        <AlreadyExportedIcon className="duration-0" />
+      ) : (
+        <ExportIcon className="duration-0" />
+      )}
     </button>
   );
 }

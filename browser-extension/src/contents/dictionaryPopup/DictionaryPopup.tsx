@@ -57,11 +57,11 @@ export function DictionaryPopup() {
       <div
         style={{ top: `${positionY}px`, left: `${positionX}px` }}
         ref={popupRef}
-        className="bg-light-green absolute max-h-112 w-112 p-4 rounded-6 duration-100"
+        className="bg-background absolute max-h-112 w-104 p-4 rounded"
         lang="ja"
       >
         <div className="flex justify-between">
-          <div>
+          <div className="space-x-1">
             {Object.values(response).map((entries, index) => (
               <TabButton
                 title={entries[0].dictEntry.headword}
@@ -75,7 +75,7 @@ export function DictionaryPopup() {
               />
             ))}
           </div>
-          <div className="fill-dark-green flex items-center space-x-1 duration-100">
+          <div className="fill-foreground flex items-center space-x-1">
             <IgnoreButton isIgnored={isIgnored} setIsIgnored={setIsIgnored} />
             <TTSButton headword={Object.keys(response)[activeTabIndex]} />
             <AddToAnkiButton
@@ -117,13 +117,13 @@ function TabButton(props: {
       onClick={props.onClick}
       className={`${
         props.isActive
-          ? "bg-green cursor-default"
-          : "bg-light-green-30 cursor-pointer hover:bg-light-green-60 hover:scale-105"
-      } text-white px-1.5 py-0.5 mr-2 rounded-6 text-2xl duration-100`}
+          ? "bg-accent cursor-default"
+          : "bg-primary cursor-pointer hover:bg-muted hover:scale-105"
+      } text-white px-1.5 py-0.5 rounded text-2xl`}
     >
       {props.title}
       {props.isActive && props.reading !== null && (
-        <span className="text-light-green-60 ml-1">{props.reading}</span>
+        <span className="ml-1 text-muted">{props.reading}</span>
       )}
     </button>
   );
@@ -142,12 +142,12 @@ function EntriesList({
 }) {
   return (
     <>
-      <div className="flex justify-between my-1.5">
+      <div className="flex justify-between my-1">
         <div>
           {isIgnored && (
-            <div className="text-nowrap">
-              <span className="text-dark-green font-extrabold">{hoveredWord}</span>
-              <span className="text-white bg-light-green-30 px-1.5 py-0.5 rounded-6 ml-1">
+            <div className="text-nowrap space-x-1 my-1">
+              <span className="font-extrabold">{hoveredWord}</span>
+              <span className="text-white text-sm bg-primary px-1.5 py-0.5 rounded">
                 学習しない
               </span>
             </div>
@@ -156,7 +156,7 @@ function EntriesList({
         <FrequencyText frequency={frequency} />
       </div>
 
-      <div className="space-y-3 max-h-94 overflow-y-auto overscroll-y-contain">{children}</div>
+      <div className="space-y-2 max-h-94 overflow-y-auto overscroll-y-contain">{children}</div>
     </>
   );
 }
@@ -181,15 +181,15 @@ function DefinitionList(props: {
   return (
     // TODO only one can be expanded at the time
     <details
-      className={`bg-light-green-30 rounded-6 text-dark-green max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-medium-green" : ""}`}
+      className={`bg-primary rounded max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-muted" : ""}`}
       onClick={props.setSelectedEntryForAnkiExport}
     >
-      <summary className="cursor-pointer p-2 hover:bg-medium-green rounded-6 duration-100 has-[button:hover]:hover:bg-transparent">
+      <summary className="cursor-pointer p-2 hover:bg-muted rounded has-[button:hover]:hover:bg-transparent">
         <div className={`flex flex-row justify-between -mt-6`}>
           <ol className={`${listStyle} ${leftMargin} font-bold`}>
             <li>
               {definitions[0].translation}
-              <span className="text-light-green-60 select-none">{hanja}</span>
+              <span className="text-muted select-none">{hanja}</span>
             </li>
           </ol>
           <StatusButtons entry={props.entry} hoveredElement={props.hoveredElement} />

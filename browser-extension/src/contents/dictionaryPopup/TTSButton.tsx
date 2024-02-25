@@ -4,7 +4,7 @@ import TextToSpeechIcon from "react:~/../assets/audio.svg";
 export function TTSButton(props: { headword: string }) {
   return (
     <button
-      className="hover:fill-light-green-60 duration-105 hover:scale-105"
+      className="hover:fill-muted hover:scale-105"
       onClick={async () => {
         const response = await sendToBackground({
           name: "tts",
@@ -17,7 +17,7 @@ export function TTSButton(props: { headword: string }) {
         audioElement.play();
       }}
     >
-      <TextToSpeechIcon />
+      <TextToSpeechIcon className="duration-0" />
     </button>
   );
 }
