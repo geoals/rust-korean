@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use std::fs::read_to_string;
+use crate::frequency_dictionary::FrequencyDictionary;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use crate::frequency_dictionary::FrequencyDictionary;
+use std::collections::HashMap;
+use std::fs::read_to_string;
 
 const KRDICT_STAR: char = '★';
 
@@ -29,7 +29,8 @@ struct EntryJson {
 // TODO: better seperation of concerns between parsing json and mapping to krdict entry?
 impl EntryJson {
     fn to_krdict_entry(&self, frequency: Option<u32>) -> KrDictEntry {
-        let definition_full = self.definitions
+        let definition_full = self
+            .definitions
             .first()
             .expect("definition is empty")
             .clone()
@@ -38,54 +39,68 @@ impl EntryJson {
         let stars = krdict_stars(&definition_full);
         KrDictEntry {
             headword: self.headword.clone(),
-            reading: if self.reading.is_empty() { None } else { Some(self.reading.clone()) },
+            reading: if self.reading.is_empty() {
+                None
+            } else {
+                Some(self.reading.clone())
+            },
             part_of_speech: self.tags.clone(),
-            deinflection_rule: if self.deinflection_rule.is_empty() { None } else { Some(self.deinflection_rule.clone()) },
+            deinflection_rule: if self.deinflection_rule.is_empty() {
+                None
+            } else {
+                Some(self.deinflection_rule.clone())
+            },
             sequence_number: self.sequence_number,
-            hanja: HANJA_REGEX.captures(&definition_full).map(|c| c.get(1).unwrap().as_str().to_string()),
-            tl_definitions: tl_definition_lines(&definition_full).into_iter()
+            hanja: HANJA_REGEX
+                .captures(&definition_full)
+                .map(|c| c.get(1).unwrap().as_str().to_string()),
+            tl_definitions: tl_definition_lines(&definition_full)
+                .into_iter()
                 .zip(tl_translation_lines(&definition_full))
-                .map(|(definition, translation)| TargetLanguageDefinition { definition, translation })
+                .map(|(definition, translation)| TargetLanguageDefinition {
+                    definition,
+                    translation,
+                })
                 .collect(),
             definition_full,
             stars,
-            frequency
+            frequency,
         }
     }
 }
 
 fn krdict_stars(definition: &String) -> u8 {
     definition
-        .chars().take(3)
-        .fold(0, |acc, c| {
-            acc + (c == KRDICT_STAR) as u8
-        })
+        .chars()
+        .take(3)
+        .fold(0, |acc, c| acc + (c == KRDICT_STAR) as u8)
 }
 
 fn tl_translation_lines(definition: &String) -> Vec<String> {
     definition
-        .lines().skip(1)
+        .lines()
+        .skip(1)
         .step_by(3)
         .map(|l| l.to_string())
         .map(|l| LIST_ITEM_REGEX.replace(&l, "").to_string())
         .collect()
 }
 
-// TODO wrong parsing id 47428
+// TODO: wrong parsing id 47428
 fn tl_definition_lines(definition: &String) -> Vec<String> {
     definition
-        .lines().skip(3)
+        .lines()
+        .skip(3)
         .step_by(3)
         .map(|l| l.to_string())
         .collect()
 }
 
-
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct KrDictEntry {
     headword: Headword,
     reading: Option<String>,
-    part_of_speech: String, // TODO translate to JP (or lang of the dict)
+    part_of_speech: String, // TODO: translate to JP (or lang of the dict)
     /// "v" or "adj or None
     deinflection_rule: Option<String>,
     definition_full: String,
@@ -107,10 +122,18 @@ pub struct TargetLanguageDefinition {
 }
 
 impl KrDictEntry {
-    pub fn sequence_number(&self) -> &i32 { &self.sequence_number }
-    pub fn frequency(&self) -> &Option<u32> { &self.frequency }
-    pub fn stars(&self) -> &u8 { &self.stars }
-    pub fn headword(&self) -> &String { &self.headword }
+    pub fn sequence_number(&self) -> &i32 {
+        &self.sequence_number
+    }
+    pub fn frequency(&self) -> &Option<u32> {
+        &self.frequency
+    }
+    pub fn stars(&self) -> &u8 {
+        &self.stars
+    }
+    pub fn headword(&self) -> &String {
+        &self.headword
+    }
 }
 
 pub type Headword = String;
@@ -123,23 +146,30 @@ pub struct Dictionary {
 #[allow(dead_code)]
 impl Dictionary {
     pub fn new(path: &str, freq_dict: &FrequencyDictionary) -> Self {
-        // TODO remove garbage entries like 24200
-        let dict_as_string = &read_to_string(path).unwrap_or_else(|e| panic!("unable to load file with path \"{}\", {}", path, e));
+        // TODO: remove garbage entries like 24200
+        let dict_as_string = &read_to_string(path)
+            .unwrap_or_else(|e| panic!("unable to load file with path \"{}\", {}", path, e));
         let terms_vec: Vec<EntryJson> = serde_json::from_str(&dict_as_string).unwrap();
 
-        let terms_map = terms_vec
-            .iter()
-            .fold(HashMap::new(), |mut map: HashMap<Headword, Vec<KrDictEntry>>, term| {
+        let terms_map = terms_vec.iter().fold(
+            HashMap::new(),
+            |mut map: HashMap<Headword, Vec<KrDictEntry>>, term| {
                 let frequency = freq_dict.lookup(&term.headword);
-                map.entry(term.headword.clone()).or_default().push(term.to_krdict_entry(frequency));
+                map.entry(term.headword.clone())
+                    .or_default()
+                    .push(term.to_krdict_entry(frequency));
                 map
-            });
+            },
+        );
         Self {
             terms_map,
-            terms_vec: terms_vec.iter().map(|term| {
-                let frequency = freq_dict.lookup(&term.headword);
-                term.to_krdict_entry(frequency)
-            }).collect(),
+            terms_vec: terms_vec
+                .iter()
+                .map(|term| {
+                    let frequency = freq_dict.lookup(&term.headword);
+                    term.to_krdict_entry(frequency)
+                })
+                .collect(),
         }
     }
 
@@ -151,30 +181,33 @@ impl Dictionary {
         self.terms_map.get(word)
     }
 
-    pub fn search_with_deinflection_rules(&self, word: &str, deinflection_rules: Vec<String>) -> Option<Vec<KrDictEntry>> {
-        self.terms_map.get(word)
-            .map(|terms| {
-                terms.clone().into_iter()
-                    .filter(|term| {
-                        if let Some(rule) = &term.deinflection_rule {
-                            deinflection_rules.contains(rule)
-                        } else {
-                            false
-                        }
-                    })
-                    .collect()
-            })
+    pub fn search_with_deinflection_rules(
+        &self,
+        word: &str,
+        deinflection_rules: Vec<String>,
+    ) -> Option<Vec<KrDictEntry>> {
+        self.terms_map.get(word).map(|terms| {
+            terms
+                .clone()
+                .into_iter()
+                .filter(|term| {
+                    if let Some(rule) = &term.deinflection_rule {
+                        deinflection_rules.contains(rule)
+                    } else {
+                        false
+                    }
+                })
+                .collect()
+        })
     }
 
     pub fn get_by_sequence_number(&self, sequence_number: i32) -> Option<KrDictEntry> {
         if sequence_number == 0 || sequence_number > self.terms_vec.len() as i32 {
-            return None
+            return None;
         }
         Some(self.terms_vec[sequence_number as usize - 1].clone())
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -188,7 +221,8 @@ mod tests {
 2. かいこくする【開国する】
 다른 나라와 문화나 사상 등을 주고받다.
 外国と文化や思想などの交流を行う。
-".to_string();
+"
+        .to_string();
         let entry_json = super::EntryJson {
             headword: "개국하다".to_string(),
             reading: "".to_string(),
@@ -202,27 +236,30 @@ mod tests {
 
         let krdict_entry = entry_json.to_krdict_entry(Some(123));
 
-        assert_eq!(krdict_entry, super::KrDictEntry {
-            headword: "개국하다".to_string(),
-            reading: None,
-            part_of_speech: "동사".to_string(),
-            deinflection_rule: None,
-            definition_full: definition.clone(),
-            sequence_number: 0,
-            hanja: Some("開國하다".to_string()),
-            tl_definitions: vec![
-                super::TargetLanguageDefinition {
-                    translation: "かいこくする【開国する】".to_string(),
-                    definition: "新たに国が建てられる。また、新たに国を建てる。".to_string(),
-                },
-                super::TargetLanguageDefinition {
-                    translation: "かいこくする【開国する】".to_string(),
-                    definition: "外国と文化や思想などの交流を行う。".to_string(),
-                },
-            ],
-            stars: 0,
-            frequency: Some(123)
-        });
+        assert_eq!(
+            krdict_entry,
+            super::KrDictEntry {
+                headword: "개국하다".to_string(),
+                reading: None,
+                part_of_speech: "동사".to_string(),
+                deinflection_rule: None,
+                definition_full: definition.clone(),
+                sequence_number: 0,
+                hanja: Some("開國하다".to_string()),
+                tl_definitions: vec![
+                    super::TargetLanguageDefinition {
+                        translation: "かいこくする【開国する】".to_string(),
+                        definition: "新たに国が建てられる。また、新たに国を建てる。".to_string(),
+                    },
+                    super::TargetLanguageDefinition {
+                        translation: "かいこくする【開国する】".to_string(),
+                        definition: "外国と文化や思想などの交流を行う。".to_string(),
+                    },
+                ],
+                stars: 0,
+                frequency: Some(123)
+            }
+        );
     }
 
     #[test]
@@ -231,7 +268,8 @@ mod tests {
 かこく【ヶ国】
 나라를 세는 단위.
 国を数える単位。
-".to_string();
+"
+        .to_string();
         let entry_json = super::EntryJson {
             headword: "개국하다".to_string(),
             reading: "".to_string(),
@@ -245,24 +283,26 @@ mod tests {
 
         let krdict_entry = entry_json.to_krdict_entry(None);
 
-        assert_eq!(krdict_entry, super::KrDictEntry {
-            headword: "개국하다".to_string(),
-            reading: None,
-            part_of_speech: "동사".to_string(),
-            deinflection_rule: None,
-            definition_full: definition.clone(),
-            sequence_number: 0,
-            hanja: Some("個國".to_string()),
-            tl_definitions: vec![
-                super::TargetLanguageDefinition {
+        assert_eq!(
+            krdict_entry,
+            super::KrDictEntry {
+                headword: "개국하다".to_string(),
+                reading: None,
+                part_of_speech: "동사".to_string(),
+                deinflection_rule: None,
+                definition_full: definition.clone(),
+                sequence_number: 0,
+                hanja: Some("個國".to_string()),
+                tl_definitions: vec![super::TargetLanguageDefinition {
                     translation: "かこく【ヶ国】".to_string(),
                     definition: "国を数える単位。".to_string(),
-                },
-            ],
-            stars: 1,
-            frequency: None,
-        });
+                },],
+                stars: 1,
+                frequency: None,
+            }
+        );
     }
-    
-    // TODO test case for (対訳語無し)
+
+    // TODO: test case for (対訳語無し)
 }
+

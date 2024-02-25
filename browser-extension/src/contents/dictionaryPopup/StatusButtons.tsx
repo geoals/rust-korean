@@ -49,7 +49,7 @@ export function StatusButtons({
             });
             setStatus(nextStatus);
             hoveredElement.className = `${underlineStyles["underline"]} ${underlineStyles[nextStatus]}`;
-            // TODO update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
+            // TODO: update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
           }}
         >
           {statusI18n[status]}

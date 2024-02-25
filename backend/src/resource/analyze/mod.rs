@@ -15,8 +15,8 @@ use crate::error_handling::AppError;
 use crate::resource::word_status::{WordStatus, WordStatusResponse, WordStatusEntity};
 use crate::{hangul, search, SharedState};
 
-// TODO refactor this abomination
-// TODO this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
+// TODO: refactor this abomination
+// TODO: this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
 pub async fn post_handler(
     State(state): State<SharedState>,
     body: String,
@@ -51,7 +51,7 @@ pub async fn post_handler(
         FROM WordStatus
         WHERE krdict_sequence_number = ANY($1) AND user_id = $2;",
         &ids,
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     )
     .fetch_all(&state.db)
     .await
@@ -59,7 +59,7 @@ pub async fn post_handler(
 
     let ids_with_statuses = word_statuses
         .iter()
-        .map(|response| response.krdict_sequence_number.unwrap()) // TODO unsafe unwrap
+        .map(|response| response.krdict_sequence_number.unwrap()) // TODO: unsafe unwrap
         .collect::<HashSet<i32>>();
     let ids_with_no_statuses = ids
         .iter()
@@ -69,7 +69,7 @@ pub async fn post_handler(
 
     let id_to_status_map: HashMap<i32, WordStatusEntity> = word_statuses
         .iter()
-        .map(|response| (response.krdict_sequence_number.unwrap(), response.clone())) // TODO unsafe unwrap
+        .map(|response| (response.krdict_sequence_number.unwrap(), response.clone())) // TODO: unsafe unwrap
         .collect();
 
     // map from unconjugated word to list of statuses
@@ -77,11 +77,11 @@ pub async fn post_handler(
 
     // words that has statuses saved
     for (id, status) in id_to_status_map {
-        let words = id_to_inflected_words_map.get(&id).unwrap(); // TODO unsafe unwrap
+        let words = id_to_inflected_words_map.get(&id).unwrap(); // TODO: unsafe unwrap
         let deinflected_word = state
             .dictionary
             .get_by_sequence_number(id)
-            .unwrap() // TODO unsafe unwrap
+            .unwrap() // TODO: unsafe unwrap
             .headword()
             .clone();
         for word in words {
@@ -94,11 +94,11 @@ pub async fn post_handler(
 
     // words that has no statuses saved
     for id in ids_with_no_statuses {
-        let words = id_to_inflected_words_map.get(&id).unwrap(); // TODO unsafe unwrap
+        let words = id_to_inflected_words_map.get(&id).unwrap(); // TODO: unsafe unwrap
         let deinflected_word = state
             .dictionary
             .get_by_sequence_number(id)
-            .unwrap() // TODO unsafe unwrap
+            .unwrap() // TODO: unsafe unwrap
             .headword()
             .clone();
         for word in words {
@@ -128,7 +128,7 @@ pub async fn post_handler(
     Ok(response)
 }
 
-// TODO change to hashmap
+// TODO: change to hashmap
 fn get_inflected_word_to_ids_mapping(
     words: HashSet<&str>,
     state: &SharedState,

@@ -41,7 +41,7 @@ export function DictionaryPopup() {
     setSelectedEntryIndexForAnkiExport(undefined);
   }
 
-  // TODO loading
+  // TODO: loading
   if (Object.keys(response).length === 0 || !hoveredWord || !hoveredElement) {
     return null;
   }
@@ -177,9 +177,9 @@ function DefinitionList(props: {
   const listStyle = definitions.length > 1 ? "list-decimal" : "list-none";
   const leftMargin = definitions.length > 1 ? "ml-9" : "ml-4";
 
-  // TODO add margin between scroll bars only when content is overflowing (have to use JS)
+  // TODO: add margin between scroll bars only when content is overflowing (have to use JS)
   return (
-    // TODO only one can be expanded at the time
+    // TODO: only one can be expanded at the time
     <details
       className={`bg-primary rounded max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-muted" : ""}`}
       onClick={props.setSelectedEntryForAnkiExport}

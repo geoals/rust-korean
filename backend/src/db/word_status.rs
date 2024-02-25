@@ -10,6 +10,6 @@ pub async fn get_all(db: &PgPool, ids: &Vec<i32>) -> Vec<WordStatusEntity> {
         FROM WordStatus
         WHERE krdict_sequence_number = ANY($1) AND user_id = $2;",
         ids,
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     ).fetch_all(db).await.expect("Failed to get word statuses")
 }

@@ -14,7 +14,7 @@ pub async fn get_handler(
     State(state): State<SharedState>,
 ) -> impl IntoResponse {
     let start_time = Instant::now();
-    debug!("New request for {}", term); // TODO request ID
+    debug!("New request for {}", term); // TODO: request ID
 
     // Use Arc to avoid cloning the matches themselves when spawning task to insert in db
     let matches: Arc<Vec<KrDictEntry>> = Arc::new(search::get_all(&term, &state.dictionary));
@@ -30,9 +30,9 @@ pub async fn get_handler(
         .await
         .iter()
         .map(|it| it.to_dto(None))
-        .collect(); // TODO frequency rank
+        .collect(); // TODO: frequency rank
 
-    // TODO remove unnecessary clone
+    // TODO: remove unnecessary clone
     let matches = matches.iter()
         .map(|m| {
             let word_status = word_statuses.iter()

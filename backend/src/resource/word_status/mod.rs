@@ -13,7 +13,7 @@ use tracing::debug;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WordStatusRequest {
-    status: Option<WordStatus>, // TODO use enum
+    status: Option<WordStatus>, // TODO: use enum
     ignored: Option<bool>,
     tracked: Option<bool>,
 }
@@ -24,7 +24,7 @@ pub async fn patch_handler(
     Json(body): Json<WordStatusRequest>,
 ) -> Result<impl IntoResponse, AppError> {
     let start_time = Instant::now();
-    debug!("New request to update id {}", id); // TODO request ID
+    debug!("New request to update id {}", id); // TODO: request ID
 
     // Check for existing row and then either update or insert as a proper `insert on conflict update`
     // would require to dynamically build the SET clause which means we cannot use the compile time
@@ -36,7 +36,7 @@ pub async fn patch_handler(
         FROM WordStatus
         WHERE krdict_sequence_number = $1 AND user_id = $2;",
         id,
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     )
     .fetch_optional(&state.db)
     .await?;
@@ -65,7 +65,7 @@ pub async fn patch_handler(
             body.status.unwrap_or(WordStatus::Unknown) as _,
             body.ignored.unwrap_or(false),
             body.tracked.unwrap_or(false),
-            1 // TODO user ID when we have more than 1 user
+            1 // TODO: user ID when we have more than 1 user
         )
         .execute(&state.db)
         .await?;
@@ -83,7 +83,7 @@ pub async fn get_handler(
     State(state): State<SharedState>,
 ) -> Result<impl IntoResponse, AppError> {
     let start_time = Instant::now();
-    debug!("New request to get id {}", id); // TODO request ID
+    debug!("New request to get id {}", id); // TODO: request ID
 
     let existing_row = sqlx::query_as!(
         WordStatusEntity,
@@ -92,33 +92,33 @@ pub async fn get_handler(
         FROM WordStatus
         WHERE krdict_sequence_number = $1 AND user_id = $2;",
         id,
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     )
     .fetch_optional(&state.db)
     .await?;
 
     let response_body = if let Some(existing_row) = existing_row {
-            serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO map error, TODO frequency rank
+            serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO: map error, TODO: frequency rank
     } else {
-        // TODO return 404 if id doesn't exist in dictionary
-        // TODO single source of truth for default value
+        // TODO: return 404 if id doesn't exist in dictionary
+        // TODO: single source of truth for default value
         serde_json::to_string(&WordStatusResponse {
             id: Some(id),
             status: WordStatus::Unknown,
             ignored: false,
             frequency_rank: None,
-        }).unwrap() // TODO map error
+        }).unwrap() // TODO: map error
     };
 
     let response = http::Response::builder()
         .status(http::StatusCode::OK)
-        .body(response_body).unwrap(); // TODO map error
+        .body(response_body).unwrap(); // TODO: map error
 
     debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
 }
 
-// TODO don't expose this, and move sql to a service (its now duplicated here and in analyze endpoint)
+// TODO: don't expose this, and move sql to a service (its now duplicated here and in analyze endpoint)
 #[derive(Debug, Clone, FromRow)]
 #[allow(dead_code)]
 pub struct WordStatusEntity {
@@ -143,7 +143,7 @@ impl WordStatusEntity {
     }
 }
 
-// TODO not public fields, use separate object for Analyze reponse
+// TODO: not public fields, use separate object for Analyze reponse
 #[derive(Debug, Clone, Serialize)]
 pub struct WordStatusResponse {
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -16,7 +16,7 @@ export function AddToAnkiButton({
   hoveredSentence: string;
   entry?: LookupDTO;
 }) {
-  // TODO check status from ankiconnect instead
+  // TODO: check status from ankiconnect instead
   const [ankiExported, setAnkiExported] = useState(false);
 
   function addToAnkiBtnHandler(): void {
@@ -68,7 +68,7 @@ async function addAnkiNoteMessage(
       sentence,
       hoveredWord,
       hanja: hanja ?? undefined,
-      reading: reading ?? undefined, // TODO map null to undefined closer to api layer
+      reading: reading ?? undefined, // TODO: map null to undefined closer to api layer
       selectionText: window.getSelection()?.toString().replaceAll("\n", "<br>"),
       definitionFull,
       frequency: payload.frequency ?? undefined,
@@ -77,6 +77,6 @@ async function addAnkiNoteMessage(
   if (wordStatus === "unknown") {
     markAsSeen(id);
   }
-  // TODO handle errors
+  // TODO: handle errors
   return resp.message;
 }

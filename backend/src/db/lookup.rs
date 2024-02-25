@@ -16,7 +16,7 @@ pub async fn insert(db: PgPool, term: String, matches: Arc<Vec<KrDictEntry>>) ->
         } else {
             None
         },
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     )
     .execute(&db)
     .await

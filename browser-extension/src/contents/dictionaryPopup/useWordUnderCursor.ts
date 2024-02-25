@@ -108,7 +108,7 @@ export function useWordUnderCursor() {
 }
 
 function filterResponse(response: LookupResponse) {
-  // TODO remove filtering after we filter garbage in backend
+  // TODO: remove filtering after we filter garbage in backend
   const filterPredicate = (it: LookupDTO) =>
     it.dictEntry.tl_definitions.length > 0 &&
     it.dictEntry.tl_definitions[0].translation.length > 0 &&
@@ -141,7 +141,7 @@ function clampHorizontallyWithinViewport(positionX: number, padding: number) {
     return padding;
   }
   if (positionX - POPUP_WIDTH / 2 + POPUP_WIDTH + padding >= document.documentElement.clientWidth) {
-    // TODO react to window resize
+    // TODO: react to window resize
     return document.documentElement.clientWidth - padding * 2 - POPUP_WIDTH;
   }
   return positionX - POPUP_WIDTH / 2;
@@ -177,7 +177,7 @@ function useHoveredWordState() {
 }
 
 const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
-  const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO caretPositionFromPoint for firefox
+  const range = document.caretRangeFromPoint(mouseX, mouseY); // TODO: caretPositionFromPoint for firefox
 
   const textContent = range?.startContainer.textContent;
   if (
@@ -219,14 +219,14 @@ const findWordAndSentenceUnderCursor = (mouseX: number, mouseY: number) => {
   }
 
   const sentences = findFullParagraph(range.startContainer).split(/[.!?]/);
-  // TODO  don't remove .!? from the sentence
-  // TODO this will return the wrong sentence if there are multiple sentences with the same word
+  // TODO:  don't remove .!? from the sentence
+  // TODO: this will return the wrong sentence if there are multiple sentences with the same word
   const sentence = sentences.find((sentence) => sentence.includes(word))?.replaceAll("\n", "");
 
   return { word, sentence, element: range.startContainer.parentElement };
 };
 
-// TODO this needs more testing and work
+// TODO: this needs more testing and work
 function findFullParagraph(node: Node): string {
   let newNode = node;
   while (
@@ -250,7 +250,7 @@ function useMousePosition() {
   const mousePositionRef = useRef({ x: 0, y: 0 });
 
   const handleMouseMove = async (e: MouseEvent) => {
-    mousePositionRef.current = { x: e.clientX, y: e.clientY }; // TODO avoid rerenders?
+    mousePositionRef.current = { x: e.clientX, y: e.clientY }; // TODO: avoid rerenders?
   };
 
   useEffect(() => {

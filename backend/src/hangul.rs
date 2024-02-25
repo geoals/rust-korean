@@ -1,4 +1,4 @@
-// TODO change arrays to a maps and benchmark difference
+// TODO: change arrays to a maps and benchmark difference
 const INITIAL_JAMO: [char; 19] = [
     'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ',
     'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ',
@@ -111,8 +111,8 @@ impl HangulExt for String {
         self.chars().flat_map(to_jamo).collect()
     }
 
-    // TODO this might need refactoring and optimization
-    // TODO return Result or Option instead?
+    // TODO: this might need refactoring and optimization
+    // TODO: return Result or Option instead?
     fn to_hangul(&self) -> String {
         let mut result = String::new();
         let mut iter = self.chars();
@@ -138,7 +138,7 @@ impl HangulExt for String {
 
                 if let Some(last) = iter.next() {
                     // if there are two vowels in a row, reassemble them first
-                    // TODO replace this if block with just reassmeble the two vowels and then going to next iteration
+                    // TODO: replace this if block with just reassmeble the two vowels and then going to next iteration
                     if VOWEL_JAMO.contains(&medial) && VOWEL_JAMO.contains(&last) {
                         let assembled_middle = assemble_vowel_jamo(medial, last);
                         if assembled_middle.is_none() {
@@ -146,7 +146,7 @@ impl HangulExt for String {
                             continue;
                         }
                         let assembled_middle = assembled_middle.unwrap();
-                        let next = iter.clone().next().unwrap_or(' '); // TODO replace with peekable
+                        let next = iter.clone().next().unwrap_or(' '); // TODO: replace with peekable
 
                         // if the fourth char is a vowel, compose the first two
                         if VOWEL_JAMO.contains(&iter.clone().nth(1).unwrap_or(' ')) {

@@ -16,7 +16,7 @@ pub async fn get_handler(
         COUNT(CASE WHEN status = 'unknown' THEN 1 END) as unknown,
         COUNT(CASE WHEN status = 'seen' THEN 1 END) as seen
         FROM WordStatus WHERE user_id = $1",
-        1 // TODO user ID when we have more than 1 user
+        1 // TODO: user ID when we have more than 1 user
     ).fetch_one(&state.db).await?;
 
     let response_body = serde_json::to_string(&WordStatusCountDTO {

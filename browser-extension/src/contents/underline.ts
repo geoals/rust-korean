@@ -33,7 +33,7 @@ async function main() {
     return { hangulWord: word.substring(start, end), start, end };
   }
 
-  // TODO configure offset in settings
+  // TODO: configure offset in settings
   function shouldHighlightUnknownCommonWord(
     word: string,
     status: "known" | "seen" | "unknown" | "unmatched",
@@ -46,7 +46,7 @@ async function main() {
     );
   }
 
-  // TODO clean up this abomination
+  // TODO: clean up this abomination
   function mutationObserverCallback(mutations: MutationRecord[]) {
     mutations.forEach((mutation) => {
       if (mutation.type === "childList") {
@@ -135,7 +135,7 @@ async function main() {
         if (!hangulRegex.test(word)) {
           newHTML += word;
         } else {
-          // TODO underline all words in the string, not just one e.g. '쵸센고(조선어)'라고
+          // TODO: underline all words in the string, not just one e.g. '쵸센고(조선어)'라고
           const {
             hangulWord,
             start: startIndex,
