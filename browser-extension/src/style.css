@@ -4,11 +4,15 @@
 
 @layer base {
   :host {
-    --background: 158 48% 86%;
-    --foreground: 158 24% 22%;
-    --primary: 158 22% 34% / 0.3;
-    --muted: 158 22% 34% / 0.6;
-    --accent: 158 42% 54%;
+    --green: 158;
+    --red: 6;
+    --yellow: 44;
+    --hue: var(--green);
+    --background: var(--hue) 48% 86%;
+    --foreground: var(--hue) 24% 22%;
+    --primary: var(--hue) 22% 34% / 0.3;
+    --muted: var(--hue) 22% 34% / 0.6;
+    --accent: var(--hue) 42% 54%;
 
     --radius: 6px;
   }
@@ -41,4 +45,3 @@
   background-clip: content-box;
   border: 2px solid transparent;
 }
-

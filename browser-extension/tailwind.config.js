@@ -14,9 +14,9 @@ module.exports = {
         DEFAULT: "6px",
       },
       colors: {
-        green: "#57BB97",
-        red: "#c07676",
-        yellow: "#dfca7e",
+        green: "hsl(var(--green) 42% 54%)",
+        red: "hsl(var(--red) 42% 54%)",
+        yellow: "hsl(var(--yellow) 52% 64%)",
 
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
