@@ -15,8 +15,8 @@ module.exports = {
       },
       colors: {
         green: "hsl(var(--green) 42% 54%)",
-        red: "hsl(var(--red) 42% 54%)",
-        yellow: "hsl(var(--yellow) 52% 64%)",
+        red: "hsl(var(--red) 42% 64%)",
+        yellow: "hsl(var(--yellow) 60% 68%)",
 
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
