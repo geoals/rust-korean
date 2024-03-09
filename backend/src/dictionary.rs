@@ -305,4 +305,3 @@ mod tests {
 
     // TODO: test case for (対訳語無し)
 }
-

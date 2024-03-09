@@ -12,7 +12,7 @@ use tracing::{debug, info};
 
 use crate::dictionary::KrDictEntry;
 use crate::error_handling::AppError;
-use crate::resource::word_status::{WordStatus, WordStatusResponse, WordStatusEntity};
+use crate::resource::word_status::{WordStatus, WordStatusEntity, WordStatusResponse};
 use crate::{hangul, search, SharedState};
 
 // TODO: refactor this abomination
@@ -25,20 +25,24 @@ pub async fn post_handler(
     debug!("New request to analyze text with length {}", body.len());
 
     let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
-    let words = bodytext_with_only_hangul.split_whitespace().collect::<HashSet<&str>>();
+    let words = bodytext_with_only_hangul
+        .split_whitespace()
+        .collect::<HashSet<&str>>();
 
     let inflected_words_to_ids_tuples = get_inflected_word_to_ids_mapping(words, &state);
     save_ids_in_cache(&inflected_words_to_ids_tuples, &state);
 
     let mut id_to_inflected_words_map = HashMap::<i32, Vec<String>>::new();
-    inflected_words_to_ids_tuples.iter().for_each(|(word, ids)| {
-        for id in ids {
-            id_to_inflected_words_map
-                .entry(*id)
-                .or_default()
-                .push(word.clone());
-        }
-    });
+    inflected_words_to_ids_tuples
+        .iter()
+        .for_each(|(word, ids)| {
+            for id in ids {
+                id_to_inflected_words_map
+                    .entry(*id)
+                    .or_default()
+                    .push(word.clone());
+            }
+        });
 
     let ids = id_to_inflected_words_map
         .keys()
@@ -85,10 +89,11 @@ pub async fn post_handler(
             .headword()
             .clone();
         for word in words {
-            response_body
-                .entry(word.clone())
-                .or_default()
-                .push(status.clone().to_dto(state.frequency_dictionary.lookup(&deinflected_word)));
+            response_body.entry(word.clone()).or_default().push(
+                status
+                    .clone()
+                    .to_dto(state.frequency_dictionary.lookup(&deinflected_word)),
+            );
         }
     }
 
@@ -105,7 +110,10 @@ pub async fn post_handler(
             response_body
                 .entry(word.clone())
                 .or_default()
-                .push(WordStatusResponse::new(id, state.frequency_dictionary.lookup(&deinflected_word)));
+                .push(WordStatusResponse::new(
+                    id,
+                    state.frequency_dictionary.lookup(&deinflected_word),
+                ));
         }
     }
 
@@ -133,7 +141,8 @@ fn get_inflected_word_to_ids_mapping(
     words: HashSet<&str>,
     state: &SharedState,
 ) -> Vec<(String, Vec<i32>)> {
-    let unconjugated_to_ids_tuples = words.into_iter()
+    let unconjugated_to_ids_tuples = words
+        .into_iter()
         .map(|word| {
             if let Ok(cached_matches) = state.analysis_cache.lock() {
                 if (*cached_matches).contains_key(word) {
@@ -154,10 +163,7 @@ fn get_inflected_word_to_ids_mapping(
     unconjugated_to_ids_tuples
 }
 
-fn save_ids_in_cache(
-    unconjugated_to_ids_tuples: &Vec<(String, Vec<i32>)>,
-    state: &SharedState,
-) {
+fn save_ids_in_cache(unconjugated_to_ids_tuples: &Vec<(String, Vec<i32>)>, state: &SharedState) {
     for (unconjugated, ids) in unconjugated_to_ids_tuples {
         if let Ok(mut cached_matches) = state.analysis_cache.lock() {
             (*cached_matches).insert(unconjugated.clone(), ids.clone());
@@ -168,10 +174,12 @@ fn save_ids_in_cache(
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalysisResultJson(pub HashMap<String, Vec<i32>>);
 
-pub async fn write_analysis_cache_to_file_every_ten_minutes(analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>) {
+pub async fn write_analysis_cache_to_file_every_ten_minutes(
+    analysis_cache: Arc<Mutex<HashMap<String, Vec<i32>>>>,
+) {
     loop {
         let number_of_cached_items = analysis_cache.lock().unwrap().len();
-        sleep(Duration::from_secs(60*10)).await;
+        sleep(Duration::from_secs(60 * 10)).await;
 
         if let Ok(cached_matches) = analysis_cache.lock() {
             if cached_matches.len() == number_of_cached_items {

@@ -1,29 +1,43 @@
 // TODO: change arrays to a maps and benchmark difference
 const INITIAL_JAMO: [char; 19] = [
-    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ',
-    'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ',
-    'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ',
-    'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ',
+    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ',
     'ㅌ', 'ㅍ', 'ㅎ',
 ];
 
 const VOWEL_JAMO: [char; 21] = [
-    'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ',
-    'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ',
-    'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ',
-    'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ',
-    'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ',
-    'ㅣ',
+    'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ',
+    'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ',
 ];
 
 const FINAL_JAMO: [Option<char>; 28] = [
-    None, Some('ㄱ'), Some('ㄲ'), Some('ㄳ'),
-    Some('ㄴ'), Some('ㄵ'), Some('ㄶ'), Some('ㄷ'),
-    Some('ㄹ'), Some('ㄺ'), Some('ㄻ'), Some('ㄼ'),
-    Some('ㄽ'), Some('ㄾ'), Some('ㄿ'), Some('ㅀ'),
-    Some('ㅁ'), Some('ㅂ'), Some('ㅄ'), Some('ㅅ'),
-    Some('ㅆ'), Some('ㅇ'), Some('ㅈ'), Some('ㅊ'),
-    Some('ㅋ'), Some('ㅌ'), Some('ㅍ'), Some('ㅎ'),
+    None,
+    Some('ㄱ'),
+    Some('ㄲ'),
+    Some('ㄳ'),
+    Some('ㄴ'),
+    Some('ㄵ'),
+    Some('ㄶ'),
+    Some('ㄷ'),
+    Some('ㄹ'),
+    Some('ㄺ'),
+    Some('ㄻ'),
+    Some('ㄼ'),
+    Some('ㄽ'),
+    Some('ㄾ'),
+    Some('ㄿ'),
+    Some('ㅀ'),
+    Some('ㅁ'),
+    Some('ㅂ'),
+    Some('ㅄ'),
+    Some('ㅅ'),
+    Some('ㅆ'),
+    Some('ㅇ'),
+    Some('ㅈ'),
+    Some('ㅊ'),
+    Some('ㅋ'),
+    Some('ㅌ'),
+    Some('ㅍ'),
+    Some('ㅎ'),
 ];
 
 const GA_LOCATION: u32 = '가' as u32; // = 44_032
@@ -38,7 +52,7 @@ fn disassemble_vowel_jamo(c: &char) -> Vec<char> {
         'ㅞ' => vec!['ㅜ', 'ㅔ'],
         'ㅟ' => vec!['ㅜ', 'ㅣ'],
         'ㅢ' => vec!['ㅡ', 'ㅣ'],
-        _ => vec![*c]
+        _ => vec![*c],
     }
 }
 
@@ -52,7 +66,7 @@ fn assemble_vowel_jamo(first: char, second: char) -> Option<char> {
         ('ㅜ', 'ㅔ') => Some('ㅞ'),
         ('ㅜ', 'ㅣ') => Some('ㅟ'),
         ('ㅡ', 'ㅣ') => Some('ㅢ'),
-        _ => None
+        _ => None,
     }
 }
 
@@ -62,12 +76,12 @@ fn from_jamo(initial: char, medial: char, last: Option<char>) -> Option<char> {
         GA_LOCATION
             + 588 * (INITIAL_JAMO.iter().position(|&c| c == initial)? as u32)
             + 28 * (VOWEL_JAMO.iter().position(|&c| c == medial)? as u32)
-            + FINAL_JAMO.iter().position(|&c| c == last)? as u32
+            + FINAL_JAMO.iter().position(|&c| c == last)? as u32,
     )
 }
 
 fn to_jamo(ch: char) -> Vec<char> {
-    if !(GA_LOCATION..GA_LOCATION+11171).contains(&(ch as u32)) {
+    if !(GA_LOCATION..GA_LOCATION + 11171).contains(&(ch as u32)) {
         return vec![ch];
     }
 
@@ -76,10 +90,7 @@ fn to_jamo(ch: char) -> Vec<char> {
     let medial_index = ((index % 588) / 28) as usize;
     let final_index = (index % 28) as usize;
 
-    let mut result = vec![
-        INITIAL_JAMO[initial_index],
-        VOWEL_JAMO[medial_index],
-    ];
+    let mut result = vec![INITIAL_JAMO[initial_index], VOWEL_JAMO[medial_index]];
     let final_char = FINAL_JAMO[final_index];
     if let Some(final_char) = final_char {
         result.push(final_char);
@@ -157,7 +168,7 @@ impl HangulExt for String {
                         if FINAL_JAMO.contains(&Some(next)) {
                             iter.next();
                             result.push(from_jamo(initial, assembled_middle, Some(next)).unwrap());
-                        } else  {
+                        } else {
                             result.push(from_jamo(initial, assembled_middle, None).unwrap());
                         }
                         continue;
@@ -169,8 +180,7 @@ impl HangulExt for String {
                         continue;
                     }
                     result.push(from_jamo(initial, medial, Some(last)).unwrap());
-                }
-                else {
+                } else {
                     result.push(from_jamo(initial, medial, None).unwrap());
                 }
             }
@@ -199,7 +209,10 @@ mod tests {
     #[test]
     fn test_as_jamo() {
         assert_eq!("ㅁㅓㄱㅇㅓㅇㅛ", "먹어요".to_string().to_jamo());
-        assert_eq!("ㄷㅐㅎㅏㄴㅁㅣㄴㄱㅜㄱㅇㅡㅣ", "대한민국의".to_string().to_jamo());
+        assert_eq!(
+            "ㄷㅐㅎㅏㄴㅁㅣㄴㄱㅜㄱㅇㅡㅣ",
+            "대한민국의".to_string().to_jamo()
+        );
         assert_eq!("ㅁㅜㄴㅈㅏㅊㅔㄱㅖㄹㅗ", "문자체계로".to_string().to_jamo());
         assert_eq!("ㅎㅗㅏㄱㅇㅣㄴㅎㅏㄹ", "확인할".to_string().to_jamo());
         assert_eq!("구성되어".to_string().to_jamo(), "ㄱㅜㅅㅓㅇㄷㅗㅣㅇㅓ");
@@ -208,8 +221,14 @@ mod tests {
     #[test]
     fn test_to_hangul() {
         assert_eq!("먹어요", "ㅁㅓㄱㅇㅓㅇㅛ".to_string().to_hangul());
-        assert_eq!("대한민국의", "ㄷㅐㅎㅏㄴㅁㅣㄴㄱㅜㄱㅇㅡㅣ".to_string().to_hangul());
-        assert_eq!("문자체계로, ", "ㅁㅜㄴㅈㅏㅊㅔㄱㅖㄹㅗ, ".to_string().to_hangul());
+        assert_eq!(
+            "대한민국의",
+            "ㄷㅐㅎㅏㄴㅁㅣㄴㄱㅜㄱㅇㅡㅣ".to_string().to_hangul()
+        );
+        assert_eq!(
+            "문자체계로, ",
+            "ㅁㅜㄴㅈㅏㅊㅔㄱㅖㄹㅗ, ".to_string().to_hangul()
+        );
         assert_eq!("확인할", "ㅎㅗㅏㄱㅇㅣㄴㅎㅏㄹ".to_string().to_hangul());
         assert_eq!("ㄱㅜㅅㅓㅇㄷㅗㅣㅇㅓ".to_string().to_hangul(), "구성되어");
     }

@@ -1,8 +1,8 @@
 pub mod count;
 
-use crate::{SharedState, frequency_dictionary};
 use crate::error_handling::AppError;
 use crate::frequency_dictionary::FrequencyDictionary;
+use crate::{frequency_dictionary, SharedState};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::{http, Json};
@@ -54,7 +54,7 @@ pub async fn patch_handler(
         )
         .execute(&state.db)
         .await?;
-        
+
         http::StatusCode::OK
     } else {
         sqlx::query!(
@@ -77,7 +77,6 @@ pub async fn patch_handler(
     Ok(response)
 }
 
-
 pub async fn get_handler(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
@@ -98,7 +97,7 @@ pub async fn get_handler(
     .await?;
 
     let response_body = if let Some(existing_row) = existing_row {
-            serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO: map error, TODO: frequency rank
+        serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO: map error, TODO: frequency rank
     } else {
         // TODO: return 404 if id doesn't exist in dictionary
         // TODO: single source of truth for default value
@@ -107,12 +106,14 @@ pub async fn get_handler(
             status: WordStatus::Unknown,
             ignored: false,
             frequency_rank: None,
-        }).unwrap() // TODO: map error
+        })
+        .unwrap() // TODO: map error
     };
 
     let response = http::Response::builder()
         .status(http::StatusCode::OK)
-        .body(response_body).unwrap(); // TODO: map error
+        .body(response_body)
+        .unwrap(); // TODO: map error
 
     debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)

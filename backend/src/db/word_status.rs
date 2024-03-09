@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 
-use crate::resource::word_status::WordStatusEntity;
 use crate::resource::word_status::WordStatus;
+use crate::resource::word_status::WordStatusEntity;
 
 pub async fn get_all(db: &PgPool, ids: &Vec<i32>) -> Vec<WordStatusEntity> {
     sqlx::query_as!(

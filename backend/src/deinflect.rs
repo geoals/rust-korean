@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use crate::hangul::{is_hangul, HangulExt};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use crate::hangul::{HangulExt, is_hangul};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DeinflectRule {
@@ -41,16 +41,15 @@ pub fn deinflect(word: &str) -> HashSet<DeinflectedMatch> {
     // should collect list of deinflection rules like:  았/었 <- 지만
     let decomposed_term = word.to_jamo();
 
-    DEINFLECTION_RULES.iter().filter(|rule| {
-        decomposed_term.ends_with(&rule.kana_in)
-    }).map(|rule| {
-        DeinflectedMatch {
+    DEINFLECTION_RULES
+        .iter()
+        .filter(|rule| decomposed_term.ends_with(&rule.kana_in))
+        .map(|rule| DeinflectedMatch {
             word: apply_inflection_rule(&decomposed_term, rule),
             rules: rule.rules_out.clone(),
-        }
-    }).filter(|rule| {
-        rule.word.chars().all(is_hangul)
-    }).collect()
+        })
+        .filter(|rule| rule.word.chars().all(is_hangul))
+        .collect()
 }
 
 /// Panics if decomposed_term does not end with rule.kana_in
@@ -74,6 +73,9 @@ mod tests {
             rules_out: vec!["v".to_string(), "adj".to_string()],
         };
 
-        assert_eq!(apply_inflection_rule(deinflected, &deinflection_rule), "드리다");
+        assert_eq!(
+            apply_inflection_rule(deinflected, &deinflection_rule),
+            "드리다"
+        );
     }
 }

@@ -1,13 +1,13 @@
-use std::collections::BTreeMap;
-use std::sync::Arc;
-use std::time::Instant;
+use crate::dictionary::{Headword, KrDictEntry};
+use crate::resource::word_status::{WordStatus, WordStatusResponse};
+use crate::{db, search, SharedState};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use serde::Serialize;
+use std::collections::BTreeMap;
+use std::sync::Arc;
+use std::time::Instant;
 use tracing::debug;
-use crate::dictionary::{KrDictEntry, Headword};
-use crate::resource::word_status::{WordStatus, WordStatusResponse};
-use crate::{db, search, SharedState};
 
 pub async fn get_handler(
     Path(term): Path<String>,
@@ -21,10 +21,17 @@ pub async fn get_handler(
     debug!("Found {} matches", matches.len());
 
     if !matches.is_empty() {
-        tokio::spawn(db::lookup::insert(state.db.clone(), term.clone(), Arc::clone(&matches)));
-    } 
+        tokio::spawn(db::lookup::insert(
+            state.db.clone(),
+            term.clone(),
+            Arc::clone(&matches),
+        ));
+    }
 
-    let ids = matches.iter().map(|m| *m.sequence_number()).collect::<Vec<i32>>();
+    let ids = matches
+        .iter()
+        .map(|m| *m.sequence_number())
+        .collect::<Vec<i32>>();
 
     let word_statuses: Vec<WordStatusResponse> = db::word_status::get_all(&state.db, &ids)
         .await
@@ -33,16 +40,19 @@ pub async fn get_handler(
         .collect(); // TODO: frequency rank
 
     // TODO: remove unnecessary clone
-    let matches = matches.iter()
+    let matches = matches
+        .iter()
         .map(|m| {
-            let word_status = word_statuses.iter()
+            let word_status = word_statuses
+                .iter()
                 .find(|ws| ws.id == Some(*m.sequence_number()))
                 .unwrap_or(&WordStatusResponse {
                     id: None,
                     status: WordStatus::Unknown,
                     ignored: false,
                     frequency_rank: None,
-                }).clone();
+                })
+                .clone();
 
             LookupDTO {
                 dict_entry: m.clone(),

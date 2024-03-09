@@ -23,23 +23,30 @@ enum MatchType {
 /// deinflected matches, and deinflected matches before partial matches
 pub fn get(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
     let matches = find_matches_in_dictionary(word, dictionary);
-    let match_types = matches.iter()
+    let match_types = matches
+        .iter()
         .map(|m| m.match_type.clone())
         .collect::<Vec<MatchType>>();
 
     if match_types.contains(&MatchType::Exact) {
-        return matches.into_iter()
+        return matches
+            .into_iter()
             .filter(|m| m.match_type == MatchType::Exact)
-            .flat_map(|m| m.matches).collect();
+            .flat_map(|m| m.matches)
+            .collect();
     }
 
     if match_types.contains(&MatchType::Deinflected) {
-        return matches.into_iter()
+        return matches
+            .into_iter()
             .filter(|m| m.match_type == MatchType::Deinflected)
-            .flat_map(|m| m.matches).collect();
+            .flat_map(|m| m.matches)
+            .collect();
     }
 
-    matches.into_iter().flat_map(|m| m.matches)
+    matches
+        .into_iter()
+        .flat_map(|m| m.matches)
         .sorted_by_key(|m| *m.frequency())
         .dedup_by(|a, b| a.sequence_number() == b.sequence_number())
         .collect()
@@ -48,7 +55,8 @@ pub fn get(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
 /// Tries to find one or more matches of word or variations of it in the dictionary
 /// Returns all matches
 pub fn get_all(word: &str, dictionary: &Dictionary) -> Vec<KrDictEntry> {
-    find_matches_in_dictionary(word, dictionary).into_iter()
+    find_matches_in_dictionary(word, dictionary)
+        .into_iter()
         .flat_map(|m| m.matches)
         .sorted_by_key(|m| *m.sequence_number())
         .dedup_by(|a, b| a.sequence_number() == b.sequence_number())
@@ -60,17 +68,26 @@ fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match>
     let mut matches = vec![];
 
     if let Some(value) = dictionary.search(word) {
-        matches.push(Match { match_type: MatchType::Exact, matches: value.clone() });
+        matches.push(Match {
+            match_type: MatchType::Exact,
+            matches: value.clone(),
+        });
     }
 
     if let Some(value) = search_deinflections_of_word(word, dictionary) {
-        matches.push(Match { match_type: MatchType::Deinflected, matches: value.clone() });
+        matches.push(Match {
+            match_type: MatchType::Deinflected,
+            matches: value.clone(),
+        });
     }
 
     // TODO: modify this to detect which words are contained in a compound word or suffixed word
     // TODO: possibly search deinflections of partial words i.e 했냔 -> deinflect and search for 했
     if let Some(value) = search_partial(word, dictionary) {
-        matches.push(Match { match_type: MatchType::Partial, matches: value.clone() });
+        matches.push(Match {
+            match_type: MatchType::Partial,
+            matches: value.clone(),
+        });
     }
 
     matches
@@ -79,7 +96,9 @@ fn find_matches_in_dictionary(word: &str, dictionary: &Dictionary) -> Vec<Match>
 fn search_deinflections_of_word(word: &str, dictionary: &Dictionary) -> Option<Vec<KrDictEntry>> {
     let mut results = vec![];
     for deinflection in deinflect(word) {
-        if let Some(result) = dictionary.search_with_deinflection_rules(&deinflection.word, deinflection.rules) {
+        if let Some(result) =
+            dictionary.search_with_deinflection_rules(&deinflection.word, deinflection.rules)
+        {
             results.extend(result.clone());
         }
     }
