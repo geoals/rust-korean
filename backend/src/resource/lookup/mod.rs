@@ -40,6 +40,7 @@ pub async fn get_handler(
         .collect(); // TODO: frequency rank
 
     // TODO: remove unnecessary clone
+    // Combine dictionary match with word status and map to DTO
     let matches = matches
         .iter()
         .map(|m| {
@@ -82,7 +83,7 @@ fn group_matches_by_headword(matches: Vec<LookupDTO>) -> LookupResponse {
 }
 
 fn sort_list_in_each_key_by_stars(matches_map: &mut LookupResponse) {
-    for (_, value) in &mut matches_map.0 {
+    for value in matches_map.0.values_mut() {
         value.sort_by_key(|v| *v.dict_entry.stars());
         value.reverse();
     }

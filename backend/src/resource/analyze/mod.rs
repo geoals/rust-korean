@@ -10,10 +10,11 @@ use tokio::io::AsyncWriteExt;
 use tokio::time::sleep;
 use tracing::{debug, info};
 
+use crate::db::word_status::WordStatusEntity;
 use crate::dictionary::KrDictEntry;
 use crate::error_handling::AppError;
-use crate::resource::word_status::{WordStatus, WordStatusEntity, WordStatusResponse};
-use crate::{hangul, search, SharedState};
+use crate::resource::word_status::{WordStatus, WordStatusResponse};
+use crate::{db, hangul, search, SharedState};
 
 // TODO: refactor this abomination
 // TODO: this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
@@ -49,22 +50,13 @@ pub async fn post_handler(
         .cloned()
         .collect::<Vec<i32>>();
 
-    let word_statuses = sqlx::query_as!(
-        WordStatusEntity,
-        "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
-        FROM WordStatus
-        WHERE krdict_sequence_number = ANY($1) AND user_id = $2;",
-        &ids,
-        1 // TODO: user ID when we have more than 1 user
-    )
-    .fetch_all(&state.db)
-    .await
-    .unwrap();
+    let word_statuses = db::word_status::get_all(&state.db, &ids).await;
 
     let ids_with_statuses = word_statuses
         .iter()
         .map(|response| response.krdict_sequence_number.unwrap()) // TODO: unsafe unwrap
         .collect::<HashSet<i32>>();
+
     let ids_with_no_statuses = ids
         .iter()
         .filter(|id| !ids_with_statuses.contains(id))

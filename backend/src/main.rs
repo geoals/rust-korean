@@ -62,7 +62,6 @@ async fn main() -> Result<(), std::io::Error> {
     let start_time = Instant::now();
     tracing_subscriber::fmt::init();
 
-    // Specify the name of the environment variable
     let db_url = std::env::var("DATABASE_URL").expect("Failed to read DATABASE_URL env var");
 
     info!("Application starting...");
@@ -104,9 +103,11 @@ async fn main() -> Result<(), std::io::Error> {
     Ok(())
 }
 
+type AnalysisCache = HashMap<String, Vec<i32>>;
+
 pub fn read_analysis_cache_from_file(
     file_path: &str,
-) -> std::io::Result<Arc<Mutex<HashMap<String, Vec<i32>>>>> {
+) -> std::io::Result<Arc<Mutex<AnalysisCache>>> {
     let time = Instant::now();
     let mut file = std::fs::File::open(file_path)?;
     let mut buffer = String::new();

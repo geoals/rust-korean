@@ -1,13 +1,12 @@
 pub mod count;
 
+use crate::db::word_status::{get_one, WordStatusEntity};
 use crate::error_handling::AppError;
-use crate::frequency_dictionary::FrequencyDictionary;
-use crate::{frequency_dictionary, SharedState};
+use crate::{db, SharedState};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::{http, Json};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use std::time::Instant;
 use tracing::debug;
 
@@ -29,31 +28,17 @@ pub async fn patch_handler(
     // Check for existing row and then either update or insert as a proper `insert on conflict update`
     // would require to dynamically build the SET clause which means we cannot use the compile time
     // checking of sqlx macros
-    let existing_row = sqlx::query_as!(
-        WordStatusEntity,
-        // Override type of status as sqlx macros doesn't support user defined types
-        "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
-        FROM WordStatus
-        WHERE krdict_sequence_number = $1 AND user_id = $2;",
-        id,
-        1 // TODO: user ID when we have more than 1 user
-    )
-    .fetch_optional(&state.db)
-    .await?;
+    let existing_row = db::word_status::get_one(&state.db, id).await;
 
     let response = if let Some(existing_row) = existing_row {
-        sqlx::query!(
-            "UPDATE WordStatus
-            SET status = $1, ignored = $2, tracked = $3
-            WHERE krdict_sequence_number = $4 AND user_id = $5;",
+        db::word_status::update(
+            &state.db,
+            id,
             body.status.unwrap_or(existing_row.status) as _,
             body.ignored.unwrap_or(existing_row.ignored),
             body.tracked.unwrap_or(existing_row.tracked),
-            id,
-            1
         )
-        .execute(&state.db)
-        .await?;
+        .await;
 
         http::StatusCode::OK
     } else {
@@ -84,17 +69,7 @@ pub async fn get_handler(
     let start_time = Instant::now();
     debug!("New request to get id {}", id); // TODO: request ID
 
-    let existing_row = sqlx::query_as!(
-        WordStatusEntity,
-        // Override type of status as sqlx macros doesn't support user defined types
-        "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
-        FROM WordStatus
-        WHERE krdict_sequence_number = $1 AND user_id = $2;",
-        id,
-        1 // TODO: user ID when we have more than 1 user
-    )
-    .fetch_optional(&state.db)
-    .await?;
+    let existing_row = db::word_status::get_one(&state.db, id).await;
 
     let response_body = if let Some(existing_row) = existing_row {
         serde_json::to_string(&existing_row.to_dto(None)).unwrap() // TODO: map error, TODO: frequency rank
@@ -112,25 +87,12 @@ pub async fn get_handler(
 
     let response = http::Response::builder()
         .status(http::StatusCode::OK)
+        .header(http::header::CONTENT_TYPE, "application/json")
         .body(response_body)
         .unwrap(); // TODO: map error
 
     debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
-}
-
-// TODO: don't expose this, and move sql to a service (its now duplicated here and in analyze endpoint)
-#[derive(Debug, Clone, FromRow)]
-#[allow(dead_code)]
-pub struct WordStatusEntity {
-    pub id: i32,
-    pub krdict_sequence_number: Option<i32>,
-    pub status: WordStatus,
-    pub ignored: bool,
-    pub tracked: bool,
-    pub user_id: i32,
-    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 impl WordStatusEntity {
