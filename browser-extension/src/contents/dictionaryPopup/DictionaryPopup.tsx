@@ -23,9 +23,9 @@ export function DictionaryPopup() {
   const [isIgnored, setIsIgnored] = useState(false);
   const [selectedEntryIndexForAnkiExport, setSelectedEntryIndexForAnkiExport] = useState<
     number | undefined
-    >(undefined);  
+  >(undefined);
   const entriesOfActiveTab = Object.values(response)[activeTabIndex];
-  const { openCloseStates, setOpenCloseStates } = useOpenCloseStates(entriesOfActiveTab)
+  const { openCloseStates, updateOpenCloseState } = useOpenCloseStates(entriesOfActiveTab);
 
   // Position popup above hovered word if it would otherwise go offscreen
   useLayoutEffect(() => {
@@ -99,7 +99,7 @@ export function DictionaryPopup() {
               setSelectedEntryForAnkiExport={() => setSelectedEntryIndexForAnkiExport(index)}
               isSelectedForAnkiExport={selectedEntryIndexForAnkiExport === index}
               isOpen={openCloseStates[index]}
-              toggle={}
+              toggle={() => updateOpenCloseState(index)}
             />
           ))}
         </EntriesList>
@@ -170,14 +170,19 @@ function DefinitionList(props: {
   setSelectedEntryForAnkiExport: () => void;
   isSelectedForAnkiExport: boolean;
   isOpen: boolean;
+  toggle: () => void;
 }) {
   const definitions = props.entry.dictEntry.tl_definitions;
   const hanja = props.entry.dictEntry.hanja;
 
-  // TODO use isOpen
-
   if (definitions.length === 0) {
     return null;
+  }
+
+  function clickHandler(e: React.MouseEvent<HTMLDetailsElement>) {
+    e.preventDefault();
+    props.setSelectedEntryForAnkiExport();
+    props.toggle();
   }
 
   const listStyle = definitions.length > 1 ? "list-decimal" : "list-none";
@@ -188,7 +193,7 @@ function DefinitionList(props: {
     // TODO: only one can be expanded at the time
     <details
       className={`bg-primary rounded max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-muted" : ""}`}
-      onClick={props.setSelectedEntryForAnkiExport}
+      onClick={clickHandler}
       open={props.isOpen}
     >
       <summary className="cursor-pointer p-2 hover:bg-muted rounded has-[button:hover]:hover:bg-transparent">
@@ -221,20 +226,22 @@ function DefinitionList(props: {
 }
 
 function useOpenCloseStates(entriesOfActiveTab?: LookupDTO[]) {
+  const [openCloseStates, setOpenCloseStates] = useState<boolean[]>([]);
 
-  const [ openCloseStates, setOpenCloseStates ] = useState<boolean[]>([]);
-  const updateOpenCloseState = (index: number) {
-    setOpenCloseStates([])
-  }
+  const updateOpenCloseState = (index: number) => {
+    const newArray = Array(openCloseStates.length).fill(false);
+    newArray[index] = !openCloseStates[index];
+    setOpenCloseStates(newArray);
+  };
 
   useEffect(() => {
     if (entriesOfActiveTab) {
-      setOpenCloseStates(Array(entriesOfActiveTab.length).fill(false))
+      setOpenCloseStates(Array(entriesOfActiveTab.length).fill(false));
     }
   }, [entriesOfActiveTab]);
 
   return {
     openCloseStates,
-    setOpenCloseStates
-  }
+    updateOpenCloseState,
+  };
 }
