@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, type ReactNode } from "react";
+import React, { useLayoutEffect, useState, type ReactNode, useEffect } from "react";
 import { useWordUnderCursor } from "./useWordUnderCursor";
 import { StatusButtons } from "./StatusButtons";
 import type { LookupDTO } from "~background/messages/lookup";
@@ -23,7 +23,9 @@ export function DictionaryPopup() {
   const [isIgnored, setIsIgnored] = useState(false);
   const [selectedEntryIndexForAnkiExport, setSelectedEntryIndexForAnkiExport] = useState<
     number | undefined
-  >(undefined);
+    >(undefined);  
+  const entriesOfActiveTab = Object.values(response)[activeTabIndex];
+  const { openCloseStates, setOpenCloseStates } = useOpenCloseStates(entriesOfActiveTab)
 
   // Position popup above hovered word if it would otherwise go offscreen
   useLayoutEffect(() => {
@@ -46,7 +48,6 @@ export function DictionaryPopup() {
     return null;
   }
 
-  const entriesOfActiveTab = Object.values(response)[activeTabIndex];
   const entryForAnkiExport =
     selectedEntryIndexForAnkiExport === undefined
       ? undefined
@@ -97,6 +98,8 @@ export function DictionaryPopup() {
               key={entry.dictEntry.sequence_number}
               setSelectedEntryForAnkiExport={() => setSelectedEntryIndexForAnkiExport(index)}
               isSelectedForAnkiExport={selectedEntryIndexForAnkiExport === index}
+              isOpen={openCloseStates[index]}
+              toggle={}
             />
           ))}
         </EntriesList>
@@ -166,9 +169,12 @@ function DefinitionList(props: {
   entry: LookupDTO;
   setSelectedEntryForAnkiExport: () => void;
   isSelectedForAnkiExport: boolean;
+  isOpen: boolean;
 }) {
   const definitions = props.entry.dictEntry.tl_definitions;
   const hanja = props.entry.dictEntry.hanja;
+
+  // TODO use isOpen
 
   if (definitions.length === 0) {
     return null;
@@ -183,6 +189,7 @@ function DefinitionList(props: {
     <details
       className={`bg-primary rounded max-h-52 overflow-y-auto ${props.isSelectedForAnkiExport ? "border-solid border-b-4 border-muted" : ""}`}
       onClick={props.setSelectedEntryForAnkiExport}
+      open={props.isOpen}
     >
       <summary className="cursor-pointer p-2 hover:bg-muted rounded has-[button:hover]:hover:bg-transparent">
         <div className={`flex flex-row justify-between -mt-6`}>
@@ -211,4 +218,23 @@ function DefinitionList(props: {
       </div>
     </details>
   );
+}
+
+function useOpenCloseStates(entriesOfActiveTab?: LookupDTO[]) {
+
+  const [ openCloseStates, setOpenCloseStates ] = useState<boolean[]>([]);
+  const updateOpenCloseState = (index: number) {
+    setOpenCloseStates([])
+  }
+
+  useEffect(() => {
+    if (entriesOfActiveTab) {
+      setOpenCloseStates(Array(entriesOfActiveTab.length).fill(false))
+    }
+  }, [entriesOfActiveTab]);
+
+  return {
+    openCloseStates,
+    setOpenCloseStates
+  }
 }
