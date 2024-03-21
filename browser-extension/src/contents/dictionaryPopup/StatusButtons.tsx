@@ -40,21 +40,20 @@ export function StatusButtons({
 
   return (
     <>
-      <div>
-        <button
-          className={`text-white rounded ${color[status]} font-bold text-sm px-2 py-1 hover:scale-105 text-nowrap select-none`}
-          onClick={() => {
-            changeWordStatus(entry.dictEntry.sequence_number, {
-              status: nextStatus,
-            });
-            setStatus(nextStatus);
-            hoveredElement.className = `${underlineStyles["underline"]} ${underlineStyles[nextStatus]}`;
-            // TODO: update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
-          }}
-        >
-          {statusI18n[status]}
-        </button>
-      </div>
+      <button
+        className={`text-white rounded ${color[status]} font-bold text-sm px-2 py-1 hover:scale-105 text-nowrap select-none`}
+        onClick={(e) => {
+          e.stopPropagation();
+          changeWordStatus(entry.dictEntry.sequence_number, {
+            status: nextStatus,
+          });
+          setStatus(nextStatus);
+          hoveredElement.className = `${underlineStyles["underline"]} ${underlineStyles[nextStatus]}`;
+          // TODO: update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
+        }}
+      >
+        {statusI18n[status]}
+      </button>
     </>
   );
 }
