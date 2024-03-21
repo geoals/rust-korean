@@ -3,6 +3,7 @@ import { sendToBackground } from "@plasmohq/messaging";
 import type { WordStatusDTO } from "~background/messages/changeWordStatus";
 import type { LookupDTO } from "~background/messages/lookup";
 import underlineStyles from "../underline.module.css";
+import { useStorage } from "@plasmohq/storage/hook";
 
 export function StatusButtons({
   entry,
@@ -12,6 +13,7 @@ export function StatusButtons({
   hoveredElement: Element;
 }) {
   const [status, setStatus] = React.useState(entry.status.status ?? "unknown");
+  const language = (useStorage<'japanese'|'english'>("language")[0]) ?? 'japanese';
 
   const color = {
     known: "bg-green",
@@ -20,9 +22,16 @@ export function StatusButtons({
   };
 
   const statusI18n = {
-    known: "学習済",
-    seen: "学習中",
-    unknown: "未学習",
+    'japanese': {
+      known: "学習済",
+      seen: "学習中",
+      unknown: "未学習",
+    },
+    'english': {
+      known: "KNOWN",
+      seen: "SEEN",
+      unknown: "UNKNOWN",
+    }
   };
 
   const getNextStatus = (status: "unknown" | "known" | "seen") => {
@@ -41,7 +50,7 @@ export function StatusButtons({
   return (
     <>
       <button
-        className={`text-white rounded ${color[status]} font-bold text-sm px-2 py-1 hover:scale-105 text-nowrap select-none`}
+        className={`text-white rounded ${color[status]} font-bold text-sm px-2 py-1 hover:scale-105 text-nowrap select-none h-fit`}
         onClick={(e) => {
           e.stopPropagation();
           changeWordStatus(entry.dictEntry.sequence_number, {
@@ -52,7 +61,7 @@ export function StatusButtons({
           // TODO: update status in  window.rustKorean.analysisResults[hoveredWord] and use that in reapply function in content.ts
         }}
       >
-        {statusI18n[status]}
+        {statusI18n[language][status]}
       </button>
     </>
   );

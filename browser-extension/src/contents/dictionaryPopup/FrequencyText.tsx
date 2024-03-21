@@ -1,6 +1,9 @@
+import { useStorage } from "@plasmohq/storage/hook";
 import React from "react";
 
 export function FrequencyText({ frequency }: { frequency: number | null }) {
+  const language = (useStorage<'japanese'|'english'>("language")[0]) ?? 'japanese';
+
   if (!frequency) {
     return null;
   }
@@ -10,7 +13,11 @@ export function FrequencyText({ frequency }: { frequency: number | null }) {
 
   return (
     <div className="text-xs">
-      上位約{roundedFrequency > 500 ? roundedFrequency : frequency}のよく使われる単語
+      {
+        language === 'japanese'? 
+          `上位約${roundedFrequency > 500 ? roundedFrequency : frequency}のよく使われる単語`:
+          `Top ${roundedFrequency > 500 ? roundedFrequency : frequency} most common word`
+      }
     </div>
   );
 }

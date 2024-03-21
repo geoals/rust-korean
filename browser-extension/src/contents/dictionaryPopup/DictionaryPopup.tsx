@@ -6,6 +6,7 @@ import { TTSButton } from "./TTSButton";
 import { FrequencyText } from "./FrequencyText";
 import { AddToAnkiButton } from "./AddToAnkiButton";
 import { IgnoreButton } from "./IgnoreButton";
+import { useStorage } from "@plasmohq/storage/hook";
 
 export function DictionaryPopup() {
   const {
@@ -26,6 +27,7 @@ export function DictionaryPopup() {
   >(undefined);
   const entriesOfActiveTab = Object.values(response)[activeTabIndex];
   const { openCloseStates, updateOpenCloseState } = useOpenCloseStates(entriesOfActiveTab);
+  const [language] = useStorage("language");
 
   // Position popup above hovered word if it would otherwise go offscreen
   useLayoutEffect(() => {
