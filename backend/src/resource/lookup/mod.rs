@@ -6,19 +6,15 @@ use axum::response::IntoResponse;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::sync::Arc;
-use std::time::Instant;
-use tracing::debug;
+use tracing::info;
 
 pub async fn get_handler(
     Path(term): Path<String>,
     State(state): State<SharedState>,
 ) -> impl IntoResponse {
-    let start_time = Instant::now();
-    debug!("New request for {}", term); // TODO: request ID
-
     // Use Arc to avoid cloning the matches themselves when spawning task to insert in db
     let matches: Arc<Vec<KrDictEntry>> = Arc::new(search::get_all(&term, &state.dictionary));
-    debug!("Found {} matches", matches.len());
+    info!("Found {} matches", matches.len());
 
     if !matches.is_empty() {
         tokio::spawn(db::lookup::insert(
@@ -64,10 +60,7 @@ pub async fn get_handler(
 
     let mut matches_map = group_matches_by_headword(matches);
     sort_list_in_each_key_by_stars(&mut matches_map);
-    let response = serde_json::to_string(&matches_map).unwrap();
-
-    debug!("Request processed in {:?}", start_time.elapsed());
-    response
+    serde_json::to_string(&matches_map).unwrap()
 }
 
 fn group_matches_by_headword(matches: Vec<LookupDTO>) -> LookupResponse {

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE WordStatus\n        SET status = $1, ignored = $2, tracked = $3\n        WHERE krdict_sequence_number = $4 AND user_id = $5;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "word_status",
+            "kind": {
+              "Enum": [
+                "unknown",
+                "seen",
+                "known"
+              ]
+            }
+          }
+        },
+        "Bool",
+        "Bool",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b31d4c213947e6053f4c6c67e68d009cb59d15862d007a20a797c4bb0fc23051"
+}

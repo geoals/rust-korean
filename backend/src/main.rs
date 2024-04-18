@@ -5,6 +5,9 @@ use std::{
     time::Instant,
 };
 
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+
 use crate::{
     dictionary::Dictionary,
     frequency_dictionary::FrequencyDictionary,
@@ -40,7 +43,7 @@ impl SharedState {
         // sequence no in different languages of KRDICTs are not always the same, so we need to use sequence no of the same
         // dict regardless of which language has been selected
         let dictionary = Arc::new(Dictionary::new(
-            "dictionaries/[KO-JA] KRDICT/term_bank_1.json",
+            "dictionaries/[KO-EN] KRDICT/term_bank_1.json",
             &frequency_dictionary,
         ));
         info!(
@@ -60,7 +63,10 @@ impl SharedState {
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let start_time = Instant::now();
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     let db_url = std::env::var("DATABASE_URL").expect("Failed to read DATABASE_URL env var");
 
@@ -90,6 +96,7 @@ async fn main() -> Result<(), std::io::Error> {
             get(resource::word_status::count::get_handler),
         )
         .route("/analyze", post(resource::analyze::post_handler))
+        .layer(TraceLayer::new_for_http())
         .with_state(shared_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;

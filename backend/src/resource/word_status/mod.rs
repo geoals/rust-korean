@@ -1,14 +1,12 @@
 pub mod count;
 
-use crate::db::word_status::{get_one, WordStatusEntity};
+use crate::db::word_status::WordStatusEntity;
 use crate::error_handling::AppError;
 use crate::{db, SharedState};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::{http, Json};
 use serde::{Deserialize, Serialize};
-use std::time::Instant;
-use tracing::debug;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WordStatusRequest {
@@ -22,9 +20,6 @@ pub async fn patch_handler(
     State(state): State<SharedState>,
     Json(body): Json<WordStatusRequest>,
 ) -> Result<impl IntoResponse, AppError> {
-    let start_time = Instant::now();
-    debug!("New request to update id {}", id); // TODO: request ID
-
     // Check for existing row and then either update or insert as a proper `insert on conflict update`
     // would require to dynamically build the SET clause which means we cannot use the compile time
     // checking of sqlx macros
@@ -58,7 +53,6 @@ pub async fn patch_handler(
         http::StatusCode::CREATED
     };
 
-    debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
 }
 
@@ -66,9 +60,6 @@ pub async fn get_handler(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
 ) -> Result<impl IntoResponse, AppError> {
-    let start_time = Instant::now();
-    debug!("New request to get id {}", id); // TODO: request ID
-
     let existing_row = db::word_status::get_one(&state.db, id).await;
 
     let response_body = if let Some(existing_row) = existing_row {
@@ -91,7 +82,6 @@ pub async fn get_handler(
         .body(response_body)
         .unwrap(); // TODO: map error
 
-    debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
 }
 

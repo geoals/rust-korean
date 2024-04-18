@@ -3,10 +3,8 @@ use crate::SharedState;
 use axum::extract::State;
 use axum::http;
 use axum::response::IntoResponse;
-use tracing::debug;
 
 pub async fn get_handler(State(state): State<SharedState>) -> Result<impl IntoResponse, AppError> {
-    debug!("New request to get count of word statuses");
     let word_status_counts = sqlx::query_as!(
         WordStatusCountEntity,
         "SELECT
@@ -32,6 +30,20 @@ pub async fn get_handler(State(state): State<SharedState>) -> Result<impl IntoRe
         .unwrap();
     Ok(response)
 }
+
+// enum ApiResponse<T> {
+//     JsonData(T),
+// }
+//
+// impl IntoResponse for ApiResponse<WordStatusCountDTO> {
+//     fn into_response(self) -> Response {
+//         axum::http::Response::builder()
+//             .header(http::header::CONTENT_TYPE, "application/json")
+//             .status(http::StatusCode::OK)
+//             .body(Json(self))
+//             .unwrap()
+//     }
+// }
 
 #[derive(Debug)]
 struct WordStatusCountEntity {

@@ -1,19 +1,19 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::{collections::HashMap, time::Instant};
 
 use axum::{extract::State, http, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::time::sleep;
-use tracing::{debug, info};
+use tracing::debug;
 
 use crate::db::word_status::WordStatusEntity;
 use crate::dictionary::KrDictEntry;
 use crate::error_handling::AppError;
-use crate::resource::word_status::{WordStatus, WordStatusResponse};
+use crate::resource::word_status::WordStatusResponse;
 use crate::{db, hangul, search, SharedState};
 
 // TODO: refactor this abomination
@@ -22,9 +22,6 @@ pub async fn post_handler(
     State(state): State<SharedState>,
     body: String,
 ) -> Result<impl IntoResponse, AppError> {
-    let start_time = Instant::now();
-    debug!("New request to analyze text with length {}", body.len());
-
     let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
     let words = bodytext_with_only_hangul
         .split_whitespace()
@@ -124,7 +121,6 @@ pub async fn post_handler(
         .body(serde_json::to_string(&response_body).unwrap())
         .unwrap();
 
-    debug!("Request processed in {:?}", start_time.elapsed());
     Ok(response)
 }
 
