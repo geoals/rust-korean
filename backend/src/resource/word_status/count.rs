@@ -1,10 +1,12 @@
 use crate::error_handling::AppError;
 use crate::SharedState;
 use axum::extract::State;
-use axum::http;
-use axum::response::IntoResponse;
+use axum::response::{IntoResponse, Response};
+use axum::Json;
 
-pub async fn get_handler(State(state): State<SharedState>) -> Result<impl IntoResponse, AppError> {
+pub async fn get_handler(
+    State(state): State<SharedState>,
+) -> Result<ApiResponse<WordStatusCountDTO>, AppError> {
     let word_status_counts = sqlx::query_as!(
         WordStatusCountEntity,
         "SELECT
@@ -17,33 +19,26 @@ pub async fn get_handler(State(state): State<SharedState>) -> Result<impl IntoRe
     .fetch_one(&state.db)
     .await?;
 
-    let response_body = serde_json::to_string(&WordStatusCountDTO {
+    let response = WordStatusCountDTO {
         known: word_status_counts.known.unwrap_or(0),
         seen: word_status_counts.seen.unwrap_or(0),
         unknown: word_status_counts.unknown.unwrap_or(0),
-    })
-    .unwrap();
+    };
 
-    let response = http::Response::builder()
-        .status(http::StatusCode::OK)
-        .body(response_body)
-        .unwrap();
-    Ok(response)
+    Ok(ApiResponse::JsonData(response))
 }
 
-// enum ApiResponse<T> {
-//     JsonData(T),
-// }
-//
-// impl IntoResponse for ApiResponse<WordStatusCountDTO> {
-//     fn into_response(self) -> Response {
-//         axum::http::Response::builder()
-//             .header(http::header::CONTENT_TYPE, "application/json")
-//             .status(http::StatusCode::OK)
-//             .body(Json(self))
-//             .unwrap()
-//     }
-// }
+pub enum ApiResponse<T> {
+    JsonData(T),
+}
+
+impl IntoResponse for ApiResponse<WordStatusCountDTO> {
+    fn into_response(self) -> Response {
+        match self {
+            Self::JsonData(data) => Json(data).into_response(),
+        }
+    }
+}
 
 #[derive(Debug)]
 struct WordStatusCountEntity {
