@@ -1,5 +1,5 @@
 use crate::dictionary::{Headword, KrDictEntry};
-use crate::resource::word_status::{WordStatus, WordStatusResponse};
+use crate::routes::word_status::{WordStatus, WordStatusResponse};
 use crate::{db, search, SharedState};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
@@ -8,10 +8,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use tracing::info;
 
-pub async fn get_handler(
-    Path(term): Path<String>,
-    State(state): State<SharedState>,
-) -> impl IntoResponse {
+pub async fn get(Path(term): Path<String>, State(state): State<SharedState>) -> impl IntoResponse {
     // Use Arc to avoid cloning the matches themselves when spawning task to insert in db
     let matches: Arc<Vec<KrDictEntry>> = Arc::new(search::get_all(&term, &state.dictionary));
     info!("Found {} matches", matches.len());

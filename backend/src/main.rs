@@ -11,7 +11,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 use crate::{
     dictionary::Dictionary,
     frequency_dictionary::FrequencyDictionary,
-    resource::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson},
+    routes::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson},
 };
 use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
@@ -23,7 +23,7 @@ mod dictionary;
 mod error_handling;
 mod frequency_dictionary;
 mod hangul;
-mod resource;
+mod routes;
 mod search;
 
 #[derive(Clone)]
@@ -85,17 +85,11 @@ async fn main() -> Result<(), std::io::Error> {
     ));
 
     let app = axum::Router::new()
-        .route("/lookup/:term", get(resource::lookup::get_handler))
-        .route("/word_status/:id", get(resource::word_status::get_handler))
-        .route(
-            "/word_status/:id",
-            patch(resource::word_status::patch_handler),
-        )
-        .route(
-            "/word_status/count",
-            get(resource::word_status::count::get_handler),
-        )
-        .route("/analyze", post(resource::analyze::post_handler))
+        .route("/lookup/:term", get(routes::lookup::get))
+        .route("/word_status/:id", get(routes::word_status::get))
+        .route("/word_status/:id", patch(routes::word_status::patch))
+        .route("/word_status/count", get(routes::word_status::count::get))
+        .route("/analyze", post(routes::analyze::post))
         .layer(TraceLayer::new_for_http())
         .with_state(shared_state);
 

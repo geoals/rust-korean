@@ -1,6 +1,6 @@
 use sqlx::{FromRow, PgPool};
 
-use crate::resource::word_status::WordStatus;
+use crate::routes::word_status::WordStatus;
 
 #[derive(Debug, Clone, FromRow)]
 pub struct WordStatusEntity {

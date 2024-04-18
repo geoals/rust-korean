@@ -13,12 +13,12 @@ use tracing::debug;
 use crate::db::word_status::WordStatusEntity;
 use crate::dictionary::KrDictEntry;
 use crate::error_handling::AppError;
-use crate::resource::word_status::WordStatusResponse;
+use crate::routes::word_status::WordStatusResponse;
 use crate::{db, hangul, search, SharedState};
 
 // TODO: refactor this abomination
 // TODO: this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
-pub async fn post_handler(
+pub async fn post(
     State(state): State<SharedState>,
     body: String,
 ) -> Result<impl IntoResponse, AppError> {

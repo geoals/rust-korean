@@ -15,7 +15,7 @@ pub struct WordStatusRequest {
     tracked: Option<bool>,
 }
 
-pub async fn patch_handler(
+pub async fn patch(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
     Json(body): Json<WordStatusRequest>,
@@ -56,7 +56,7 @@ pub async fn patch_handler(
     Ok(response)
 }
 
-pub async fn get_handler(
+pub async fn get(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
 ) -> Result<impl IntoResponse, AppError> {

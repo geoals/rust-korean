@@ -1,10 +1,11 @@
 use crate::error_handling::AppError;
+use crate::routes::ApiResponse;
 use crate::SharedState;
 use axum::extract::State;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 
-pub async fn get_handler(
+pub async fn get(
     State(state): State<SharedState>,
 ) -> Result<ApiResponse<WordStatusCountDTO>, AppError> {
     let word_status_counts = sqlx::query_as!(
@@ -26,10 +27,6 @@ pub async fn get_handler(
     };
 
     Ok(ApiResponse::JsonData(response))
-}
-
-pub enum ApiResponse<T> {
-    JsonData(T),
 }
 
 impl IntoResponse for ApiResponse<WordStatusCountDTO> {
