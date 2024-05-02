@@ -2,6 +2,7 @@ use axum::{http, response::IntoResponse};
 use serde::Serialize;
 use tracing::error;
 
+#[derive(Debug)]
 pub enum AppError {
     SQLError(sqlx::Error),
 }

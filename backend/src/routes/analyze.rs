@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use axum::{extract::State, http, response::IntoResponse};
+use axum::extract::State;
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -16,12 +16,16 @@ use crate::error_handling::AppError;
 use crate::routes::word_status::WordStatusResponse;
 use crate::{db, hangul, search, SharedState};
 
+use super::ApiResponse;
+
+type AnalyseResponseDTO = HashMap<String, Vec<WordStatusResponse>>;
+
 // TODO: refactor this abomination
 // TODO: this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
 pub async fn post(
     State(state): State<SharedState>,
     body: String,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<ApiResponse<AnalyseResponseDTO>, AppError> {
     let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
     let words = bodytext_with_only_hangul
         .split_whitespace()
@@ -47,7 +51,7 @@ pub async fn post(
         .cloned()
         .collect::<Vec<i32>>();
 
-    let word_statuses = db::word_status::get_all(&state.db, &ids).await;
+    let word_statuses = db::word_status::get_all(&state.db, &ids).await?;
 
     let ids_with_statuses = word_statuses
         .iter()
@@ -116,12 +120,7 @@ pub async fn post(
         response_body.entry(word).or_default();
     }
 
-    let response = http::Response::builder()
-        .status(http::StatusCode::OK)
-        .body(serde_json::to_string(&response_body).unwrap())
-        .unwrap();
-
-    Ok(response)
+    Ok(ApiResponse::JsonData(response_body))
 }
 
 // TODO: change to hashmap

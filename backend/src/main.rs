@@ -43,7 +43,7 @@ impl SharedState {
         // sequence no in different languages of KRDICTs are not always the same, so we need to use sequence no of the same
         // dict regardless of which language has been selected
         let dictionary = Arc::new(Dictionary::new(
-            "dictionaries/[KO-EN] KRDICT/term_bank_1.json",
+            "dictionaries/[KO-JA] KRDICT/term_bank_1.json",
             &frequency_dictionary,
         ));
         info!(

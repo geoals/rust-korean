@@ -1,24 +1,25 @@
 use crate::dictionary::{Headword, KrDictEntry};
+use crate::error_handling::AppError;
 use crate::routes::word_status::{WordStatus, WordStatusResponse};
 use crate::{db, search, SharedState};
 use axum::extract::{Path, State};
-use axum::response::IntoResponse;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use tracing::info;
 
-pub async fn get(Path(term): Path<String>, State(state): State<SharedState>) -> impl IntoResponse {
+use super::ApiResponse;
+
+pub async fn get(
+    Path(term): Path<String>,
+    State(state): State<SharedState>,
+) -> Result<ApiResponse<LookupResponse>, AppError> {
     // Use Arc to avoid cloning the matches themselves when spawning task to insert in db
     let matches: Arc<Vec<KrDictEntry>> = Arc::new(search::get_all(&term, &state.dictionary));
     info!("Found {} matches", matches.len());
 
     if !matches.is_empty() {
-        tokio::spawn(db::lookup::insert(
-            state.db.clone(),
-            term.clone(),
-            Arc::clone(&matches),
-        ));
+        db::lookup::insert(state.db.clone(), term.clone(), Arc::clone(&matches)).await?;
     }
 
     let ids = matches
@@ -27,7 +28,7 @@ pub async fn get(Path(term): Path<String>, State(state): State<SharedState>) -> 
         .collect::<Vec<i32>>();
 
     let word_statuses: Vec<WordStatusResponse> = db::word_status::get_all(&state.db, &ids)
-        .await
+        .await?
         .iter()
         .map(|it| it.to_dto(None))
         .collect(); // TODO: frequency rank
@@ -57,7 +58,7 @@ pub async fn get(Path(term): Path<String>, State(state): State<SharedState>) -> 
 
     let mut matches_map = group_matches_by_headword(matches);
     sort_list_in_each_key_by_stars(&mut matches_map);
-    serde_json::to_string(&matches_map).unwrap()
+    Ok(ApiResponse::JsonData(matches_map))
 }
 
 fn group_matches_by_headword(matches: Vec<LookupDTO>) -> LookupResponse {

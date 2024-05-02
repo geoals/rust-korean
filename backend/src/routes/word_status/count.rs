@@ -2,8 +2,6 @@ use crate::error_handling::AppError;
 use crate::routes::ApiResponse;
 use crate::SharedState;
 use axum::extract::State;
-use axum::response::{IntoResponse, Response};
-use axum::Json;
 
 pub async fn get(
     State(state): State<SharedState>,
@@ -27,14 +25,6 @@ pub async fn get(
     };
 
     Ok(ApiResponse::JsonData(response))
-}
-
-impl IntoResponse for ApiResponse<WordStatusCountDTO> {
-    fn into_response(self) -> Response {
-        match self {
-            Self::JsonData(data) => Json(data).into_response(),
-        }
-    }
 }
 
 #[derive(Debug)]
