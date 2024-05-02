@@ -13,7 +13,10 @@ use crate::{
     frequency_dictionary::FrequencyDictionary,
     routes::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson},
 };
-use axum::routing::{get, patch, post};
+use axum::{
+    routing::{get, patch, post},
+    Error,
+};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
@@ -61,7 +64,7 @@ impl SharedState {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), std::io::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_time = Instant::now();
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
@@ -75,8 +78,7 @@ async fn main() -> Result<(), std::io::Error> {
     let db = PgPoolOptions::new()
         .max_connections(128)
         .connect(&db_url)
-        .await
-        .unwrap();
+        .await?;
 
     let shared_state = SharedState::new(db);
 
