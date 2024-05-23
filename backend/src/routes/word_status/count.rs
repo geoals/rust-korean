@@ -1,10 +1,12 @@
 use crate::error_handling::AppError;
+use crate::extractors::auth_session::AuthSession;
 use crate::routes::ApiResponse;
 use crate::SharedState;
 use axum::extract::State;
 
 pub async fn get(
     State(state): State<SharedState>,
+    AuthSession(session): AuthSession,
 ) -> Result<ApiResponse<WordStatusCountDTO>, AppError> {
     let word_status_counts = sqlx::query_as!(
         WordStatusCountEntity,
@@ -13,7 +15,7 @@ pub async fn get(
         COUNT(CASE WHEN status = 'unknown' THEN 1 END) as unknown,
         COUNT(CASE WHEN status = 'seen' THEN 1 END) as seen
         FROM WordStatus WHERE user_id = $1",
-        1 // TODO: user ID when we have more than 1 user
+        session.user_id
     )
     .fetch_one(&state.db)
     .await?;

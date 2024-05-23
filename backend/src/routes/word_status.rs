@@ -2,6 +2,7 @@ pub mod count;
 
 use crate::db::word_status::WordStatusEntity;
 use crate::error_handling::AppError;
+use crate::extractors::auth_session::AuthSession;
 use crate::{db, SharedState};
 use axum::extract::{Path, State};
 use axum::Json;
@@ -19,12 +20,13 @@ pub struct WordStatusRequestDTO {
 pub async fn patch(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
+    AuthSession(session): AuthSession,
     Json(body): Json<WordStatusRequestDTO>,
 ) -> Result<ApiResponse<()>, AppError> {
     // Check for existing row and then either update or insert as a proper `insert on conflict update`
     // would require to dynamically build the SET clause which means we cannot use the compile time
     // checking of sqlx macros
-    let existing_row = db::word_status::get_one(&state.db, id).await?;
+    let existing_row = db::word_status::get_one(&state.db, id, session.user_id).await?;
 
     if let Some(existing_row) = existing_row {
         db::word_status::update(
@@ -33,6 +35,7 @@ pub async fn patch(
             body.status.unwrap_or(existing_row.status) as _,
             body.ignored.unwrap_or(existing_row.ignored),
             body.tracked.unwrap_or(existing_row.tracked),
+            session.user_id,
         )
         .await?;
 
@@ -47,7 +50,7 @@ pub async fn patch(
         body.status.unwrap_or(WordStatus::Unknown) as _,
         body.ignored.unwrap_or(false),
         body.tracked.unwrap_or(false),
-        1 // TODO: user ID when we have more than 1 user
+        session.user_id,
     )
     .execute(&state.db)
     .await?;
@@ -58,8 +61,9 @@ pub async fn patch(
 pub async fn get(
     Path(id): Path<i32>,
     State(state): State<SharedState>,
+    AuthSession(session): AuthSession,
 ) -> Result<ApiResponse<WordStatusResponse>, AppError> {
-    let existing_row = db::word_status::get_one(&state.db, id).await?;
+    let existing_row = db::word_status::get_one(&state.db, id, session.user_id).await?;
 
     let response_body = if let Some(existing_row) = existing_row {
         existing_row.to_dto(None) // TODO: frequency rank

@@ -5,6 +5,7 @@ use std::{
     time::Instant,
 };
 
+use tower_cookies::CookieManagerLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
@@ -13,10 +14,7 @@ use crate::{
     frequency_dictionary::FrequencyDictionary,
     routes::analyze::{write_analysis_cache_to_file_every_ten_minutes, AnalysisResultJson},
 };
-use axum::{
-    routing::{get, patch, post},
-    Error,
-};
+use axum::routing::{get, patch, post};
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
@@ -24,6 +22,7 @@ mod db;
 mod deinflect;
 mod dictionary;
 mod error_handling;
+mod extractors;
 mod frequency_dictionary;
 mod hangul;
 mod routes;
@@ -93,6 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/word_status/count", get(routes::word_status::count::get))
         .route("/analyze", post(routes::analyze::post))
         .layer(TraceLayer::new_for_http())
+        .layer(CookieManagerLayer::new())
         .with_state(shared_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await?;

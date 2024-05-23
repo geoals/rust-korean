@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS WordStatus (
     status word_status NOT NULL,
     ignored BOOLEAN NOT NULL,
     tracked BOOLEAN NOT NULL,
-    user_id INTEGER NOT NULL,
+    user_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_user_and_sequence_no UNIQUE (user_id, krdict_sequence_number)
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Lookup (
     id SERIAL PRIMARY KEY,
     headword VARCHAR(255) NOT NULL,
     conjugated_form VARCHAR(255),
-    user_id INTEGER NOT NULL,
+    user_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 

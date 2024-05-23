@@ -1,4 +1,5 @@
 use sqlx::{postgres::PgQueryResult, FromRow, PgPool};
+use uuid::Uuid;
 
 use crate::{error_handling::AppError, routes::word_status::WordStatus};
 
@@ -9,25 +10,33 @@ pub struct WordStatusEntity {
     pub status: WordStatus,
     pub ignored: bool,
     pub tracked: bool,
-    pub user_id: i32,
+    pub user_id: Uuid,
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-pub async fn get_all(db: &PgPool, ids: &Vec<i32>) -> Result<Vec<WordStatusEntity>, AppError> {
+pub async fn get_all(
+    db: &PgPool,
+    ids: &Vec<i32>,
+    user_id: Uuid,
+) -> Result<Vec<WordStatusEntity>, AppError> {
     let result = sqlx::query_as!(
         WordStatusEntity,
         "SELECT id, krdict_sequence_number, status as \"status: WordStatus\", ignored, tracked, user_id, created_at, updated_at
         FROM WordStatus
         WHERE krdict_sequence_number = ANY($1) AND user_id = $2;",
         ids,
-        1 // TODO: user ID when we have more than 1 user
+        user_id,
     ).fetch_all(db).await?;
 
     Ok(result)
 }
 
-pub async fn get_one(db: &PgPool, id: i32) -> Result<Option<WordStatusEntity>, AppError> {
+pub async fn get_one(
+    db: &PgPool,
+    id: i32,
+    user_id: Uuid,
+) -> Result<Option<WordStatusEntity>, AppError> {
     let result = sqlx::query_as!(
         WordStatusEntity,
         // Override type of status as sqlx macros doesn't support user defined types
@@ -35,7 +44,7 @@ pub async fn get_one(db: &PgPool, id: i32) -> Result<Option<WordStatusEntity>, A
         FROM WordStatus
         WHERE krdict_sequence_number = $1 AND user_id = $2;",
         id,
-        1 // TODO: user ID when we have more than 1 user
+        user_id,
     )
     .fetch_optional(db)
     .await?;
@@ -49,6 +58,7 @@ pub async fn update(
     status: WordStatus,
     ignored: bool,
     tracked: bool,
+    user_id: Uuid,
 ) -> Result<PgQueryResult, AppError> {
     let result = sqlx::query!(
         "UPDATE WordStatus
@@ -58,7 +68,7 @@ pub async fn update(
         ignored,
         tracked,
         id,
-        1
+        user_id,
     )
     .execute(db)
     .await?;

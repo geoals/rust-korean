@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -7,6 +7,6 @@ services:
     environment:
       POSTGRES_PASSWORD: secret
     ports:
-      - "5432:5432"
+      - "5532:5432"
     volumes:
       - ./db_persistent_storage:/var/lib/postgresql/data

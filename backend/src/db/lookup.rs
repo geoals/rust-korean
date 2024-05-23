@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use sqlx::{postgres::PgQueryResult, PgPool};
+use uuid::Uuid;
 
 use crate::{dictionary::KrDictEntry, error_handling::AppError};
 
@@ -8,6 +9,7 @@ pub async fn insert(
     db: PgPool,
     term: String,
     matches: Arc<Vec<KrDictEntry>>,
+    user_id: Uuid,
 ) -> Result<PgQueryResult, AppError> {
     let result = sqlx::query!(
         r#"
@@ -20,7 +22,7 @@ pub async fn insert(
         } else {
             None
         },
-        1 // TODO: user ID when we have more than 1 user
+        user_id,
     )
     .execute(&db)
     .await?;

@@ -13,6 +13,7 @@ use tracing::debug;
 use crate::db::word_status::WordStatusEntity;
 use crate::dictionary::KrDictEntry;
 use crate::error_handling::AppError;
+use crate::extractors::auth_session::AuthSession;
 use crate::routes::word_status::WordStatusResponse;
 use crate::{db, hangul, search, SharedState};
 
@@ -24,6 +25,7 @@ type AnalyseResponseDTO = HashMap<String, Vec<WordStatusResponse>>;
 // TODO: this response has data duplication, could be split into map of unconjugated word to ids and a map of id to status
 pub async fn post(
     State(state): State<SharedState>,
+    AuthSession(session): AuthSession,
     body: String,
 ) -> Result<ApiResponse<AnalyseResponseDTO>, AppError> {
     let bodytext_with_only_hangul = body.replace(|c| !hangul::is_hangul(c), " ");
@@ -51,7 +53,7 @@ pub async fn post(
         .cloned()
         .collect::<Vec<i32>>();
 
-    let word_statuses = db::word_status::get_all(&state.db, &ids).await?;
+    let word_statuses = db::word_status::get_all(&state.db, &ids, session.user_id).await?;
 
     let ids_with_statuses = word_statuses
         .iter()

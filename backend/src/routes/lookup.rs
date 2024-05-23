@@ -1,5 +1,6 @@
 use crate::dictionary::{Headword, KrDictEntry};
 use crate::error_handling::AppError;
+use crate::extractors::auth_session::AuthSession;
 use crate::routes::word_status::{WordStatus, WordStatusResponse};
 use crate::{db, search, SharedState};
 use axum::extract::{Path, State};
@@ -13,13 +14,20 @@ use super::ApiResponse;
 pub async fn get(
     Path(term): Path<String>,
     State(state): State<SharedState>,
+    AuthSession(session): AuthSession,
 ) -> Result<ApiResponse<LookupResponse>, AppError> {
     // Use Arc to avoid cloning the matches themselves when spawning task to insert in db
     let matches: Arc<Vec<KrDictEntry>> = Arc::new(search::get_all(&term, &state.dictionary));
     info!("Found {} matches", matches.len());
 
     if !matches.is_empty() {
-        db::lookup::insert(state.db.clone(), term.clone(), Arc::clone(&matches)).await?;
+        db::lookup::insert(
+            state.db.clone(),
+            term.clone(),
+            Arc::clone(&matches),
+            session.user_id,
+        )
+        .await?;
     }
 
     let ids = matches
@@ -27,11 +35,12 @@ pub async fn get(
         .map(|m| *m.sequence_number())
         .collect::<Vec<i32>>();
 
-    let word_statuses: Vec<WordStatusResponse> = db::word_status::get_all(&state.db, &ids)
-        .await?
-        .iter()
-        .map(|it| it.to_dto(None))
-        .collect(); // TODO: frequency rank
+    let word_statuses: Vec<WordStatusResponse> =
+        db::word_status::get_all(&state.db, &ids, session.user_id)
+            .await?
+            .iter()
+            .map(|it| it.to_dto(None))
+            .collect(); // TODO: frequency rank
 
     // TODO: remove unnecessary clone
     // Combine dictionary match with word status and map to DTO
